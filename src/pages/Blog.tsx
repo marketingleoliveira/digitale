@@ -1,81 +1,82 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Calendar, Clock, Search, Tag } from "lucide-react";
 import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const categories = ["Todos", "Tendências", "Tecnologia", "Guias", "Sustentabilidade", "Novidades"];
+interface Post {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  featured_image: string | null;
+  published_at: string | null;
+  created_at: string;
+  category: { name: string; slug: string } | null;
+}
 
-const allPosts = [
-  {
-    id: 1,
-    title: "Tendências de Tecidos para 2026: O Futuro é Sustentável",
-    excerpt: "Descubra as principais tendências que estão moldando a indústria têxtil e como a sustentabilidade está no centro das inovações.",
-    image: "https://images.unsplash.com/photo-1558171813-4c088753af8f?w=800&q=80",
-    date: "05 Jan 2026",
-    readTime: "5 min",
-    category: "Tendências",
-  },
-  {
-    id: 2,
-    title: "Como Escolher o Tecido Ideal para Moda Fitness",
-    excerpt: "Guia completo sobre as características essenciais que você deve buscar em tecidos para peças de alta performance.",
-    image: "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80",
-    date: "02 Jan 2026",
-    readTime: "7 min",
-    category: "Guias",
-  },
-  {
-    id: 3,
-    title: "Tecnologia Antibacteriana: O Diferencial nos Tecidos Modernos",
-    excerpt: "Entenda como a tecnologia antibacteriana funciona e por que ela é cada vez mais valorizada no mercado.",
-    image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&q=80",
-    date: "28 Dez 2025",
-    readTime: "4 min",
-    category: "Tecnologia",
-  },
-  {
-    id: 4,
-    title: "A Revolução dos Tecidos ECO: Por Que Investir em Sustentabilidade",
-    excerpt: "Saiba como os tecidos sustentáveis estão transformando a indústria da moda e conquistando consumidores conscientes.",
-    image: "https://images.unsplash.com/photo-1532453288672-3a27e9be9efd?w=800&q=80",
-    date: "20 Dez 2025",
-    readTime: "6 min",
-    category: "Sustentabilidade",
-  },
-  {
-    id: 5,
-    title: "Milano: O Tecido Preferido para Leggings Premium",
-    excerpt: "Conheça as características que fazem do Milano o tecido mais procurado para confecção de leggings de alta qualidade.",
-    image: "https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=800&q=80",
-    date: "15 Dez 2025",
-    readTime: "5 min",
-    category: "Novidades",
-  },
-  {
-    id: 6,
-    title: "Proteção UV 50+: A Ciência por Trás dos Tecidos Inteligentes",
-    excerpt: "Descubra como funciona a tecnologia de proteção solar nos tecidos e seus benefícios para a saúde.",
-    image: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80",
-    date: "10 Dez 2025",
-    readTime: "8 min",
-    category: "Tecnologia",
-  },
-];
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 const Blog = () => {
-  const [selectedCategory, setSelectedCategory] = useState("Todos");
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState("todos");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredPosts = allPosts.filter((post) => {
-    const matchesCategory = selectedCategory === "Todos" || post.category === selectedCategory;
-    const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    const [postsRes, categoriesRes] = await Promise.all([
+      supabase
+        .from("blog_posts")
+        .select("id, title, slug, excerpt, featured_image, published_at, created_at, category:blog_categories(name, slug)")
+        .eq("status", "published")
+        .order("published_at", { ascending: false }),
+      supabase
+        .from("blog_categories")
+        .select("id, name, slug")
+        .order("name"),
+    ]);
+
+    setPosts(postsRes.data || []);
+    setCategories(categoriesRes.data || []);
+    setLoading(false);
+  };
+
+  const filteredPosts = posts.filter((post) => {
+    const matchesCategory = selectedCategory === "todos" || post.category?.slug === selectedCategory;
+    const matchesSearch = 
+      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (post.excerpt?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
     return matchesCategory && matchesSearch;
   });
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "";
+    return new Date(dateString).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  const estimateReadTime = (excerpt: string | null) => {
+    const words = excerpt?.split(" ").length || 0;
+    const minutes = Math.max(1, Math.ceil(words / 50));
+    return `${minutes} min`;
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -104,14 +105,21 @@ const Blog = () => {
           <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
             {/* Categories */}
             <div className="flex flex-wrap gap-2">
+              <Button
+                variant={selectedCategory === "todos" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedCategory("todos")}
+              >
+                Todos
+              </Button>
               {categories.map((category) => (
                 <Button
-                  key={category}
-                  variant={selectedCategory === category ? "default" : "outline"}
+                  key={category.id}
+                  variant={selectedCategory === category.slug ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setSelectedCategory(category)}
+                  onClick={() => setSelectedCategory(category.slug)}
                 >
-                  {category}
+                  {category.name}
                 </Button>
               ))}
             </div>
@@ -133,7 +141,21 @@ const Blog = () => {
       {/* Posts Grid */}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          {filteredPosts.length > 0 ? (
+          {loading ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="card-premium">
+                  <Skeleton className="aspect-[16/10] rounded-t-2xl" />
+                  <div className="p-6 space-y-3">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-6 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredPosts.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredPosts.map((post, index) => (
                 <motion.article
@@ -142,31 +164,41 @@ const Blog = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Link to={`/blog/${post.id}`} className="group block card-premium">
-                    <div className="aspect-[16/10] overflow-hidden">
-                      <img
-                        src={post.image}
-                        alt={post.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
+                  <Link to={`/blog/${post.slug}`} className="group block card-premium">
+                    <div className="aspect-[16/10] overflow-hidden bg-muted">
+                      {post.featured_image ? (
+                        <img
+                          src={post.featured_image}
+                          alt={post.title}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                          <Tag className="h-12 w-12" />
+                        </div>
+                      )}
                     </div>
                     <div className="p-6">
-                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-accent uppercase tracking-wider mb-3">
-                        <Tag className="h-3 w-3" />
-                        {post.category}
-                      </span>
+                      {post.category && (
+                        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-accent uppercase tracking-wider mb-3">
+                          <Tag className="h-3 w-3" />
+                          {post.category.name}
+                        </span>
+                      )}
                       <h3 className="font-display text-xl font-semibold text-foreground mb-3 group-hover:text-primary transition-colors line-clamp-2">
                         {post.title}
                       </h3>
-                      <p className="text-muted-foreground text-sm mb-4 line-clamp-2">{post.excerpt}</p>
+                      {post.excerpt && (
+                        <p className="text-muted-foreground text-sm mb-4 line-clamp-2">{post.excerpt}</p>
+                      )}
                       <div className="flex items-center gap-4 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Calendar className="h-3.5 w-3.5" />
-                          {post.date}
+                          {formatDate(post.published_at || post.created_at)}
                         </span>
                         <span className="flex items-center gap-1">
                           <Clock className="h-3.5 w-3.5" />
-                          {post.readTime}
+                          {estimateReadTime(post.excerpt)}
                         </span>
                       </div>
                     </div>
@@ -176,7 +208,13 @@ const Blog = () => {
             </div>
           ) : (
             <div className="text-center py-16">
+              <Tag className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <p className="text-muted-foreground text-lg">Nenhum post encontrado.</p>
+              {searchQuery && (
+                <Button variant="outline" className="mt-4" onClick={() => setSearchQuery("")}>
+                  Limpar busca
+                </Button>
+              )}
             </div>
           )}
         </div>
