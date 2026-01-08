@@ -133,7 +133,7 @@ const Users = () => {
     }
   };
 
-  const handleUpdateRole = async (userId: string, newRole: string) => {
+  const handleUpdateRole = async (userId: string, newRole: "admin" | "editor" | "user") => {
     const { error } = await supabase
       .from("user_roles")
       .update({ role: newRole })
@@ -300,7 +300,7 @@ const Users = () => {
                     <div className="flex items-center gap-1">
                       <Select
                         value={u.role}
-                        onValueChange={(value) => handleUpdateRole(u.user_id, value)}
+                        onValueChange={(value) => handleUpdateRole(u.user_id, value as "admin" | "editor" | "user")}
                         disabled={u.user_id === currentUser?.id}
                       >
                         <SelectTrigger className="w-28 h-8">

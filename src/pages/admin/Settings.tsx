@@ -70,12 +70,12 @@ const Settings = () => {
     }
   };
 
-  const saveSettings = async (key: string, value: object) => {
+  const saveSettings = async (key: string, value: GeneralSettings | SocialSettings | SeoSettings) => {
     setLoading(true);
 
     const { error } = await supabase
       .from("site_settings")
-      .update({ value })
+      .update({ value: value as any })
       .eq("key", key);
 
     if (error) {
