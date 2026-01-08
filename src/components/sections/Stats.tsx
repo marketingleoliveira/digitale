@@ -2,10 +2,10 @@ import { motion } from "framer-motion";
 import { useEffect, useState, useRef } from "react";
 
 const stats = [
-  { value: 60, suffix: "+", label: "Anos de Mercado" },
-  { value: 1000, suffix: "+", label: "Clientes Atendidos" },
-  { value: 10, suffix: "M+", label: "m² de Tecidos Produzidos" },
-  { value: 15, suffix: "+", label: "Países Atendidos" },
+  { value: 60, suffix: "+", label: "Anos de mercado" },
+  { value: 1000, suffix: "+", label: "Clientes ativos" },
+  { value: 10, suffix: "M+", label: "Metros produzidos/ano" },
+  { value: 15, suffix: "+", label: "Países atendidos" },
 ];
 
 function AnimatedNumber({ value, suffix }: { value: number; suffix: string }) {
@@ -18,8 +18,8 @@ function AnimatedNumber({ value, suffix }: { value: number; suffix: string }) {
       ([entry]) => {
         if (entry.isIntersecting && !hasAnimated) {
           setHasAnimated(true);
-          const duration = 2000;
-          const steps = 60;
+          const duration = 1500;
+          const steps = 40;
           const increment = value / steps;
           let current = 0;
           const timer = setInterval(() => {
@@ -36,15 +36,12 @@ function AnimatedNumber({ value, suffix }: { value: number; suffix: string }) {
       { threshold: 0.5 }
     );
 
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
-
+    if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
   }, [value, hasAnimated]);
 
   return (
-    <div ref={ref} className="font-display text-5xl md:text-6xl font-bold text-accent">
+    <div ref={ref} className="text-4xl md:text-5xl font-bold text-primary">
       {displayValue}
       {suffix}
     </div>
@@ -53,34 +50,20 @@ function AnimatedNumber({ value, suffix }: { value: number; suffix: string }) {
 
 export function Stats() {
   return (
-    <section className="py-24 bg-primary text-primary-foreground">
-      <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <span className="text-sm uppercase tracking-[0.2em] text-primary-foreground/60 font-medium">
-            Nossa História e Credibilidade
-          </span>
-          <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-semibold mt-3">
-            Em Números
-          </h2>
-        </motion.div>
-
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
+    <section className="py-20 lg:py-28 bg-background border-y border-border">
+      <div className="container mx-auto px-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {stats.map((stat, index) => (
             <motion.div
               key={stat.label}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
               className="text-center"
             >
               <AnimatedNumber value={stat.value} suffix={stat.suffix} />
-              <p className="mt-3 text-primary-foreground/70 font-medium">{stat.label}</p>
+              <p className="mt-2 text-muted-foreground">{stat.label}</p>
             </motion.div>
           ))}
         </div>

@@ -2,61 +2,47 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* Digitale Têxtil - Design System
-   Paleta baseada no logo: Azul marinho elegante
-*/
+/* Digitale Têxtil - Clean Corporate Design System */
 
 @layer base {
   :root {
-    --background: 210 20% 99%;
-    --foreground: 217 45% 18%;
+    --background: 0 0% 100%;
+    --foreground: 220 20% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 217 45% 18%;
+    --card-foreground: 220 20% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 217 45% 18%;
+    --popover-foreground: 220 20% 15%;
 
-    --primary: 217 45% 23%;
+    --primary: 220 65% 45%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 20% 96%;
-    --secondary-foreground: 217 45% 18%;
+    --secondary: 220 15% 96%;
+    --secondary-foreground: 220 20% 25%;
 
-    --muted: 210 15% 94%;
-    --muted-foreground: 217 20% 50%;
+    --muted: 220 15% 96%;
+    --muted-foreground: 220 10% 50%;
 
-    --accent: 16 80% 60%;
+    --accent: 220 65% 45%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 210 20% 90%;
-    --input: 210 20% 90%;
-    --ring: 217 45% 23%;
+    --border: 220 15% 90%;
+    --input: 220 15% 90%;
+    --ring: 220 65% 45%;
 
-    --radius: 0.5rem;
+    --radius: 0.375rem;
 
     /* Custom tokens */
-    --digitale-navy: 217 45% 23%;
-    --digitale-navy-light: 217 35% 35%;
-    --digitale-navy-dark: 217 50% 15%;
-    --digitale-coral: 16 80% 60%;
-    --digitale-coral-light: 16 85% 70%;
-    --digitale-green: 152 45% 45%;
-    --digitale-cream: 40 30% 96%;
-    --digitale-gold: 38 70% 55%;
-
-    --gradient-hero: linear-gradient(135deg, hsl(217 45% 23%) 0%, hsl(217 35% 35%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(16 80% 60%) 0%, hsl(16 85% 70%) 100%);
-    --gradient-eco: linear-gradient(135deg, hsl(152 45% 45%) 0%, hsl(152 55% 55%) 100%);
-    
-    --shadow-soft: 0 4px 20px -4px hsl(217 45% 23% / 0.1);
-    --shadow-card: 0 8px 30px -8px hsl(217 45% 23% / 0.12);
-    --shadow-hover: 0 12px 40px -10px hsl(217 45% 23% / 0.18);
+    --digitale-blue: 220 65% 45%;
+    --digitale-blue-light: 220 60% 55%;
+    --digitale-gray: 220 10% 50%;
+    --digitale-light: 220 15% 98%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -65,46 +51,46 @@
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 220 65% 45%;
   }
 
   .dark {
-    --background: 217 50% 8%;
-    --foreground: 210 20% 95%;
+    --background: 220 20% 8%;
+    --foreground: 0 0% 95%;
 
-    --card: 217 45% 12%;
-    --card-foreground: 210 20% 95%;
+    --card: 220 20% 12%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 217 45% 12%;
-    --popover-foreground: 210 20% 95%;
+    --popover: 220 20% 12%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 210 20% 95%;
-    --primary-foreground: 217 45% 18%;
+    --primary: 220 60% 55%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217 40% 18%;
-    --secondary-foreground: 210 20% 95%;
+    --secondary: 220 20% 18%;
+    --secondary-foreground: 0 0% 90%;
 
-    --muted: 217 40% 18%;
-    --muted-foreground: 210 15% 60%;
+    --muted: 220 20% 18%;
+    --muted-foreground: 220 10% 60%;
 
-    --accent: 16 80% 55%;
+    --accent: 220 60% 55%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 62% 40%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 217 40% 20%;
-    --input: 217 40% 20%;
-    --ring: 210 20% 80%;
+    --border: 220 20% 20%;
+    --input: 220 20% 20%;
+    --ring: 220 60% 55%;
     
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-background: 220 20% 10%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 220 60% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 220 20% 15%;
+    --sidebar-accent-foreground: 0 0% 90%;
+    --sidebar-border: 220 20% 18%;
+    --sidebar-ring: 220 60% 55%;
   }
 }
 
@@ -119,50 +105,42 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', Georgia, serif;
-    @apply tracking-tight;
+    font-family: 'Inter', system-ui, sans-serif;
+    @apply font-semibold tracking-tight;
   }
 }
 
 @layer components {
   .section-title {
-    @apply text-3xl md:text-4xl lg:text-5xl font-semibold text-foreground;
+    @apply text-3xl md:text-4xl font-semibold text-foreground tracking-tight;
   }
 
   .section-subtitle {
-    @apply text-sm md:text-base uppercase tracking-[0.2em] text-muted-foreground font-medium;
+    @apply text-sm uppercase tracking-widest text-primary font-medium;
   }
 
-  .gradient-text {
-    @apply bg-clip-text text-transparent;
-    background-image: var(--gradient-hero);
+  .card-clean {
+    @apply bg-card rounded-lg border border-border overflow-hidden transition-all duration-300;
   }
 
-  .card-premium {
-    @apply bg-card rounded-2xl border border-border/50 overflow-hidden;
-    box-shadow: var(--shadow-card);
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
-  }
-
-  .card-premium:hover {
-    box-shadow: var(--shadow-hover);
-    transform: translateY(-4px);
+  .card-clean:hover {
+    @apply shadow-lg border-border/80;
   }
 }
 
 @layer utilities {
   .animate-fade-up {
-    animation: fadeUp 0.6s ease-out forwards;
+    animation: fadeUp 0.5s ease-out forwards;
   }
 
   .animate-fade-in {
-    animation: fadeIn 0.5s ease-out forwards;
+    animation: fadeIn 0.4s ease-out forwards;
   }
 
   @keyframes fadeUp {
     from {
       opacity: 0;
-      transform: translateY(20px);
+      transform: translateY(16px);
     }
     to {
       opacity: 1;
