@@ -2,31 +2,34 @@ import { motion } from "framer-motion";
 import { Leaf, Droplets, Zap, Recycle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-
-const benefits = [
-  {
-    icon: Recycle,
-    title: "60 Garrafas",
-    description: "1 kg de PET (100% resíduos pós-consumo) mantém 60 garrafas fora do aterro",
-  },
-  {
-    icon: Leaf,
-    title: "65% Menos CO₂",
-    description: "Redução significativa nas emissões de carbono",
-  },
-  {
-    icon: Droplets,
-    title: "90% Menos Água",
-    description: "Economia expressiva no consumo de água",
-  },
-  {
-    icon: Zap,
-    title: "64% Menos Energia",
-    description: "Redução no consumo energético total",
-  },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function Sustainability() {
+  const { t } = useLanguage();
+
+  const benefits = [
+    {
+      icon: Recycle,
+      title: t("sustainability.bottles"),
+      description: t("sustainability.bottles.desc"),
+    },
+    {
+      icon: Leaf,
+      title: t("sustainability.co2"),
+      description: t("sustainability.co2.desc"),
+    },
+    {
+      icon: Droplets,
+      title: t("sustainability.water"),
+      description: t("sustainability.water.desc"),
+    },
+    {
+      icon: Zap,
+      title: t("sustainability.energy"),
+      description: t("sustainability.energy.desc"),
+    },
+  ];
+
   return (
     <section className="py-24 bg-digitale-green/5 overflow-hidden">
       <div className="container mx-auto px-4">
@@ -38,14 +41,13 @@ export function Sustainability() {
             viewport={{ once: true }}
           >
             <span className="inline-block text-digitale-green font-medium tracking-[0.2em] uppercase text-sm mb-4">
-              Digitale ECO
+              {t("sustainability.label")}
             </span>
             <h2 className="section-title mb-6">
-              A Linha ECO da Digitale
+              {t("sustainability.title")}
             </h2>
             <p className="text-muted-foreground text-lg leading-relaxed mb-8">
-              Transformamos resíduos pós-consumo em recursos valiosos. A reciclagem de 1 garrafa de plástico 
-              economiza o equivalente a 3 horas de energia de uma lâmpada de 60 watts.
+              {t("sustainability.description")}
             </p>
 
             <div className="grid grid-cols-2 gap-6 mb-8">
@@ -70,7 +72,7 @@ export function Sustainability() {
             </div>
 
             <Button asChild variant="eco" size="lg">
-              <Link to="/sustentabilidade">Saiba Mais</Link>
+              <Link to="/sustentabilidade">{t("sustainability.cta")}</Link>
             </Button>
           </motion.div>
 
@@ -88,7 +90,7 @@ export function Sustainability() {
                 <div className="text-center">
                   <Recycle className="h-20 w-20 text-digitale-green mx-auto mb-4" />
                   <p className="font-display text-2xl font-semibold text-digitale-green">100%</p>
-                  <p className="text-sm text-muted-foreground">Sustentável</p>
+                  <p className="text-sm text-muted-foreground">{t("sustainability.sustainable")}</p>
                 </div>
               </div>
             </div>

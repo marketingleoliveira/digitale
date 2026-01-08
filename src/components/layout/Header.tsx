@@ -3,31 +3,34 @@ import { Link, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X, ChevronDown } from "lucide-react";
 import logoColor from "@/assets/logo-color.png";
-
-const navigation = [
-  { name: "HOME", href: "/" },
-  { name: "SOBRE NÓS", href: "/sobre" },
-  {
-    name: "TECIDOS",
-    href: "/tecidos",
-    children: [
-      { name: "Milano", href: "/tecidos/milano" },
-      { name: "Lyon", href: "/tecidos/lyon" },
-      { name: "Aerodry", href: "/tecidos/aerodry" },
-      { name: "Veneza", href: "/tecidos/veneza" },
-    ],
-  },
-  { name: "ESTAMPAS", href: "/estampas" },
-  { name: "SUSTENTABILIDADE", href: "/sustentabilidade" },
-  { name: "BLOG", href: "/blog" },
-  { name: "FALE CONOSCO", href: "/contato" },
-];
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const location = useLocation();
+  const { t } = useLanguage();
+
+  const navigation = [
+    { name: t("nav.home"), href: "/" },
+    { name: t("nav.about"), href: "/sobre" },
+    {
+      name: t("nav.fabrics"),
+      href: "/tecidos",
+      children: [
+        { name: "Milano", href: "/tecidos/milano" },
+        { name: "Lyon", href: "/tecidos/lyon" },
+        { name: "Aerodry", href: "/tecidos/aerodry" },
+        { name: "Veneza", href: "/tecidos/veneza" },
+      ],
+    },
+    { name: t("nav.prints"), href: "/estampas" },
+    { name: t("nav.sustainability"), href: "/sustentabilidade" },
+    { name: t("nav.blog"), href: "/blog" },
+    { name: t("nav.contact"), href: "/contato" },
+  ];
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -94,15 +97,23 @@ export function Header() {
                 )}
               </div>
             ))}
+            
+            {/* Language Switcher */}
+            <div className="ml-6 pl-6 border-l border-border">
+              <LanguageSwitcher />
+            </div>
           </nav>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden p-2 text-foreground"
-          >
-            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+          {/* Mobile: Language + Menu Button */}
+          <div className="lg:hidden flex items-center gap-4">
+            <LanguageSwitcher />
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 text-foreground"
+            >
+              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
         </div>
       </div>
 

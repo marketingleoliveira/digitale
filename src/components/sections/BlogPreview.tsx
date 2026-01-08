@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Calendar, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const posts = [
   {
@@ -34,6 +35,8 @@ const posts = [
 ];
 
 export function BlogPreview() {
+  const { t } = useLanguage();
+
   return (
     <section className="py-24 bg-muted/30">
       <div className="container mx-auto px-4">
@@ -44,12 +47,12 @@ export function BlogPreview() {
           className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12"
         >
           <div>
-            <span className="section-subtitle">Blog</span>
-            <h2 className="section-title mt-3">Últimas do Blog</h2>
+            <span className="section-subtitle">{t("blog.label")}</span>
+            <h2 className="section-title mt-3">{t("blog.title")}</h2>
           </div>
           <Button variant="outline" asChild>
             <Link to="/blog">
-              Ver Todos os Posts
+              {t("blog.viewAll")}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
