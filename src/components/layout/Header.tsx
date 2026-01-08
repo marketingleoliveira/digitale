@@ -42,10 +42,10 @@ export function Header() {
       }`}
     >
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-24">
           {/* Logo */}
           <Link to="/" className="flex-shrink-0">
-            <img src={logoColor} alt="Digitale Têxtil" className="h-12" />
+            <img src={logoColor} alt="Digitale Têxtil" className="h-16 md:h-20" />
           </Link>
 
           {/* Desktop Navigation */}
