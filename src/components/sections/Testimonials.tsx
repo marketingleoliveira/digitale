@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Quote } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const testimonials = [
   {
@@ -37,6 +38,7 @@ const testimonials = [
 
 export function Testimonials() {
   const [current, setCurrent] = useState(0);
+  const { t } = useLanguage();
 
   const next = () => setCurrent((prev) => (prev + 1) % testimonials.length);
   const prev = () => setCurrent((prev) => (prev - 1 + testimonials.length) % testimonials.length);
@@ -50,8 +52,8 @@ export function Testimonials() {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <span className="section-subtitle">Depoimentos</span>
-          <h2 className="section-title mt-3">O Que Nossos Clientes Dizem</h2>
+          <span className="section-subtitle">{t("testimonials.label")}</span>
+          <h2 className="section-title mt-3">{t("testimonials.title")}</h2>
         </motion.div>
 
         <div className="max-w-4xl mx-auto">

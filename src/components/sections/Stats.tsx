@@ -1,12 +1,6 @@
 import { motion } from "framer-motion";
 import { useEffect, useState, useRef } from "react";
-
-const stats = [
-  { value: 60, suffix: "+", label: "Anos de Mercado" },
-  { value: 1000, suffix: "+", label: "Clientes Atendidos" },
-  { value: 10, suffix: "M+", label: "Metros Produzidos/Ano" },
-  { value: 15, suffix: "+", label: "Países Atendidos" },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 function AnimatedNumber({ value, suffix }: { value: number; suffix: string }) {
   const [displayValue, setDisplayValue] = useState(0);
@@ -49,6 +43,15 @@ function AnimatedNumber({ value, suffix }: { value: number; suffix: string }) {
 }
 
 export function Stats() {
+  const { t } = useLanguage();
+
+  const stats = [
+    { value: 60, suffix: "+", label: t("stats.years") },
+    { value: 1000, suffix: "+", label: t("stats.clients") },
+    { value: 10, suffix: "M+", label: t("stats.fabrics") },
+    { value: 15, suffix: "+", label: t("stats.production") },
+  ];
+
   return (
     <section className="py-16 md:py-24 bg-background">
       <div className="container mx-auto px-4">
@@ -58,7 +61,7 @@ export function Stats() {
           viewport={{ once: true }}
           className="section-title text-center mb-12"
         >
-          Em Números
+          {t("testimonials.label")}
         </motion.h2>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">

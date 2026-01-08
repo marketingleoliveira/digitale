@@ -1,21 +1,7 @@
 import { Link } from "react-router-dom";
 import { Instagram, Youtube, Linkedin, Facebook, MapPin, Mail, Phone } from "lucide-react";
 import logoColor from "@/assets/logo-color.png";
-
-const footerLinks = {
-  empresa: [
-    { name: "Sobre Nós", href: "/sobre" },
-    { name: "Sustentabilidade", href: "/sustentabilidade" },
-    { name: "Blog", href: "/blog" },
-    { name: "Fale Conosco", href: "/contato" },
-  ],
-  produtos: [
-    { name: "Milano", href: "/tecidos/milano" },
-    { name: "Lyon", href: "/tecidos/lyon" },
-    { name: "Aerodry", href: "/tecidos/aerodry" },
-    { name: "Veneza", href: "/tecidos/veneza" },
-  ],
-};
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const socialLinks = [
   { name: "Instagram", icon: Instagram, href: "https://www.instagram.com/digitale.textil/" },
@@ -25,6 +11,23 @@ const socialLinks = [
 ];
 
 export function Footer() {
+  const { t } = useLanguage();
+
+  const footerLinks = {
+    empresa: [
+      { name: t("nav.about"), href: "/sobre" },
+      { name: t("nav.sustainability"), href: "/sustentabilidade" },
+      { name: t("nav.blog"), href: "/blog" },
+      { name: t("nav.contact"), href: "/contato" },
+    ],
+    produtos: [
+      { name: "Milano", href: "/tecidos/milano" },
+      { name: "Lyon", href: "/tecidos/lyon" },
+      { name: "Aerodry", href: "/tecidos/aerodry" },
+      { name: "Veneza", href: "/tecidos/veneza" },
+    ],
+  };
+
   return (
     <footer className="bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-12">
@@ -33,7 +36,7 @@ export function Footer() {
           <div>
             <img src={logoColor} alt="Digitale Têxtil" className="h-12 mb-4 brightness-0 invert" />
             <p className="text-gray-400 text-sm leading-relaxed mb-4">
-              Mais de 60 anos de experiência em tecidos de alta tecnologia para moda fitness, esportiva e casual.
+              {t("footer.description")}
             </p>
             <div className="flex gap-3">
               {socialLinks.map((social) => (
@@ -52,7 +55,7 @@ export function Footer() {
 
           {/* Empresa */}
           <div>
-            <h4 className="font-semibold text-lg mb-4">Empresa</h4>
+            <h4 className="font-semibold text-lg mb-4">{t("footer.navigation")}</h4>
             <ul className="space-y-2">
               {footerLinks.empresa.map((link) => (
                 <li key={link.name}>
@@ -66,7 +69,7 @@ export function Footer() {
 
           {/* Tecidos */}
           <div>
-            <h4 className="font-semibold text-lg mb-4">Tecidos</h4>
+            <h4 className="font-semibold text-lg mb-4">{t("nav.fabrics")}</h4>
             <ul className="space-y-2">
               {footerLinks.produtos.map((link) => (
                 <li key={link.name}>
@@ -80,7 +83,7 @@ export function Footer() {
 
           {/* Contato */}
           <div>
-            <h4 className="font-semibold text-lg mb-4">Contato</h4>
+            <h4 className="font-semibold text-lg mb-4">{t("footer.contact")}</h4>
             <ul className="space-y-3 text-sm text-gray-400">
               <li className="flex items-start gap-2">
                 <Mail className="h-4 w-4 mt-0.5 flex-shrink-0" />
@@ -106,12 +109,12 @@ export function Footer() {
         </div>
 
         <div className="mt-10 pt-6 border-t border-gray-800 text-center text-gray-500 text-sm">
-          <p>© {new Date().getFullYear()} Digitale Têxtil. Todos os direitos reservados.</p>
+          <p>© {new Date().getFullYear()} Digitale Têxtil. {t("footer.rights")}</p>
           <Link 
             to="/admin" 
             className="inline-block mt-3 text-xs text-gray-600 hover:text-gray-400 transition-colors"
           >
-            Painel Administrativo
+            {t("footer.admin")}
           </Link>
         </div>
       </div>

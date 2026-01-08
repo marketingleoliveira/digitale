@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const clients = [
   { name: "Puma", logo: "https://digitaletextil.com.br/wp-content/uploads/2023/03/Puma-Logo.png" },
@@ -12,6 +13,8 @@ const clients = [
 ];
 
 export function Clients() {
+  const { t } = useLanguage();
+
   return (
     <section className="py-20 bg-background overflow-hidden">
       <div className="container mx-auto px-4">
@@ -21,8 +24,8 @@ export function Clients() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <span className="section-subtitle">Parceiros</span>
-          <h2 className="section-title mt-3">Alguns de Nossos Clientes</h2>
+          <span className="section-subtitle">{t("clients.label")}</span>
+          <h2 className="section-title mt-3">{t("clients.title")}</h2>
         </motion.div>
 
         {/* Infinite Scroll Effect */}
