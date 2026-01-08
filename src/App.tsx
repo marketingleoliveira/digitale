@@ -18,6 +18,7 @@ import Categories from "./pages/admin/Categories";
 import Contacts from "./pages/admin/Contacts";
 import Settings from "./pages/admin/Settings";
 import Users from "./pages/admin/Users";
+import Carousel from "./pages/admin/Carousel";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
             {/* Admin Routes */}
             <Route path="/admin/login" element={<Login />} />
             <Route path="/admin" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/admin/carousel" element={<ProtectedRoute requireAdmin><Carousel /></ProtectedRoute>} />
             <Route path="/admin/posts" element={<ProtectedRoute><Posts /></ProtectedRoute>} />
             <Route path="/admin/posts/:id" element={<ProtectedRoute><PostEditor /></ProtectedRoute>} />
             <Route path="/admin/categories" element={<ProtectedRoute><Categories /></ProtectedRoute>} />
