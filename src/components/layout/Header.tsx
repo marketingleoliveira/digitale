@@ -1,15 +1,14 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown, Phone } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { AnimatePresence, motion } from "framer-motion";
+import { Menu, X, ChevronDown } from "lucide-react";
 import logoColor from "@/assets/logo-color.png";
 
 const navigation = [
-  { name: "Home", href: "/" },
-  { name: "Sobre", href: "/sobre" },
+  { name: "HOME", href: "/" },
+  { name: "SOBRE NÓS", href: "/sobre" },
   {
-    name: "Tecidos",
+    name: "TECIDOS",
     href: "/tecidos",
     children: [
       { name: "Milano", href: "/tecidos/milano" },
@@ -18,9 +17,10 @@ const navigation = [
       { name: "Veneza", href: "/tecidos/veneza" },
     ],
   },
-  { name: "Sustentabilidade", href: "/sustentabilidade" },
-  { name: "Blog", href: "/blog" },
-  { name: "Contato", href: "/contato" },
+  { name: "ESTAMPAS", href: "/estampas" },
+  { name: "SUSTENTABILIDADE", href: "/sustentabilidade" },
+  { name: "BLOG", href: "/blog" },
+  { name: "FALE CONOSCO", href: "/contato" },
 ];
 
 export function Header() {
@@ -37,32 +37,19 @@ export function Header() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
-        isScrolled
-          ? "bg-background/98 backdrop-blur-sm shadow-sm border-b border-border"
-          : "bg-background"
+      className={`fixed top-0 left-0 right-0 z-50 bg-background transition-shadow duration-300 ${
+        isScrolled ? "shadow-md" : ""
       }`}
     >
-      {/* Top Bar */}
-      <div className="hidden lg:block bg-primary text-primary-foreground">
-        <div className="container mx-auto px-6 py-2 flex justify-between text-xs">
-          <span>Atendimento: Seg - Sex, 8h às 18h</span>
-          <a href="tel:+551120649662" className="flex items-center gap-1 hover:underline">
-            <Phone className="h-3 w-3" />
-            +55 11 2064-9662
-          </a>
-        </div>
-      </div>
-
-      <div className="container mx-auto px-6">
-        <div className="flex items-center justify-between h-16 lg:h-20">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link to="/" className="flex-shrink-0">
-            <img src={logoColor} alt="Digitale Têxtil" className="h-10 lg:h-12" />
+            <img src={logoColor} alt="Digitale Têxtil" className="h-12" />
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-1">
+          <nav className="hidden lg:flex items-center">
             {navigation.map((item) => (
               <div
                 key={item.name}
@@ -75,27 +62,28 @@ export function Header() {
                   className={`px-4 py-2 text-sm font-medium transition-colors flex items-center gap-1 ${
                     location.pathname === item.href
                       ? "text-primary"
-                      : "text-foreground/70 hover:text-foreground"
+                      : "text-foreground hover:text-primary"
                   }`}
                 >
                   {item.name}
                   {item.children && <ChevronDown className="h-3.5 w-3.5" />}
                 </Link>
+                
                 {item.children && (
                   <AnimatePresence>
                     {openDropdown === item.name && (
                       <motion.div
-                        initial={{ opacity: 0, y: 8 }}
+                        initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 8 }}
+                        exit={{ opacity: 0, y: 10 }}
                         transition={{ duration: 0.15 }}
-                        className="absolute top-full left-0 mt-1 py-2 bg-card rounded-lg shadow-lg border border-border min-w-[160px]"
+                        className="absolute top-full left-0 mt-0 py-2 bg-background rounded-md shadow-lg border border-border min-w-[180px]"
                       >
                         {item.children.map((child) => (
                           <Link
                             key={child.name}
                             to={child.href}
-                            className="block px-4 py-2 text-sm text-foreground/70 hover:text-foreground hover:bg-muted transition-colors"
+                            className="block px-4 py-2.5 text-sm text-foreground hover:text-primary hover:bg-muted transition-colors"
                           >
                             {child.name}
                           </Link>
@@ -107,13 +95,6 @@ export function Header() {
               </div>
             ))}
           </nav>
-
-          {/* CTA Button */}
-          <div className="hidden lg:flex items-center gap-3">
-            <Button asChild>
-              <Link to="/contato">Solicitar Orçamento</Link>
-            </Button>
-          </div>
 
           {/* Mobile Menu Button */}
           <button
@@ -134,13 +115,15 @@ export function Header() {
             exit={{ opacity: 0, height: 0 }}
             className="lg:hidden bg-background border-t border-border"
           >
-            <nav className="container mx-auto px-6 py-4">
+            <nav className="container mx-auto px-4 py-4">
               {navigation.map((item) => (
                 <div key={item.name}>
                   <Link
                     to={item.href}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="block py-3 text-foreground font-medium border-b border-border/50"
+                    className={`block py-3 font-medium border-b border-border/50 ${
+                      location.pathname === item.href ? "text-primary" : "text-foreground"
+                    }`}
                   >
                     {item.name}
                   </Link>
@@ -160,9 +143,6 @@ export function Header() {
                   )}
                 </div>
               ))}
-              <Button asChild className="w-full mt-4">
-                <Link to="/contato">Solicitar Orçamento</Link>
-              </Button>
             </nav>
           </motion.div>
         )}
