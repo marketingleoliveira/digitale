@@ -106,7 +106,13 @@ export function Footer() {
         </div>
 
         <div className="mt-10 pt-6 border-t border-gray-800 text-center text-gray-500 text-sm">
-          © {new Date().getFullYear()} Digitale Têxtil. Todos os direitos reservados.
+          <p>© {new Date().getFullYear()} Digitale Têxtil. Todos os direitos reservados.</p>
+          <Link 
+            to="/admin" 
+            className="inline-block mt-3 text-xs text-gray-600 hover:text-gray-400 transition-colors"
+          >
+            Painel Administrativo
+          </Link>
         </div>
       </div>
     </footer>
