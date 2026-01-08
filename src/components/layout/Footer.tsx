@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Instagram, Youtube, Linkedin, Facebook, MapPin, Mail, Phone, ArrowUpRight } from "lucide-react";
+import { Instagram, Youtube, Linkedin, Facebook, MapPin, Mail, Phone } from "lucide-react";
 import logoColor from "@/assets/logo-color.png";
 
 const footerLinks = {
@@ -7,17 +7,13 @@ const footerLinks = {
     { name: "Sobre Nós", href: "/sobre" },
     { name: "Sustentabilidade", href: "/sustentabilidade" },
     { name: "Blog", href: "/blog" },
-    { name: "Contato", href: "/contato" },
+    { name: "Fale Conosco", href: "/contato" },
   ],
   produtos: [
     { name: "Milano", href: "/tecidos/milano" },
     { name: "Lyon", href: "/tecidos/lyon" },
     { name: "Aerodry", href: "/tecidos/aerodry" },
     { name: "Veneza", href: "/tecidos/veneza" },
-  ],
-  suporte: [
-    { name: "Política de Privacidade", href: "/politica-de-privacidade" },
-    { name: "Termos de Uso", href: "/termos-de-uso" },
   ],
 };
 
@@ -30,24 +26,23 @@ const socialLinks = [
 
 export function Footer() {
   return (
-    <footer className="bg-muted border-t border-border">
-      <div className="container mx-auto px-6 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
+    <footer className="bg-gray-900 text-white">
+      <div className="container mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand */}
-          <div className="lg:col-span-2">
-            <img src={logoColor} alt="Digitale Têxtil" className="h-12 mb-5" />
-            <p className="text-muted-foreground text-sm leading-relaxed max-w-sm mb-6">
-              Com mais de 60 anos de experiência, somos referência em tecidos de alta tecnologia para moda fitness, esportiva e casual.
+          <div>
+            <img src={logoColor} alt="Digitale Têxtil" className="h-12 mb-4 brightness-0 invert" />
+            <p className="text-gray-400 text-sm leading-relaxed mb-4">
+              Mais de 60 anos de experiência em tecidos de alta tecnologia para moda fitness, esportiva e casual.
             </p>
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               {socialLinks.map((social) => (
                 <a
                   key={social.name}
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-md bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary transition-colors"
-                  aria-label={social.name}
+                  className="w-9 h-9 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white hover:bg-primary transition-colors"
                 >
                   <social.icon className="h-4 w-4" />
                 </a>
@@ -57,14 +52,11 @@ export function Footer() {
 
           {/* Empresa */}
           <div>
-            <h4 className="font-semibold text-foreground mb-4">Empresa</h4>
-            <ul className="space-y-2.5">
+            <h4 className="font-semibold text-lg mb-4">Empresa</h4>
+            <ul className="space-y-2">
               {footerLinks.empresa.map((link) => (
                 <li key={link.name}>
-                  <Link
-                    to={link.href}
-                    className="text-muted-foreground hover:text-foreground transition-colors text-sm"
-                  >
+                  <Link to={link.href} className="text-gray-400 hover:text-white transition-colors text-sm">
                     {link.name}
                   </Link>
                 </li>
@@ -72,16 +64,13 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Produtos */}
+          {/* Tecidos */}
           <div>
-            <h4 className="font-semibold text-foreground mb-4">Tecidos</h4>
-            <ul className="space-y-2.5">
+            <h4 className="font-semibold text-lg mb-4">Tecidos</h4>
+            <ul className="space-y-2">
               {footerLinks.produtos.map((link) => (
                 <li key={link.name}>
-                  <Link
-                    to={link.href}
-                    className="text-muted-foreground hover:text-foreground transition-colors text-sm"
-                  >
+                  <Link to={link.href} className="text-gray-400 hover:text-white transition-colors text-sm">
                     {link.name}
                   </Link>
                 </li>
@@ -91,21 +80,21 @@ export function Footer() {
 
           {/* Contato */}
           <div>
-            <h4 className="font-semibold text-foreground mb-4">Contato</h4>
-            <ul className="space-y-3 text-sm">
-              <li className="flex items-start gap-2 text-muted-foreground">
+            <h4 className="font-semibold text-lg mb-4">Contato</h4>
+            <ul className="space-y-3 text-sm text-gray-400">
+              <li className="flex items-start gap-2">
                 <Mail className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                <a href="mailto:atendimento@digitaletextil.com.br" className="hover:text-foreground transition-colors">
+                <a href="mailto:atendimento@digitaletextil.com.br" className="hover:text-white">
                   atendimento@digitaletextil.com.br
                 </a>
               </li>
-              <li className="flex items-start gap-2 text-muted-foreground">
+              <li className="flex items-start gap-2">
                 <Phone className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                <a href="tel:+551120649662" className="hover:text-foreground transition-colors">
+                <a href="tel:+551120649662" className="hover:text-white">
                   +55 11 2064-9662
                 </a>
               </li>
-              <li className="flex items-start gap-2 text-muted-foreground">
+              <li className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
                 <span>
                   Av. Henry Ford, 354<br />
@@ -116,22 +105,8 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Bottom */}
-        <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-muted-foreground text-sm">
-            © {new Date().getFullYear()} Digitale Têxtil. Todos os direitos reservados.
-          </p>
-          <div className="flex gap-6 text-sm">
-            {footerLinks.suporte.map((link) => (
-              <Link
-                key={link.name}
-                to={link.href}
-                className="text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {link.name}
-              </Link>
-            ))}
-          </div>
+        <div className="mt-10 pt-6 border-t border-gray-800 text-center text-gray-500 text-sm">
+          © {new Date().getFullYear()} Digitale Têxtil. Todos os direitos reservados.
         </div>
       </div>
     </footer>

@@ -1,51 +1,45 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Phone, Mail } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Phone, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export function CTA() {
   return (
-    <section className="py-20 lg:py-28 bg-primary">
-      <div className="container mx-auto px-6">
+    <section className="py-16 md:py-24 bg-primary">
+      <div className="container mx-auto px-4 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="max-w-3xl mx-auto text-center"
         >
-          <h2 className="text-3xl md:text-4xl font-semibold text-primary-foreground mb-6">
-            Pronto para elevar a qualidade dos seus produtos?
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            Fale Conosco
           </h2>
-          <p className="text-primary-foreground/80 text-lg mb-10">
+          <p className="text-white/80 text-lg mb-8 max-w-2xl mx-auto">
             Entre em contato com nossa equipe e descubra como nossos tecidos podem transformar sua produção.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">
-            <Button asChild size="lg" variant="secondary" className="group">
-              <Link to="/contato">
-                Solicitar Orçamento
-                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </Link>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="ghost"
-              className="text-primary-foreground border border-primary-foreground/30 hover:bg-primary-foreground/10"
+            <Link
+              to="/contato"
+              className="inline-block bg-white text-primary px-8 py-3 rounded-full font-medium hover:bg-gray-100 transition-colors"
             >
-              <a href="tel:+551120649662">
-                <Phone className="mr-2 h-4 w-4" />
-                Ligar Agora
-              </a>
-            </Button>
+              Solicitar Orçamento
+            </Link>
+            <a
+              href="tel:+551120649662"
+              className="inline-flex items-center justify-center gap-2 border-2 border-white text-white px-8 py-3 rounded-full font-medium hover:bg-white/10 transition-colors"
+            >
+              <Phone className="h-4 w-4" />
+              Ligar Agora
+            </a>
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-center gap-6 text-primary-foreground/70 text-sm">
-            <a href="tel:+551120649662" className="flex items-center gap-2 hover:text-primary-foreground transition-colors">
+          <div className="flex flex-col sm:flex-row justify-center gap-6 text-white/70 text-sm">
+            <a href="tel:+551120649662" className="flex items-center justify-center gap-2 hover:text-white">
               <Phone className="h-4 w-4" />
               +55 11 2064-9662
             </a>
-            <a href="mailto:atendimento@digitaletextil.com.br" className="flex items-center gap-2 hover:text-primary-foreground transition-colors">
+            <a href="mailto:atendimento@digitaletextil.com.br" className="flex items-center justify-center gap-2 hover:text-white">
               <Mail className="h-4 w-4" />
               atendimento@digitaletextil.com.br
             </a>

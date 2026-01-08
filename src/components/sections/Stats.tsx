@@ -2,10 +2,10 @@ import { motion } from "framer-motion";
 import { useEffect, useState, useRef } from "react";
 
 const stats = [
-  { value: 60, suffix: "+", label: "Anos de mercado" },
-  { value: 1000, suffix: "+", label: "Clientes ativos" },
-  { value: 10, suffix: "M+", label: "Metros produzidos/ano" },
-  { value: 15, suffix: "+", label: "Países atendidos" },
+  { value: 60, suffix: "+", label: "Anos de Mercado" },
+  { value: 1000, suffix: "+", label: "Clientes Atendidos" },
+  { value: 10, suffix: "M+", label: "Metros Produzidos/Ano" },
+  { value: 15, suffix: "+", label: "Países Atendidos" },
 ];
 
 function AnimatedNumber({ value, suffix }: { value: number; suffix: string }) {
@@ -50,9 +50,18 @@ function AnimatedNumber({ value, suffix }: { value: number; suffix: string }) {
 
 export function Stats() {
   return (
-    <section className="py-20 lg:py-28 bg-background border-y border-border">
-      <div className="container mx-auto px-6">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+    <section className="py-16 md:py-24 bg-background">
+      <div className="container mx-auto px-4">
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="section-title text-center mb-12"
+        >
+          Em Números
+        </motion.h2>
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
           {stats.map((stat, index) => (
             <motion.div
               key={stat.label}
