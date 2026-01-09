@@ -4,28 +4,31 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Stats } from "@/components/sections/Stats";
 import { Clients } from "@/components/sections/Clients";
+import { useLanguage } from "@/contexts/LanguageContext";
 import athleteImg from "@/assets/athlete-model.jpg";
 
-const values = [
-  {
-    title: "Qualidade",
-    description: "Entregamos tecidos com os mais altos padrões de qualidade do mercado.",
-  },
-  {
-    title: "Inovação",
-    description: "Investimos constantemente em novas tecnologias e processos.",
-  },
-  {
-    title: "Sustentabilidade",
-    description: "Compromisso com práticas ambientalmente responsáveis.",
-  },
-  {
-    title: "Parceria",
-    description: "Construímos relacionamentos duradouros com nossos clientes.",
-  },
-];
-
 const About = () => {
+  const { t } = useLanguage();
+
+  const values = [
+    {
+      titleKey: "about.value.quality",
+      descKey: "about.value.quality.desc",
+    },
+    {
+      titleKey: "about.value.innovation",
+      descKey: "about.value.innovation.desc",
+    },
+    {
+      titleKey: "about.value.sustainability",
+      descKey: "about.value.sustainability.desc",
+    },
+    {
+      titleKey: "about.value.partnership",
+      descKey: "about.value.partnership.desc",
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -38,13 +41,12 @@ const About = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <span className="section-subtitle">Sobre Nós</span>
+            <span className="section-subtitle">{t("about.label")}</span>
             <h1 className="section-title mt-3 mb-6">
-              Mais de 60 Anos de Excelência Têxtil
+              {t("about.title")}
             </h1>
             <p className="text-muted-foreground text-lg leading-relaxed">
-              Somos uma empresa do Grupo VMF/Schick Bin, com mais de seis décadas de experiência 
-              no segmento têxtil, sempre à frente das inovações do mercado.
+              {t("about.description")}
             </p>
           </motion.div>
         </div>
@@ -59,21 +61,18 @@ const About = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <h2 className="section-title mb-6">Nossa História</h2>
+              <h2 className="section-title mb-6">{t("about.history.title")}</h2>
               <p className="text-muted-foreground text-lg leading-relaxed mb-6">
-                A Digitale Têxtil nasceu da paixão por transformar tecidos em experiências. 
-                Ao longo de mais de 60 anos, nos tornamos referência em tecidos de alta tecnologia, 
-                sempre investindo em inovação e sustentabilidade.
+                {t("about.history.p1")}
               </p>
               <p className="text-muted-foreground text-lg leading-relaxed mb-8">
-                Hoje, atendemos mais de 1.000 clientes em 15 países, oferecendo tecidos com 
-                tecnologias exclusivas como Aloe Vera, proteção UV 50+, antibacteriano e muito mais.
+                {t("about.history.p2")}
               </p>
 
               <div className="space-y-4">
                 {values.map((value, index) => (
                   <motion.div
-                    key={value.title}
+                    key={value.titleKey}
                     initial={{ opacity: 0, x: -20 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
@@ -82,8 +81,8 @@ const About = () => {
                   >
                     <CheckCircle className="h-6 w-6 text-accent flex-shrink-0" />
                     <div>
-                      <h4 className="font-semibold text-foreground">{value.title}</h4>
-                      <p className="text-sm text-muted-foreground">{value.description}</p>
+                      <h4 className="font-semibold text-foreground">{t(value.titleKey)}</h4>
+                      <p className="text-sm text-muted-foreground">{t(value.descKey)}</p>
                     </div>
                   </motion.div>
                 ))}
@@ -99,13 +98,13 @@ const About = () => {
               <div className="aspect-[4/5] rounded-3xl overflow-hidden">
                 <img
                   src={athleteImg}
-                  alt="Atleta usando tecidos Digitale"
+                  alt={t("about.image.alt")}
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="absolute -bottom-6 -left-6 bg-primary text-primary-foreground p-6 rounded-2xl shadow-xl">
                 <p className="font-display text-4xl font-bold">60+</p>
-                <p className="text-sm text-primary-foreground/80">Anos de mercado</p>
+                <p className="text-sm text-primary-foreground/80">{t("about.years")}</p>
               </div>
             </motion.div>
           </div>

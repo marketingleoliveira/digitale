@@ -8,6 +8,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Post {
   id: string;
@@ -27,6 +28,7 @@ interface Category {
 }
 
 const Blog = () => {
+  const { t, language } = useLanguage();
   const [posts, setPosts] = useState<Post[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,7 +64,8 @@ const Blog = () => {
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "";
-    return new Date(dateString).toLocaleDateString("pt-BR", {
+    const localeMap = { pt: "pt-BR", es: "es-ES", en: "en-US" };
+    return new Date(dateString).toLocaleDateString(localeMap[language], {
       day: "2-digit",
       month: "long",
       year: "numeric",
@@ -81,10 +84,10 @@ const Blog = () => {
             animate={{ opacity: 1, y: 0 }}
             className="max-w-2xl"
           >
-            <span className="section-subtitle">Blog</span>
-            <h1 className="section-title mt-2 mb-4">Novidades e Tendências</h1>
+            <span className="section-subtitle">{t("blog.label")}</span>
+            <h1 className="section-title mt-2 mb-4">{t("blog.hero.title")}</h1>
             <p className="text-muted-foreground text-lg">
-              Acompanhe as últimas novidades do mercado têxtil, dicas e inovações em tecidos de alta tecnologia.
+              {t("blog.hero.subtitle")}
             </p>
           </motion.div>
         </div>
@@ -100,7 +103,7 @@ const Blog = () => {
                 size="sm"
                 onClick={() => setSelectedCategory("todos")}
               >
-                Todos
+                {t("blog.all")}
               </Button>
               {categories.map((category) => (
                 <Button
@@ -116,7 +119,7 @@ const Blog = () => {
             <div className="relative w-full md:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Buscar posts..."
+                placeholder={t("blog.search")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
@@ -184,7 +187,7 @@ const Blog = () => {
                           {formatDate(post.published_at || post.created_at)}
                         </span>
                         <span className="flex items-center gap-1 text-primary font-medium">
-                          Ler mais
+                          {t("blog.readMore")}
                           <ArrowRight className="h-3 w-3" />
                         </span>
                       </div>
@@ -196,10 +199,10 @@ const Blog = () => {
           ) : (
             <div className="text-center py-16">
               <Tag className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground text-lg mb-4">Nenhum post encontrado.</p>
+              <p className="text-muted-foreground text-lg mb-4">{t("blog.noResults")}</p>
               {searchQuery && (
                 <Button variant="outline" onClick={() => setSearchQuery("")}>
-                  Limpar busca
+                  {t("blog.clearSearch")}
                 </Button>
               )}
             </div>
