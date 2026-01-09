@@ -1,42 +1,45 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const products = [
   {
     id: "lyon",
     name: "Lyon",
-    tagline: "Aumente suas vendas",
-    subtitle: "Zero transparência",
+    taglineKey: "products.lyon.tagline",
+    subtitleKey: "products.lyon.subtitle",
     image: "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80",
     bgColor: "bg-sky-400",
   },
   {
     id: "aerodry",
     name: "Aerodry",
-    tagline: "Mais vendas, mais valor",
-    subtitle: "Mais performance",
+    taglineKey: "products.aerodry.tagline",
+    subtitleKey: "products.aerodry.subtitle",
     image: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80",
     bgColor: "bg-gray-700",
   },
   {
     id: "veneza",
     name: "Veneza",
-    tagline: "Elegância e conforto",
-    subtitle: "Em cada detalhe",
+    taglineKey: "products.veneza.tagline",
+    subtitleKey: "products.veneza.subtitle",
     image: "https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?w=800&q=80",
     bgColor: "bg-rose-400",
   },
   {
     id: "milano",
     name: "Milano Myst",
-    tagline: "O melhor tecido",
-    subtitle: "Para leggings premium",
+    taglineKey: "products.milano.tagline",
+    subtitleKey: "products.milano.subtitle",
     image: "https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=800&q=80",
     bgColor: "bg-violet-600",
   },
 ];
 
 export function Products() {
+  const { t } = useLanguage();
+
   return (
     <section className="py-16 md:py-24 bg-background">
       <div className="container mx-auto px-4">
@@ -46,7 +49,7 @@ export function Products() {
           viewport={{ once: true }}
           className="section-title text-center mb-12"
         >
-          Últimos Lançamentos
+          {t("products.title")}
         </motion.h2>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -69,9 +72,9 @@ export function Products() {
                     className="w-full h-full object-cover mix-blend-overlay opacity-60 group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-6 text-center">
-                    <span className="text-sm opacity-80 mb-2">{product.tagline}</span>
+                    <span className="text-sm opacity-80 mb-2">{t(product.taglineKey)}</span>
                     <h3 className="text-3xl md:text-4xl font-bold mb-2">{product.name}</h3>
-                    <span className="text-sm opacity-80">{product.subtitle}</span>
+                    <span className="text-sm opacity-80">{t(product.subtitleKey)}</span>
                   </div>
                 </div>
               </Link>

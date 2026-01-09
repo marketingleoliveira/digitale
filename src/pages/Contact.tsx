@@ -9,35 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-
-const contactInfo = [
-  {
-    icon: Mail,
-    title: "Email",
-    value: "atendimento@digitaletextil.com.br",
-    href: "mailto:atendimento@digitaletextil.com.br",
-  },
-  {
-    icon: Phone,
-    title: "Telefone",
-    value: "+55 11 2064-9662",
-    href: "tel:+551120649662",
-  },
-  {
-    icon: MapPin,
-    title: "Endereço",
-    value: "Av. Henry Ford, 354 - São Paulo-SP",
-    href: "https://maps.google.com/?q=Av.+Henry+Ford,+354+-+Mooca,+São+Paulo",
-  },
-  {
-    icon: Clock,
-    title: "Horário",
-    value: "Seg - Sex: 8h às 18h",
-    href: null,
-  },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Contact = () => {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({
@@ -47,6 +22,33 @@ const Contact = () => {
     company: "",
     message: "",
   });
+
+  const contactInfo = [
+    {
+      icon: Mail,
+      titleKey: "contact.info.email",
+      value: "atendimento@digitaletextil.com.br",
+      href: "mailto:atendimento@digitaletextil.com.br",
+    },
+    {
+      icon: Phone,
+      titleKey: "contact.info.phone",
+      value: "+55 11 2064-9662",
+      href: "tel:+551120649662",
+    },
+    {
+      icon: MapPin,
+      titleKey: "contact.info.address",
+      value: "Av. Henry Ford, 354 - São Paulo-SP",
+      href: "https://maps.google.com/?q=Av.+Henry+Ford,+354+-+Mooca,+São+Paulo",
+    },
+    {
+      icon: Clock,
+      titleKey: "contact.info.hours",
+      valueKey: "contact.info.hours.value",
+      href: null,
+    },
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,10 +65,10 @@ const Contact = () => {
     ]);
 
     if (error) {
-      toast.error("Erro ao enviar mensagem. Tente novamente.");
+      toast.error(t("contact.form.error"));
     } else {
       setSubmitted(true);
-      toast.success("Mensagem enviada com sucesso!");
+      toast.success(t("contact.form.successToast"));
     }
 
     setLoading(false);
@@ -84,10 +86,10 @@ const Contact = () => {
             animate={{ opacity: 1, y: 0 }}
             className="max-w-2xl"
           >
-            <span className="section-subtitle">Contato</span>
-            <h1 className="section-title mt-2 mb-4">Fale Conosco</h1>
+            <span className="section-subtitle">{t("contact.label")}</span>
+            <h1 className="section-title mt-2 mb-4">{t("contact.title")}</h1>
             <p className="text-muted-foreground text-lg">
-              Estamos prontos para atender você e ajudar a encontrar os melhores tecidos para o seu negócio.
+              {t("contact.description")}
             </p>
           </motion.div>
         </div>
@@ -108,21 +110,21 @@ const Contact = () => {
                   <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
                     <CheckCircle className="h-8 w-8 text-primary" />
                   </div>
-                  <h2 className="text-2xl font-semibold text-foreground mb-4">Mensagem Enviada!</h2>
+                  <h2 className="text-2xl font-semibold text-foreground mb-4">{t("contact.form.success.title")}</h2>
                   <p className="text-muted-foreground mb-6">
-                    Obrigado pelo contato. Nossa equipe retornará em breve.
+                    {t("contact.form.success.desc")}
                   </p>
                   <Button onClick={() => { setSubmitted(false); setForm({ name: "", email: "", phone: "", company: "", message: "" }); }}>
-                    Enviar nova mensagem
+                    {t("contact.form.success.new")}
                   </Button>
                 </div>
               ) : (
                 <div className="bg-card rounded-lg border border-border p-8">
-                  <h2 className="text-xl font-semibold text-foreground mb-6">Envie sua mensagem</h2>
+                  <h2 className="text-xl font-semibold text-foreground mb-6">{t("contact.form.title")}</h2>
                   <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="grid md:grid-cols-2 gap-5">
                       <div className="space-y-2">
-                        <Label htmlFor="name">Nome completo *</Label>
+                        <Label htmlFor="name">{t("contact.form.name")}</Label>
                         <Input
                           id="name"
                           value={form.name}
@@ -131,7 +133,7 @@ const Contact = () => {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="company">Empresa</Label>
+                        <Label htmlFor="company">{t("contact.form.company")}</Label>
                         <Input
                           id="company"
                           value={form.company}
@@ -141,7 +143,7 @@ const Contact = () => {
                     </div>
                     <div className="grid md:grid-cols-2 gap-5">
                       <div className="space-y-2">
-                        <Label htmlFor="email">Email *</Label>
+                        <Label htmlFor="email">{t("contact.form.email")}</Label>
                         <Input
                           id="email"
                           type="email"
@@ -151,7 +153,7 @@ const Contact = () => {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="phone">Telefone</Label>
+                        <Label htmlFor="phone">{t("contact.form.phone")}</Label>
                         <Input
                           id="phone"
                           value={form.phone}
@@ -160,7 +162,7 @@ const Contact = () => {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="message">Mensagem *</Label>
+                      <Label htmlFor="message">{t("contact.form.message")}</Label>
                       <Textarea
                         id="message"
                         value={form.message}
@@ -171,7 +173,7 @@ const Contact = () => {
                     </div>
                     <Button type="submit" size="lg" disabled={loading}>
                       <Send className="mr-2 h-4 w-4" />
-                      {loading ? "Enviando..." : "Enviar Mensagem"}
+                      {loading ? t("contact.form.sending") : t("contact.form.submit")}
                     </Button>
                   </form>
                 </div>
@@ -186,7 +188,7 @@ const Contact = () => {
             >
               {contactInfo.map((item, index) => (
                 <motion.div
-                  key={item.title}
+                  key={item.titleKey}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
@@ -197,18 +199,18 @@ const Contact = () => {
                       <item.icon className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <h4 className="font-medium text-foreground mb-1">{item.title}</h4>
+                      <h4 className="font-medium text-foreground mb-1">{t(item.titleKey)}</h4>
                       {item.href ? (
                         <a
                           href={item.href}
-                          target={item.title === "Endereço" ? "_blank" : undefined}
+                          target={item.titleKey === "contact.info.address" ? "_blank" : undefined}
                           rel="noopener noreferrer"
                           className="text-muted-foreground hover:text-primary transition-colors text-sm"
                         >
                           {item.value}
                         </a>
                       ) : (
-                        <p className="text-muted-foreground text-sm">{item.value}</p>
+                        <p className="text-muted-foreground text-sm">{item.valueKey ? t(item.valueKey) : item.value}</p>
                       )}
                     </div>
                   </div>
