@@ -111,16 +111,28 @@ export function Hero() {
         <AnimatePresence mode="wait">
           <motion.div
             key={slide.id}
-            initial={{ opacity: 0, scale: 1.1 }}
+            initial={{ opacity: 0, scale: 1.15 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="absolute inset-[-20px]"
           >
-            <img
+            {/* Ken Burns effect - slow zoom animation */}
+            <motion.img
               src={slide.image_url}
               alt={slide.alt_text || "Slide"}
               className="w-full h-full object-cover object-center"
+              initial={{ scale: 1, x: 0, y: 0 }}
+              animate={{ 
+                scale: 1.08,
+                x: currentSlide % 2 === 0 ? 15 : -15,
+                y: currentSlide % 3 === 0 ? 10 : -10,
+              }}
+              transition={{ 
+                duration: 6,
+                ease: "linear",
+              }}
+              key={`img-${slide.id}`}
             />
             
             {/* Gradient overlays for depth */}
