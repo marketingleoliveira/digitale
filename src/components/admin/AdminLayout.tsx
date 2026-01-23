@@ -27,6 +27,7 @@ interface AdminLayoutProps {
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
   { icon: Images, label: "Carrossel", href: "/admin/carousel", adminOnly: true },
+  { icon: FolderOpen, label: "Tecidos", href: "/admin/fabrics" },
   { icon: FileText, label: "Posts", href: "/admin/posts" },
   { icon: FolderOpen, label: "Categorias", href: "/admin/categories" },
   { icon: MessageSquare, label: "Contatos", href: "/admin/contacts" },

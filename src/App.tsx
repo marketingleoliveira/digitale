@@ -10,6 +10,8 @@ import Index from "./pages/Index";
 import Blog from "./pages/Blog";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import Fabrics from "./pages/Fabrics";
+import FabricDetail from "./pages/FabricDetail";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/admin/Login";
 import Dashboard from "./pages/admin/Dashboard";
@@ -20,6 +22,7 @@ import Contacts from "./pages/admin/Contacts";
 import Settings from "./pages/admin/Settings";
 import Users from "./pages/admin/Users";
 import Carousel from "./pages/admin/Carousel";
+import AdminFabrics from "./pages/admin/Fabrics";
 
 const queryClient = new QueryClient();
 
@@ -34,13 +37,17 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<Blog />} />
               <Route path="/sobre" element={<About />} />
               <Route path="/contato" element={<Contact />} />
+              <Route path="/tecidos" element={<Fabrics />} />
+              <Route path="/tecidos/:slug" element={<FabricDetail />} />
               
               {/* Admin Routes */}
               <Route path="/admin/login" element={<Login />} />
               <Route path="/admin" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/admin/carousel" element={<ProtectedRoute requireAdmin><Carousel /></ProtectedRoute>} />
+              <Route path="/admin/fabrics" element={<ProtectedRoute><AdminFabrics /></ProtectedRoute>} />
               <Route path="/admin/posts" element={<ProtectedRoute><Posts /></ProtectedRoute>} />
               <Route path="/admin/posts/:id" element={<ProtectedRoute><PostEditor /></ProtectedRoute>} />
               <Route path="/admin/categories" element={<ProtectedRoute><Categories /></ProtectedRoute>} />

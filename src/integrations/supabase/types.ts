@@ -169,6 +169,57 @@ export type Database = {
         }
         Relationships: []
       }
+      fabrics: {
+        Row: {
+          applications: string[] | null
+          created_at: string
+          description: string | null
+          display_order: number
+          features: Json | null
+          gallery_images: Json | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          short_description: string | null
+          slug: string
+          specifications: Json | null
+          updated_at: string
+        }
+        Insert: {
+          applications?: string[] | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          features?: Json | null
+          gallery_images?: Json | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          short_description?: string | null
+          slug: string
+          specifications?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          applications?: string[] | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          features?: Json | null
+          gallery_images?: Json | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          short_description?: string | null
+          slug?: string
+          specifications?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
