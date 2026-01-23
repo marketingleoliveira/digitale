@@ -29,6 +29,8 @@ import Settings from "./pages/admin/Settings";
 import Users from "./pages/admin/Users";
 import Carousel from "./pages/admin/Carousel";
 import AdminFabrics from "./pages/admin/Fabrics";
+import Newsletter from "./pages/admin/Newsletter";
+import { NewsletterPopup } from "./components/newsletter/NewsletterPopup";
 
 const queryClient = new QueryClient();
 
@@ -77,12 +79,14 @@ const App = () => (
               <Route path="/admin/posts/:id" element={<ProtectedRoute><PostEditor /></ProtectedRoute>} />
               <Route path="/admin/categories" element={<ProtectedRoute><Categories /></ProtectedRoute>} />
               <Route path="/admin/contacts" element={<ProtectedRoute><Contacts /></ProtectedRoute>} />
+              <Route path="/admin/newsletter" element={<ProtectedRoute requireAdmin><Newsletter /></ProtectedRoute>} />
               <Route path="/admin/settings" element={<ProtectedRoute requireAdmin><Settings /></ProtectedRoute>} />
               <Route path="/admin/users" element={<ProtectedRoute requireAdmin><Users /></ProtectedRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
             <WhatsAppButton />
+            <NewsletterPopup />
           </BrowserRouter>
         </TooltipProvider>
       </FavoritesProvider>

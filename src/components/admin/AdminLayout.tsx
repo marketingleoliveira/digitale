@@ -24,6 +24,8 @@ interface AdminLayoutProps {
   title: string;
 }
 
+import { Mail } from "lucide-react";
+
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
   { icon: Images, label: "Carrossel", href: "/admin/carousel", adminOnly: true },
@@ -31,6 +33,7 @@ const menuItems = [
   { icon: FileText, label: "Posts", href: "/admin/posts" },
   { icon: FolderOpen, label: "Categorias", href: "/admin/categories" },
   { icon: MessageSquare, label: "Contatos", href: "/admin/contacts" },
+  { icon: Mail, label: "Newsletter", href: "/admin/newsletter", adminOnly: true },
   { icon: Users, label: "Usuários", href: "/admin/users", adminOnly: true },
   { icon: Settings, label: "Configurações", href: "/admin/settings", adminOnly: true },
 ];

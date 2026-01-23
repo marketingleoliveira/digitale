@@ -228,6 +228,10 @@ const translations: Record<Language, Record<string, string>> = {
     "newsletter.invalidEmail": "Por favor, informe um email válido.",
     "newsletter.alreadySubscribed": "Este email já está cadastrado.",
     "newsletter.thanks": "Obrigado por se inscrever!",
+    "newsletter.popupTitle": "Receba Novidades Exclusivas",
+    "newsletter.popupDescription": "Cadastre-se e seja o primeiro a receber lançamentos, tendências e promoções especiais.",
+    "newsletter.popupButton": "Quero Receber",
+    "newsletter.privacy": "Respeitamos sua privacidade. Cancele quando quiser.",
     
     // WhatsApp
     "whatsapp.title": "Precisa de ajuda?",
@@ -506,6 +510,10 @@ const translations: Record<Language, Record<string, string>> = {
     "newsletter.invalidEmail": "Por favor, ingresa un email válido.",
     "newsletter.alreadySubscribed": "Este email ya está registrado.",
     "newsletter.thanks": "¡Gracias por suscribirte!",
+    "newsletter.popupTitle": "Recibe Novedades Exclusivas",
+    "newsletter.popupDescription": "Suscríbete y sé el primero en recibir lanzamientos, tendencias y promociones especiales.",
+    "newsletter.popupButton": "Quiero Recibir",
+    "newsletter.privacy": "Respetamos tu privacidad. Cancela cuando quieras.",
     
     // WhatsApp
     "whatsapp.title": "¿Necesitas ayuda?",
@@ -784,6 +792,10 @@ const translations: Record<Language, Record<string, string>> = {
     "newsletter.invalidEmail": "Please enter a valid email.",
     "newsletter.alreadySubscribed": "This email is already registered.",
     "newsletter.thanks": "Thank you for subscribing!",
+    "newsletter.popupTitle": "Get Exclusive Updates",
+    "newsletter.popupDescription": "Subscribe and be the first to receive launches, trends and special promotions.",
+    "newsletter.popupButton": "Subscribe Now",
+    "newsletter.privacy": "We respect your privacy. Cancel anytime.",
     
     // WhatsApp
     "whatsapp.title": "Need help?",
