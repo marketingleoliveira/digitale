@@ -5,9 +5,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Search, ArrowUpDown, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { FabricFilters, FilterState } from "@/components/fabric/FabricFilters";
 import { 
   CompareProvider, 
@@ -27,8 +36,12 @@ const defaultImages: Record<string, string> = {
   veneza: fabricVeneza,
 };
 
+type SortOption = "display_order" | "name_asc" | "name_desc" | "weight_asc" | "weight_desc";
+
 function FabricsContent() {
   const { t } = useLanguage();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<SortOption>("display_order");
   const [filters, setFilters] = useState<FilterState>({
     compositions: [],
     weights: [],
@@ -49,11 +62,33 @@ function FabricsContent() {
     },
   });
 
-  // Filter fabrics based on selected filters
-  const filteredFabrics = useMemo(() => {
+  // Helper to extract weight number from gramatura string
+  const extractWeight = (fabric: typeof fabrics extends (infer T)[] | null ? T : never) => {
+    const specs = fabric.specifications as Record<string, string> | null;
+    const gramatura = specs?.gramatura || "";
+    const match = gramatura.match(/(\d+)/);
+    return match ? parseInt(match[1]) : 0;
+  };
+
+  // Filter and sort fabrics
+  const filteredAndSortedFabrics = useMemo(() => {
     if (!fabrics) return [];
 
-    return fabrics.filter((fabric) => {
+    // First, filter by search query
+    let result = fabrics.filter((fabric) => {
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        const matchesName = fabric.name.toLowerCase().includes(query);
+        const matchesDescription = fabric.short_description?.toLowerCase().includes(query) || false;
+        const matchesApplications = fabric.applications?.some(app => 
+          app.toLowerCase().includes(query)
+        ) || false;
+        
+        if (!matchesName && !matchesDescription && !matchesApplications) {
+          return false;
+        }
+      }
+
       // Check composition filter
       if (filters.compositions.length > 0) {
         const specs = fabric.specifications as Record<string, string> | null;
@@ -81,7 +116,30 @@ function FabricsContent() {
 
       return true;
     });
-  }, [fabrics, filters]);
+
+    // Then sort
+    result = [...result].sort((a, b) => {
+      switch (sortBy) {
+        case "name_asc":
+          return a.name.localeCompare(b.name, "pt-BR");
+        case "name_desc":
+          return b.name.localeCompare(a.name, "pt-BR");
+        case "weight_asc":
+          return extractWeight(a) - extractWeight(b);
+        case "weight_desc":
+          return extractWeight(b) - extractWeight(a);
+        case "display_order":
+        default:
+          return a.display_order - b.display_order;
+      }
+    });
+
+    return result;
+  }, [fabrics, searchQuery, filters, sortBy]);
+
+  const clearSearch = () => {
+    setSearchQuery("");
+  };
 
   return (
     <div className="min-h-screen">
@@ -110,6 +168,46 @@ function FabricsContent() {
         {/* Fabrics Grid */}
         <section className="py-16">
           <div className="container mx-auto px-6">
+            {/* Search and Sort Bar */}
+            <div className="flex flex-col md:flex-row gap-4 mb-6">
+              {/* Search */}
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Buscar tecidos por nome, descrição ou aplicação..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-12 pr-10 h-12 text-base"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={clearSearch}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Sort */}
+              <div className="flex items-center gap-2">
+                <ArrowUpDown className="h-5 w-5 text-muted-foreground" />
+                <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
+                  <SelectTrigger className="w-[200px] h-12">
+                    <SelectValue placeholder="Ordenar por" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="display_order">Padrão</SelectItem>
+                    <SelectItem value="name_asc">Nome (A-Z)</SelectItem>
+                    <SelectItem value="name_desc">Nome (Z-A)</SelectItem>
+                    <SelectItem value="weight_asc">Gramatura (menor)</SelectItem>
+                    <SelectItem value="weight_desc">Gramatura (maior)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             {/* Filters */}
             {fabrics && fabrics.length > 0 && (
               <FabricFilters
@@ -129,15 +227,20 @@ function FabricsContent() {
                   </div>
                 ))}
               </div>
-            ) : filteredFabrics.length > 0 ? (
+            ) : filteredAndSortedFabrics.length > 0 ? (
               <>
                 {/* Results count */}
                 <div className="mb-6 text-muted-foreground">
-                  {filteredFabrics.length} tecido{filteredFabrics.length !== 1 ? "s" : ""} encontrado{filteredFabrics.length !== 1 ? "s" : ""}
+                  {filteredAndSortedFabrics.length} tecido{filteredAndSortedFabrics.length !== 1 ? "s" : ""} encontrado{filteredAndSortedFabrics.length !== 1 ? "s" : ""}
+                  {searchQuery && (
+                    <span className="ml-1">
+                      para "<span className="font-medium text-foreground">{searchQuery}</span>"
+                    </span>
+                  )}
                 </div>
 
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {filteredFabrics.map((fabric, index) => (
+                  {filteredAndSortedFabrics.map((fabric, index) => (
                     <motion.div
                       key={fabric.id}
                       initial={{ opacity: 0, y: 30 }}
@@ -195,12 +298,27 @@ function FabricsContent() {
               </>
             ) : (
               <div className="text-center py-16">
-                <p className="text-muted-foreground">
-                  {fabrics && fabrics.length > 0 
-                    ? "Nenhum tecido corresponde aos filtros selecionados." 
-                    : "Nenhum tecido disponível no momento."
+                <Search className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+                <p className="text-muted-foreground text-lg">
+                  {searchQuery 
+                    ? `Nenhum tecido encontrado para "${searchQuery}".`
+                    : fabrics && fabrics.length > 0 
+                      ? "Nenhum tecido corresponde aos filtros selecionados." 
+                      : "Nenhum tecido disponível no momento."
                   }
                 </p>
+                {(searchQuery || filters.compositions.length > 0 || filters.weights.length > 0 || filters.applications.length > 0) && (
+                  <Button
+                    variant="outline"
+                    className="mt-4"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setFilters({ compositions: [], weights: [], applications: [] });
+                    }}
+                  >
+                    Limpar busca e filtros
+                  </Button>
+                )}
               </div>
             )}
           </div>
