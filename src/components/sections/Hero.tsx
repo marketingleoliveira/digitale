@@ -78,7 +78,7 @@ export function Hero() {
   return (
     <section
       className="relative w-full overflow-hidden"
-      style={{ height: "clamp(500px, 70vh, 800px)" }}
+      style={{ height: "350px" }}
       onMouseEnter={() => setIsAutoPlaying(false)}
       onMouseLeave={() => setIsAutoPlaying(true)}
     >
