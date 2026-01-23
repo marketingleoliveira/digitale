@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Check, Phone, Mail, ArrowRight } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ColorGallery } from "@/components/fabric/ColorGallery";
 import fabricMilano from "@/assets/fabric-milano.jpg";
 import fabricLyon from "@/assets/fabric-lyon.jpg";
 import fabricAerodry from "@/assets/fabric-aerodry.jpg";
@@ -18,6 +19,11 @@ const defaultImages: Record<string, string> = {
   aerodry: fabricAerodry,
   veneza: fabricVeneza,
 };
+
+interface ColorVariant {
+  name: string;
+  hex: string;
+}
 
 export default function FabricDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -101,6 +107,9 @@ export default function FabricDetail() {
   const features = Array.isArray(fabric.features) ? fabric.features : [];
   const specifications = fabric.specifications as Record<string, string> || {};
   const applications = fabric.applications || [];
+  const colorVariants = Array.isArray(fabric.color_variants) 
+    ? (fabric.color_variants as unknown as ColorVariant[])
+    : [];
   const imageUrl = fabric.image_url || defaultImages[fabric.slug] || fabricMilano;
 
   return (
@@ -154,6 +163,11 @@ export default function FabricDetail() {
                     {fabric.description || fabric.short_description}
                   </p>
                 </div>
+
+                {/* Color Gallery */}
+                {colorVariants.length > 0 && (
+                  <ColorGallery colors={colorVariants} />
+                )}
 
                 {/* Features */}
                 {features.length > 0 && (
