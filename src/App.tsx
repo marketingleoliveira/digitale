@@ -15,6 +15,8 @@ import Fabrics from "./pages/Fabrics";
 import FabricDetail from "./pages/FabricDetail";
 import Prints from "./pages/Prints";
 import Sustainability from "./pages/Sustainability";
+import Privacy from "./pages/Privacy";
+import BlogPost from "./pages/BlogPost";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/admin/Login";
 import Dashboard from "./pages/admin/Dashboard";
@@ -43,7 +45,7 @@ const App = () => (
               <Route path="/inicio" element={<Navigate to="/" replace />} />
               <Route path="/home" element={<Navigate to="/" replace />} />
               <Route path="/blog" element={<Blog />} />
-              <Route path="/blog/:slug" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
               <Route path="/sobre" element={<About />} />
               <Route path="/nosotros" element={<Navigate to="/sobre" replace />} />
               <Route path="/about" element={<Navigate to="/sobre" replace />} />
@@ -60,6 +62,10 @@ const App = () => (
               <Route path="/sustentabilidade" element={<Sustainability />} />
               <Route path="/sostenibilidad" element={<Navigate to="/sustentabilidade" replace />} />
               <Route path="/sustainability" element={<Navigate to="/sustentabilidade" replace />} />
+              <Route path="/politica-de-privacidade" element={<Privacy />} />
+              <Route path="/privacidade" element={<Navigate to="/politica-de-privacidade" replace />} />
+              <Route path="/privacy" element={<Navigate to="/politica-de-privacidade" replace />} />
+              <Route path="/termos" element={<Navigate to="/politica-de-privacidade" replace />} />
               
               {/* Admin Routes */}
               <Route path="/admin/login" element={<Login />} />
