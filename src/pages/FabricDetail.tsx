@@ -8,6 +8,7 @@ import { ArrowLeft, Check, Phone, Mail, ArrowRight } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ColorGallery } from "@/components/fabric/ColorGallery";
+import { FabricGallery } from "@/components/fabric/FabricGallery";
 import fabricMilano from "@/assets/fabric-milano.jpg";
 import fabricLyon from "@/assets/fabric-lyon.jpg";
 import fabricAerodry from "@/assets/fabric-aerodry.jpg";
@@ -23,6 +24,11 @@ const defaultImages: Record<string, string> = {
 interface ColorVariant {
   name: string;
   hex: string;
+}
+
+interface GalleryImage {
+  url: string;
+  alt?: string;
 }
 
 export default function FabricDetail() {
@@ -110,6 +116,9 @@ export default function FabricDetail() {
   const colorVariants = Array.isArray(fabric.color_variants) 
     ? (fabric.color_variants as unknown as ColorVariant[])
     : [];
+  const galleryImages = Array.isArray(fabric.gallery_images)
+    ? (fabric.gallery_images as unknown as GalleryImage[])
+    : [];
   const imageUrl = fabric.image_url || defaultImages[fabric.slug] || fabricMilano;
 
   return (
@@ -133,19 +142,16 @@ export default function FabricDetail() {
         <section className="py-16">
           <div className="container mx-auto px-6">
             <div className="grid lg:grid-cols-2 gap-12 items-start">
-              {/* Image */}
+              {/* Image Gallery */}
               <motion.div
                 initial={{ opacity: 0, x: -30 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="relative"
               >
-                <div className="aspect-square rounded-3xl overflow-hidden shadow-2xl">
-                  <img
-                    src={imageUrl}
-                    alt={fabric.name}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+                <FabricGallery
+                  mainImage={imageUrl}
+                  images={galleryImages}
+                  fabricName={fabric.name}
+                />
               </motion.div>
 
               {/* Content */}
