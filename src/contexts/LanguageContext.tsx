@@ -20,7 +20,14 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.contact": "FALE CONOSCO",
     
     // Products Section
+    "products.label": "Nossos Tecidos",
     "products.title": "Últimos Lançamentos",
+    "products.viewMore": "Ver Detalhes",
+    "products.viewAll": "Ver Todos os Tecidos",
+    "products.milano.desc": "Tecido de alta compressão, ideal para leggings e shorts fitness com excelente suporte muscular.",
+    "products.lyon.desc": "Malha com toque suave e caimento perfeito, versátil para diversas aplicações esportivas.",
+    "products.aerodry.desc": "Tecnologia dry fit avançada com secagem ultra-rápida e alta respirabilidade.",
+    "products.veneza.desc": "Acabamento acetinado premium com brilho sofisticado para peças elegantes.",
     "products.lyon.tagline": "Aumente suas vendas",
     "products.lyon.subtitle": "Zero transparência",
     "products.aerodry.tagline": "Mais vendas, mais valor",
@@ -137,7 +144,14 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.contact": "CONTACTO",
     
     // Products Section
+    "products.label": "Nuestros Tejidos",
     "products.title": "Últimos Lanzamientos",
+    "products.viewMore": "Ver Detalles",
+    "products.viewAll": "Ver Todos los Tejidos",
+    "products.milano.desc": "Tejido de alta compresión, ideal para leggings y shorts fitness con excelente soporte muscular.",
+    "products.lyon.desc": "Malla con tacto suave y caída perfecta, versátil para diversas aplicaciones deportivas.",
+    "products.aerodry.desc": "Tecnología dry fit avanzada con secado ultra-rápido y alta transpirabilidad.",
+    "products.veneza.desc": "Acabado satinado premium con brillo sofisticado para piezas elegantes.",
     "products.lyon.tagline": "Aumente sus ventas",
     "products.lyon.subtitle": "Cero transparencia",
     "products.aerodry.tagline": "Más ventas, más valor",
@@ -254,7 +268,14 @@ const translations: Record<Language, Record<string, string>> = {
     "nav.contact": "CONTACT US",
     
     // Products Section
+    "products.label": "Our Fabrics",
     "products.title": "Latest Releases",
+    "products.viewMore": "View Details",
+    "products.viewAll": "View All Fabrics",
+    "products.milano.desc": "High compression fabric, ideal for leggings and fitness shorts with excellent muscle support.",
+    "products.lyon.desc": "Soft touch mesh with perfect drape, versatile for various sports applications.",
+    "products.aerodry.desc": "Advanced dry fit technology with ultra-fast drying and high breathability.",
+    "products.veneza.desc": "Premium satin finish with sophisticated shine for elegant pieces.",
     "products.lyon.tagline": "Boost your sales",
     "products.lyon.subtitle": "Zero transparency",
     "products.aerodry.tagline": "More sales, more value",
