@@ -4,11 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { motion } from "framer-motion";
-import { ArrowLeft, Check, Phone, Mail, ArrowRight } from "lucide-react";
+import { ArrowLeft, Check, Phone, Mail, ArrowRight, Heart } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ColorGallery } from "@/components/fabric/ColorGallery";
 import { FabricGallery } from "@/components/fabric/FabricGallery";
+import { FavoriteButton } from "@/components/fabric/FavoriteButton";
 import fabricMilano from "@/assets/fabric-milano.jpg";
 import fabricLyon from "@/assets/fabric-lyon.jpg";
 import fabricAerodry from "@/assets/fabric-aerodry.jpg";
@@ -161,10 +162,18 @@ export default function FabricDetail() {
                 className="space-y-8"
               >
                 <div>
-                  <span className="section-subtitle">{t("products.label")}</span>
-                  <h1 className="text-4xl md:text-5xl font-bold text-foreground mt-2 mb-4">
-                    {fabric.name}
-                  </h1>
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <span className="section-subtitle">{t("products.label")}</span>
+                      <h1 className="text-4xl md:text-5xl font-bold text-foreground mt-2 mb-4">
+                        {fabric.name}
+                      </h1>
+                    </div>
+                    <FavoriteButton 
+                      fabric={fabric}
+                      size="lg"
+                    />
+                  </div>
                   <p className="text-lg text-muted-foreground leading-relaxed">
                     {fabric.description || fabric.short_description}
                   </p>
