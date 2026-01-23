@@ -1,11 +1,11 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { motion } from "framer-motion";
-import { ArrowRight, Search, ArrowUpDown, X } from "lucide-react";
+import { ArrowRight, Search, ArrowUpDown, X, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
@@ -36,17 +36,60 @@ const defaultImages: Record<string, string> = {
   veneza: fabricVeneza,
 };
 
+const ITEMS_PER_PAGE = 6;
+const STORAGE_KEY = "fabrics_preferences";
+
 type SortOption = "display_order" | "name_asc" | "name_desc" | "weight_asc" | "weight_desc";
+
+interface StoredPreferences {
+  sortBy: SortOption;
+  filters: FilterState;
+}
+
+function loadPreferences(): StoredPreferences {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (e) {
+    console.error("Failed to load preferences:", e);
+  }
+  return {
+    sortBy: "display_order",
+    filters: { compositions: [], weights: [], applications: [] },
+  };
+}
+
+function savePreferences(prefs: StoredPreferences) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+  } catch (e) {
+    console.error("Failed to save preferences:", e);
+  }
+}
 
 function FabricsContent() {
   const { t } = useLanguage();
+  
+  // Load initial preferences from localStorage
+  const initialPrefs = useMemo(() => loadPreferences(), []);
+  
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState<SortOption>("display_order");
-  const [filters, setFilters] = useState<FilterState>({
-    compositions: [],
-    weights: [],
-    applications: [],
-  });
+  const [sortBy, setSortBy] = useState<SortOption>(initialPrefs.sortBy);
+  const [filters, setFilters] = useState<FilterState>(initialPrefs.filters);
+  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  // Save preferences when they change
+  useEffect(() => {
+    savePreferences({ sortBy, filters });
+  }, [sortBy, filters]);
+
+  // Reset visible count when filters/search/sort change
+  useEffect(() => {
+    setVisibleCount(ITEMS_PER_PAGE);
+  }, [searchQuery, sortBy, filters]);
 
   const { data: fabrics, isLoading } = useQuery({
     queryKey: ["fabrics"],
@@ -63,12 +106,12 @@ function FabricsContent() {
   });
 
   // Helper to extract weight number from gramatura string
-  const extractWeight = (fabric: typeof fabrics extends (infer T)[] | null ? T : never) => {
+  const extractWeight = useCallback((fabric: typeof fabrics extends (infer T)[] | null ? T : never) => {
     const specs = fabric.specifications as Record<string, string> | null;
     const gramatura = specs?.gramatura || "";
     const match = gramatura.match(/(\d+)/);
     return match ? parseInt(match[1]) : 0;
-  };
+  }, []);
 
   // Filter and sort fabrics
   const filteredAndSortedFabrics = useMemo(() => {
@@ -135,10 +178,33 @@ function FabricsContent() {
     });
 
     return result;
-  }, [fabrics, searchQuery, filters, sortBy]);
+  }, [fabrics, searchQuery, filters, sortBy, extractWeight]);
+
+  // Paginated fabrics
+  const visibleFabrics = useMemo(() => {
+    return filteredAndSortedFabrics.slice(0, visibleCount);
+  }, [filteredAndSortedFabrics, visibleCount]);
+
+  const hasMore = visibleCount < filteredAndSortedFabrics.length;
+  const remainingCount = filteredAndSortedFabrics.length - visibleCount;
+
+  const loadMore = useCallback(() => {
+    setIsLoadingMore(true);
+    // Simulate loading delay for smooth UX
+    setTimeout(() => {
+      setVisibleCount((prev) => Math.min(prev + ITEMS_PER_PAGE, filteredAndSortedFabrics.length));
+      setIsLoadingMore(false);
+    }, 300);
+  }, [filteredAndSortedFabrics.length]);
 
   const clearSearch = () => {
     setSearchQuery("");
+  };
+
+  const clearAllFilters = () => {
+    setSearchQuery("");
+    setFilters({ compositions: [], weights: [], applications: [] });
+    setSortBy("display_order");
   };
 
   return (
@@ -219,7 +285,7 @@ function FabricsContent() {
 
             {isLoading ? (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {[1, 2, 3, 4].map((i) => (
+                {[1, 2, 3, 4, 5, 6].map((i) => (
                   <div key={i} className="space-y-4">
                     <Skeleton className="aspect-[4/3] rounded-2xl" />
                     <Skeleton className="h-8 w-3/4" />
@@ -227,25 +293,38 @@ function FabricsContent() {
                   </div>
                 ))}
               </div>
-            ) : filteredAndSortedFabrics.length > 0 ? (
+            ) : visibleFabrics.length > 0 ? (
               <>
                 {/* Results count */}
-                <div className="mb-6 text-muted-foreground">
-                  {filteredAndSortedFabrics.length} tecido{filteredAndSortedFabrics.length !== 1 ? "s" : ""} encontrado{filteredAndSortedFabrics.length !== 1 ? "s" : ""}
-                  {searchQuery && (
-                    <span className="ml-1">
-                      para "<span className="font-medium text-foreground">{searchQuery}</span>"
-                    </span>
+                <div className="mb-6 flex items-center justify-between">
+                  <p className="text-muted-foreground">
+                    Mostrando {visibleFabrics.length} de {filteredAndSortedFabrics.length} tecido{filteredAndSortedFabrics.length !== 1 ? "s" : ""}
+                    {searchQuery && (
+                      <span className="ml-1">
+                        para "<span className="font-medium text-foreground">{searchQuery}</span>"
+                      </span>
+                    )}
+                  </p>
+                  {(sortBy !== "display_order" || filters.compositions.length > 0 || filters.weights.length > 0 || filters.applications.length > 0) && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={clearAllFilters}
+                      className="text-muted-foreground"
+                    >
+                      <X className="h-4 w-4 mr-1" />
+                      Limpar preferências
+                    </Button>
                   )}
                 </div>
 
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {filteredAndSortedFabrics.map((fabric, index) => (
+                  {visibleFabrics.map((fabric, index) => (
                     <motion.div
                       key={fabric.id}
                       initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
+                      transition={{ delay: Math.min(index, 5) * 0.1 }}
                     >
                       <Link
                         to={`/tecidos/${fabric.slug}`}
@@ -295,6 +374,53 @@ function FabricsContent() {
                     </motion.div>
                   ))}
                 </div>
+
+                {/* Load More Button */}
+                {hasMore && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex justify-center mt-12"
+                  >
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      onClick={loadMore}
+                      disabled={isLoadingMore}
+                      className="min-w-[200px]"
+                    >
+                      {isLoadingMore ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Carregando...
+                        </>
+                      ) : (
+                        <>
+                          Carregar mais ({remainingCount} restante{remainingCount !== 1 ? "s" : ""})
+                        </>
+                      )}
+                    </Button>
+                  </motion.div>
+                )}
+
+                {/* Progress indicator */}
+                {filteredAndSortedFabrics.length > ITEMS_PER_PAGE && (
+                  <div className="mt-8">
+                    <div className="h-1 bg-secondary rounded-full overflow-hidden">
+                      <motion.div
+                        className="h-full bg-accent"
+                        initial={{ width: 0 }}
+                        animate={{ 
+                          width: `${(visibleCount / filteredAndSortedFabrics.length) * 100}%` 
+                        }}
+                        transition={{ duration: 0.3 }}
+                      />
+                    </div>
+                    <p className="text-center text-sm text-muted-foreground mt-2">
+                      {Math.round((visibleCount / filteredAndSortedFabrics.length) * 100)}% carregado
+                    </p>
+                  </div>
+                )}
               </>
             ) : (
               <div className="text-center py-16">
@@ -311,10 +437,7 @@ function FabricsContent() {
                   <Button
                     variant="outline"
                     className="mt-4"
-                    onClick={() => {
-                      setSearchQuery("");
-                      setFilters({ compositions: [], weights: [], applications: [] });
-                    }}
+                    onClick={clearAllFilters}
                   >
                     Limpar busca e filtros
                   </Button>
