@@ -123,12 +123,20 @@ export function Footer() {
         <div className="container mx-auto px-6 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-white/50">
             <p>© {new Date().getFullYear()} Digitale Têxtil. {t("footer.rights")}</p>
-            <Link 
-              to="/admin" 
-              className="text-white/30 hover:text-white/60 transition-colors"
-            >
-              {t("footer.admin")}
-            </Link>
+            <div className="flex items-center gap-6">
+              <Link 
+                to="/politica-de-privacidade" 
+                className="hover:text-white/80 transition-colors"
+              >
+                {t("footer.privacy")}
+              </Link>
+              <Link 
+                to="/admin" 
+                className="text-white/30 hover:text-white/60 transition-colors"
+              >
+                {t("footer.admin")}
+              </Link>
+            </div>
           </div>
         </div>
       </div>
