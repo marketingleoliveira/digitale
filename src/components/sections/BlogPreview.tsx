@@ -90,38 +90,67 @@ export function BlogPreview() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="group"
+                className="group relative"
               >
-                <Link to={`/blog/${post.slug}`} className="block card-hover bg-card rounded-xl overflow-hidden h-full">
-                  <div className="relative h-56 overflow-hidden bg-muted">
-                    {post.featured_image ? (
-                      <img
-                        src={post.featured_image}
-                        alt={post.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                        <Tag className="h-10 w-10" />
+                <Link to={`/blog/${post.slug}`} className="block h-full">
+                  {/* Main Card */}
+                  <div className="relative bg-card rounded-xl overflow-hidden h-full shadow-md transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-accent/20 group-hover:-translate-y-2">
+                    {/* Image Container */}
+                    <div className="relative h-56 overflow-hidden bg-muted">
+                      {post.featured_image ? (
+                        <img
+                          src={post.featured_image}
+                          alt={post.title}
+                          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-75"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-muted-foreground bg-gradient-to-br from-muted to-muted/50">
+                          <Tag className="h-10 w-10" />
+                        </div>
+                      )}
+                      
+                      {/* Category Badge */}
+                      {post.category && (
+                        <span className="absolute top-4 left-4 px-4 py-1.5 bg-accent text-white text-xs font-semibold rounded-full shadow-lg transition-transform duration-300 group-hover:scale-110">
+                          {post.category.name}
+                        </span>
+                      )}
+
+                      {/* Overlay with Read More */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-end justify-center pb-6">
+                        <span className="flex items-center gap-2 text-white font-semibold px-6 py-2 bg-accent rounded-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                          {t("blog.readMore")}
+                          <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                        </span>
                       </div>
-                    )}
-                    {post.category && (
-                      <span className="absolute top-4 left-4 px-4 py-1.5 bg-accent text-white text-xs font-semibold rounded-full">
-                        {post.category.name}
-                      </span>
-                    )}
-                  </div>
-                  <div className="p-6">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-                      <Calendar className="h-4 w-4" />
-                      <span>{formatDate(post.published_at || post.created_at)}</span>
                     </div>
-                    <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-accent transition-colors line-clamp-2">
-                      {post.title}
-                    </h3>
-                    {post.excerpt && (
-                      <p className="text-muted-foreground text-sm line-clamp-2">{post.excerpt}</p>
-                    )}
+
+                    {/* Content */}
+                    <div className="p-6 relative">
+                      {/* Decorative accent line */}
+                      <div className="absolute top-0 left-6 right-6 h-0.5 bg-gradient-to-r from-transparent via-accent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+                        <Calendar className="h-4 w-4 text-accent" />
+                        <span>{formatDate(post.published_at || post.created_at)}</span>
+                      </div>
+                      
+                      <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-accent transition-colors duration-300 line-clamp-2">
+                        {post.title}
+                      </h3>
+                      
+                      {post.excerpt && (
+                        <p className="text-muted-foreground text-sm line-clamp-2 group-hover:line-clamp-3 transition-all duration-300">
+                          {post.excerpt}
+                        </p>
+                      )}
+
+                      {/* Arrow indicator */}
+                      <div className="mt-4 flex items-center gap-2 text-accent font-medium opacity-0 group-hover:opacity-100 transform translate-x-[-10px] group-hover:translate-x-0 transition-all duration-300">
+                        <span className="text-sm">Continuar lendo</span>
+                        <ArrowRight className="h-4 w-4" />
+                      </div>
+                    </div>
                   </div>
                 </Link>
               </motion.article>
