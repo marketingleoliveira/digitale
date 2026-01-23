@@ -24,12 +24,13 @@ interface AdminLayoutProps {
   title: string;
 }
 
-import { Mail } from "lucide-react";
+import { Mail, Quote } from "lucide-react";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
   { icon: Images, label: "Carrossel", href: "/admin/carousel", adminOnly: true },
   { icon: FolderOpen, label: "Tecidos", href: "/admin/fabrics" },
+  { icon: Quote, label: "Depoimentos", href: "/admin/testimonials" },
   { icon: FileText, label: "Posts", href: "/admin/posts" },
   { icon: FolderOpen, label: "Categorias", href: "/admin/categories" },
   { icon: MessageSquare, label: "Contatos", href: "/admin/contacts" },

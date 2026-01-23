@@ -1,77 +1,72 @@
-import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { supabase } from "@/integrations/supabase/client";
 
-const testimonials = [
-  {
-    id: 1,
-    quote: "Sou estilista há mais de 10 anos e sempre trabalhei com as malhas da digitale. O que mais me agrada nas malhas são as tecnologias como Aloe Vera, além da qualidade que agregam muito valor as minhas criações.",
-    author: "Loreine",
-    company: "LB Criação",
-    avatar: "L",
-    rating: 5,
-    years: "10+ anos de parceria",
-  },
-  {
-    id: 2,
-    quote: "O Milano é o melhor tecido para leggings que já usei, sem transparência e com ótima elasticidade. Minhas vendas só crescem!",
-    author: "Simone Mecias da Silva",
-    company: "Empreendedora Fitness",
-    avatar: "S",
-    rating: 5,
-    years: "5 anos de parceria",
-  },
-  {
-    id: 3,
-    quote: "Estamos a 15 anos no mercado e trabalhamos com a Digitale a quase 10 anos! Digitale é nosso principal fornecedor, pela qualidade de suas estampas e parceria nos prazos.",
-    author: "Juliana Hermans",
-    company: "Abacaxiclub",
-    avatar: "J",
-    rating: 5,
-    years: "10 anos de parceria",
-  },
-  {
-    id: 4,
-    quote: "Encontrei a Digitale pesquisando e a experiência superou todas as expectativas. Comprei os tecidos e fiquei impressionada com a qualidade e o acabamento.",
-    author: "Jussara",
-    company: "Designer de Moda",
-    avatar: "J",
-    rating: 5,
-    years: "3 anos de parceria",
-  },
-  {
-    id: 5,
-    quote: "São mais de 10 anos de parceria com uma equipe fantástica. Entregam qualidade, beleza e segurança em cada metro de tecido.",
-    author: "Viviane",
-    company: "Mar & Sol",
-    avatar: "V",
-    rating: 5,
-    years: "10+ anos de parceria",
-  },
-];
+interface Testimonial {
+  id: string;
+  quote: string;
+  author_name: string;
+  author_company: string | null;
+  author_photo_url: string | null;
+  rating: number;
+  years_partnership: string | null;
+}
 
 export function Testimonials() {
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [current, setCurrent] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const { t } = useLanguage();
+  const sectionRef = useRef<HTMLElement>(null);
+
+  // Parallax effect
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"]
+  });
+
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+  const opacityOrbs = useTransform(scrollYProgress, [0, 0.5, 1], [0.03, 0.08, 0.03]);
+
+  useEffect(() => {
+    fetchTestimonials();
+  }, []);
+
+  const fetchTestimonials = async () => {
+    const { data } = await supabase
+      .from("testimonials")
+      .select("*")
+      .eq("is_active", true)
+      .order("display_order", { ascending: true });
+
+    if (data && data.length > 0) {
+      setTestimonials(data);
+    }
+  };
 
   const next = useCallback(() => {
+    if (testimonials.length === 0) return;
     setCurrent((prev) => (prev + 1) % testimonials.length);
-  }, []);
+  }, [testimonials.length]);
 
   const prev = useCallback(() => {
+    if (testimonials.length === 0) return;
     setCurrent((prev) => (prev - 1 + testimonials.length) % testimonials.length);
-  }, []);
+  }, [testimonials.length]);
 
   // Auto-play with pause on hover
   useEffect(() => {
-    if (!isAutoPlaying) return;
+    if (!isAutoPlaying || testimonials.length === 0) return;
     const timer = setInterval(next, 6000);
     return () => clearInterval(timer);
-  }, [isAutoPlaying, next]);
+  }, [isAutoPlaying, next, testimonials.length]);
 
   const getVisibleTestimonials = () => {
+    if (testimonials.length === 0) return [];
+    if (testimonials.length < 3) return testimonials.map((_, i) => i);
+    
     const indices = [];
     for (let i = -1; i <= 1; i++) {
       indices.push((current + i + testimonials.length) % testimonials.length);
@@ -79,13 +74,36 @@ export function Testimonials() {
     return indices;
   };
 
+  if (testimonials.length === 0) {
+    return null;
+  }
+
   return (
-    <section className="py-24 bg-primary relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-accent rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-accent rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
-      </div>
+    <section ref={sectionRef} className="py-24 bg-primary relative overflow-hidden">
+      {/* Parallax Background Elements */}
+      <motion.div 
+        className="absolute inset-0 pointer-events-none"
+        style={{ y: backgroundY }}
+      >
+        <motion.div 
+          className="absolute top-0 left-0 w-[600px] h-[600px] bg-accent rounded-full blur-[150px] -translate-x-1/2 -translate-y-1/2"
+          style={{ opacity: opacityOrbs }}
+        />
+        <motion.div 
+          className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-accent rounded-full blur-[150px] translate-x-1/2 translate-y-1/2"
+          style={{ opacity: opacityOrbs }}
+        />
+        <motion.div 
+          className="absolute top-1/2 left-1/2 w-[400px] h-[400px] bg-primary-foreground rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2"
+          style={{ opacity: useTransform(scrollYProgress, [0, 0.5, 1], [0.01, 0.03, 0.01]) }}
+        />
+      </motion.div>
+
+      {/* Decorative Grid Pattern */}
+      <div className="absolute inset-0 opacity-[0.02]" style={{
+        backgroundImage: `linear-gradient(hsl(var(--primary-foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary-foreground)) 1px, transparent 1px)`,
+        backgroundSize: '60px 60px'
+      }} />
       
       <div className="container mx-auto px-6 relative z-10">
         <motion.div
@@ -114,7 +132,9 @@ export function Testimonials() {
           <div className="flex items-center justify-center gap-6">
             {getVisibleTestimonials().map((index, position) => {
               const testimonial = testimonials[index];
-              const isCenter = position === 1;
+              if (!testimonial) return null;
+              
+              const isCenter = testimonials.length < 3 ? true : position === 1;
               
               return (
                 <motion.div
@@ -152,21 +172,33 @@ export function Testimonials() {
 
                     {/* Author */}
                     <div className="flex items-center gap-4 pt-4 border-t border-border">
-                      <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground text-xl font-bold shadow-lg">
-                        {testimonial.avatar}
-                      </div>
+                      {testimonial.author_photo_url ? (
+                        <img
+                          src={testimonial.author_photo_url}
+                          alt={testimonial.author_name}
+                          className="w-14 h-14 rounded-full object-cover border-2 border-border shadow-lg"
+                        />
+                      ) : (
+                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground text-xl font-bold shadow-lg">
+                          {testimonial.author_name.charAt(0)}
+                        </div>
+                      )}
                       <div className="flex-1">
-                        <p className="font-bold text-foreground">{testimonial.author}</p>
-                        <p className="text-accent text-sm font-medium">{testimonial.company}</p>
+                        <p className="font-bold text-foreground">{testimonial.author_name}</p>
+                        {testimonial.author_company && (
+                          <p className="text-accent text-sm font-medium">{testimonial.author_company}</p>
+                        )}
                       </div>
                     </div>
 
                     {/* Years Badge */}
-                    <div className="mt-4">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-medium">
-                        {testimonial.years}
-                      </span>
-                    </div>
+                    {testimonial.years_partnership && (
+                      <div className="mt-4">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-medium">
+                          {testimonial.years_partnership}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               );
@@ -174,18 +206,22 @@ export function Testimonials() {
           </div>
 
           {/* Navigation Arrows */}
-          <button
-            onClick={prev}
-            className="absolute left-0 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-card border-2 border-border flex items-center justify-center hover:border-accent hover:text-accent transition-all shadow-lg z-20"
-          >
-            <ChevronLeft className="h-6 w-6" />
-          </button>
-          <button
-            onClick={next}
-            className="absolute right-0 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-card border-2 border-border flex items-center justify-center hover:border-accent hover:text-accent transition-all shadow-lg z-20"
-          >
-            <ChevronRight className="h-6 w-6" />
-          </button>
+          {testimonials.length > 1 && (
+            <>
+              <button
+                onClick={prev}
+                className="absolute left-0 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-card border-2 border-border flex items-center justify-center hover:border-accent hover:text-accent transition-all shadow-lg z-20"
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+              <button
+                onClick={next}
+                className="absolute right-0 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-card border-2 border-border flex items-center justify-center hover:border-accent hover:text-accent transition-all shadow-lg z-20"
+              >
+                <ChevronRight className="h-6 w-6" />
+              </button>
+            </>
+          )}
         </div>
 
         {/* Mobile: Single Card with Swipe */}
@@ -205,7 +241,7 @@ export function Testimonials() {
             >
               {/* Rating Stars */}
               <div className="flex gap-1 mb-4">
-                {[...Array(testimonials[current].rating)].map((_, i) => (
+                {[...Array(testimonials[current]?.rating || 5)].map((_, i) => (
                   <Star 
                     key={i} 
                     className="w-5 h-5 fill-accent text-accent" 
@@ -215,75 +251,91 @@ export function Testimonials() {
 
               {/* Quote */}
               <blockquote className="text-foreground text-lg md:text-xl leading-relaxed mb-6">
-                "{testimonials[current].quote}"
+                "{testimonials[current]?.quote}"
               </blockquote>
 
               {/* Author */}
               <div className="flex items-center gap-4 pt-4 border-t border-border">
-                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground text-xl font-bold shadow-lg">
-                  {testimonials[current].avatar}
-                </div>
+                {testimonials[current]?.author_photo_url ? (
+                  <img
+                    src={testimonials[current].author_photo_url}
+                    alt={testimonials[current].author_name}
+                    className="w-14 h-14 rounded-full object-cover border-2 border-border shadow-lg"
+                  />
+                ) : (
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground text-xl font-bold shadow-lg">
+                    {testimonials[current]?.author_name.charAt(0)}
+                  </div>
+                )}
                 <div className="flex-1">
-                  <p className="font-bold text-foreground">{testimonials[current].author}</p>
-                  <p className="text-accent text-sm font-medium">{testimonials[current].company}</p>
+                  <p className="font-bold text-foreground">{testimonials[current]?.author_name}</p>
+                  {testimonials[current]?.author_company && (
+                    <p className="text-accent text-sm font-medium">{testimonials[current].author_company}</p>
+                  )}
                 </div>
               </div>
 
               {/* Years Badge */}
-              <div className="mt-4">
-                <span className="inline-flex items-center px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-medium">
-                  {testimonials[current].years}
-                </span>
-              </div>
+              {testimonials[current]?.years_partnership && (
+                <div className="mt-4">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-medium">
+                    {testimonials[current].years_partnership}
+                  </span>
+                </div>
+              )}
             </motion.div>
           </AnimatePresence>
 
           {/* Mobile Navigation */}
-          <div className="flex items-center justify-center gap-6 mt-8">
-            <button
-              onClick={prev}
-              className="w-12 h-12 rounded-full bg-card/20 backdrop-blur-sm border border-primary-foreground/20 flex items-center justify-center text-primary-foreground hover:bg-accent hover:border-accent transition-all"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-            
-            <div className="flex gap-2">
-              {testimonials.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrent(index)}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    index === current 
-                      ? "bg-accent w-8" 
-                      : "bg-primary-foreground/30 hover:bg-primary-foreground/50 w-2"
-                  }`}
-                />
-              ))}
-            </div>
+          {testimonials.length > 1 && (
+            <div className="flex items-center justify-center gap-6 mt-8">
+              <button
+                onClick={prev}
+                className="w-12 h-12 rounded-full bg-card/20 backdrop-blur-sm border border-primary-foreground/20 flex items-center justify-center text-primary-foreground hover:bg-accent hover:border-accent transition-all"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              
+              <div className="flex gap-2">
+                {testimonials.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrent(index)}
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      index === current 
+                        ? "bg-accent w-8" 
+                        : "bg-primary-foreground/30 hover:bg-primary-foreground/50 w-2"
+                    }`}
+                  />
+                ))}
+              </div>
 
-            <button
-              onClick={next}
-              className="w-12 h-12 rounded-full bg-card/20 backdrop-blur-sm border border-primary-foreground/20 flex items-center justify-center text-primary-foreground hover:bg-accent hover:border-accent transition-all"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
-          </div>
+              <button
+                onClick={next}
+                className="w-12 h-12 rounded-full bg-card/20 backdrop-blur-sm border border-primary-foreground/20 flex items-center justify-center text-primary-foreground hover:bg-accent hover:border-accent transition-all"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Desktop Dots */}
-        <div className="hidden lg:flex justify-center gap-2 mt-10">
-          {testimonials.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrent(index)}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                index === current 
-                  ? "bg-accent w-8" 
-                  : "bg-primary-foreground/30 hover:bg-primary-foreground/50 w-2"
-              }`}
-            />
-          ))}
-        </div>
+        {testimonials.length > 1 && (
+          <div className="hidden lg:flex justify-center gap-2 mt-10">
+            {testimonials.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrent(index)}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  index === current 
+                    ? "bg-accent w-8" 
+                    : "bg-primary-foreground/30 hover:bg-primary-foreground/50 w-2"
+                }`}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Trust Stats */}
         <motion.div
@@ -299,13 +351,17 @@ export function Testimonials() {
             { value: "4.9", label: "Avaliação Média" },
             { value: "98%", label: "Taxa de Recompra" },
           ].map((stat, index) => (
-            <div 
+            <motion.div 
               key={index}
-              className="text-center p-4 rounded-xl bg-primary-foreground/5 backdrop-blur-sm"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 + index * 0.1 }}
+              className="text-center p-4 rounded-xl bg-primary-foreground/5 backdrop-blur-sm border border-primary-foreground/10"
             >
               <p className="text-2xl md:text-3xl font-bold text-accent">{stat.value}</p>
               <p className="text-sm text-primary-foreground/70 mt-1">{stat.label}</p>
-            </div>
+            </motion.div>
           ))}
         </motion.div>
       </div>
