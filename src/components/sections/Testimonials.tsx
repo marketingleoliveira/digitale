@@ -21,7 +21,7 @@ export function Testimonials() {
   const { t } = useLanguage();
   const sectionRef = useRef<HTMLElement>(null);
 
-  // Parallax effect
+  // Parallax effect - ALL hooks must be called unconditionally at top level
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"]
@@ -29,6 +29,7 @@ export function Testimonials() {
 
   const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
   const opacityOrbs = useTransform(scrollYProgress, [0, 0.5, 1], [0.03, 0.08, 0.03]);
+  const opacityCenterOrb = useTransform(scrollYProgress, [0, 0.5, 1], [0.01, 0.03, 0.01]);
 
   useEffect(() => {
     fetchTestimonials();
@@ -95,7 +96,7 @@ export function Testimonials() {
         />
         <motion.div 
           className="absolute top-1/2 left-1/2 w-[400px] h-[400px] bg-primary-foreground rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2"
-          style={{ opacity: useTransform(scrollYProgress, [0, 0.5, 1], [0.01, 0.03, 0.01]) }}
+          style={{ opacity: opacityCenterOrb }}
         />
       </motion.div>
 
