@@ -18,6 +18,7 @@ import Sustainability from "./pages/Sustainability";
 import Privacy from "./pages/Privacy";
 import BlogPost from "./pages/BlogPost";
 import NotFound from "./pages/NotFound";
+import { WhatsAppButton } from "./components/chat/WhatsAppButton";
 import Login from "./pages/admin/Login";
 import Dashboard from "./pages/admin/Dashboard";
 import Posts from "./pages/admin/Posts";
@@ -81,6 +82,7 @@ const App = () => (
               
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <WhatsAppButton />
           </BrowserRouter>
         </TooltipProvider>
       </FavoritesProvider>
