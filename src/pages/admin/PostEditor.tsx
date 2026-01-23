@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
 
 interface Category {
   id: string;
@@ -137,6 +138,16 @@ const PostEditor = () => {
             Voltar
           </Button>
           <div className="flex-1" />
+          {!isNew && form.status === "published" && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => window.open(`/blog/${form.slug}`, "_blank")}
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              Visualizar
+            </Button>
+          )}
           <Button type="submit" disabled={loading}>
             <Save className="h-4 w-4 mr-2" />
             {loading ? "Salvando..." : "Salvar"}
@@ -181,14 +192,11 @@ const PostEditor = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="content">Conteúdo</Label>
-                <Textarea
-                  id="content"
-                  value={form.content}
-                  onChange={(e) => setForm({ ...form, content: e.target.value })}
+                <Label>Conteúdo</Label>
+                <RichTextEditor
+                  content={form.content}
+                  onChange={(content) => setForm({ ...form, content })}
                   placeholder="Escreva o conteúdo do post..."
-                  rows={15}
-                  required
                 />
               </div>
             </div>
