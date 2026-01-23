@@ -277,7 +277,7 @@ const BlogPost = () => {
         {/* Content */}
         <section className="py-12 md:py-16">
           <div className="container mx-auto px-6">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-3xl mx-auto">
               <div className="flex justify-between items-center mb-8">
                 <Link to="/blog">
                   <Button variant="ghost" size="sm">
@@ -295,7 +295,7 @@ const BlogPost = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
-                className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-muted-foreground prose-strong:text-foreground prose-a:text-accent"
+                className="blog-content"
                 dangerouslySetInnerHTML={{ __html: post.content }}
               />
             </div>
