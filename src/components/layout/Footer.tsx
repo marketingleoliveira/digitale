@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Instagram, Youtube, Linkedin, Facebook, MapPin, Mail, Phone, ArrowRight } from "lucide-react";
 import logoWhite from "@/assets/logo-white.png";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { NewsletterForm } from "@/components/newsletter/NewsletterForm";
 
 const socialLinks = [
   { name: "Instagram", icon: Instagram, href: "https://www.instagram.com/digitale.textil/" },
@@ -30,6 +31,21 @@ export function Footer() {
 
   return (
     <footer className="bg-primary text-white">
+      {/* Newsletter Section */}
+      <div className="border-b border-white/10">
+        <div className="container mx-auto px-6 py-12">
+          <div className="grid lg:grid-cols-2 gap-8 items-center">
+            <div>
+              <h3 className="text-2xl font-bold mb-2">{t("newsletter.title")}</h3>
+              <p className="text-white/70">{t("newsletter.subtitle")}</p>
+            </div>
+            <div className="lg:max-w-md lg:ml-auto">
+              <NewsletterForm />
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Main Footer */}
       <div className="container mx-auto px-6 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
