@@ -30,6 +30,7 @@ import Users from "./pages/admin/Users";
 import Carousel from "./pages/admin/Carousel";
 import AdminFabrics from "./pages/admin/Fabrics";
 import Newsletter from "./pages/admin/Newsletter";
+import AdminTestimonials from "./pages/admin/Testimonials";
 import { NewsletterPopup } from "./components/newsletter/NewsletterPopup";
 
 const queryClient = new QueryClient();
@@ -75,6 +76,7 @@ const App = () => (
               <Route path="/admin" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/admin/carousel" element={<ProtectedRoute requireAdmin><Carousel /></ProtectedRoute>} />
               <Route path="/admin/fabrics" element={<ProtectedRoute><AdminFabrics /></ProtectedRoute>} />
+              <Route path="/admin/testimonials" element={<ProtectedRoute><AdminTestimonials /></ProtectedRoute>} />
               <Route path="/admin/posts" element={<ProtectedRoute><Posts /></ProtectedRoute>} />
               <Route path="/admin/posts/:id" element={<ProtectedRoute><PostEditor /></ProtectedRoute>} />
               <Route path="/admin/categories" element={<ProtectedRoute><Categories /></ProtectedRoute>} />
