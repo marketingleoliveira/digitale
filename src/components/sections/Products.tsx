@@ -3,27 +3,35 @@ import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import logoColor from "@/assets/logo-color.png";
+import fabricMilano from "@/assets/fabric-milano.jpg";
+import fabricLyon from "@/assets/fabric-lyon.jpg";
+import fabricAerodry from "@/assets/fabric-aerodry.jpg";
+import fabricVeneza from "@/assets/fabric-veneza.jpg";
 
 const products = [
   {
     name: "Milano",
-    image: "https://images.unsplash.com/photo-1558171813-4c088753af8f?w=600&h=700&fit=crop",
+    image: fabricMilano,
     description: "products.milano.desc",
+    color: "from-blue-600/80 to-blue-900/80",
   },
   {
     name: "Lyon",
-    image: "https://images.unsplash.com/photo-1620799140188-3b2a02fd9a77?w=600&h=700&fit=crop",
+    image: fabricLyon,
     description: "products.lyon.desc",
+    color: "from-pink-400/80 to-rose-600/80",
   },
   {
     name: "Aerodry",
-    image: "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=600&h=700&fit=crop",
+    image: fabricAerodry,
     description: "products.aerodry.desc",
+    color: "from-teal-400/80 to-teal-700/80",
   },
   {
     name: "Veneza",
-    image: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600&h=700&fit=crop",
+    image: fabricVeneza,
     description: "products.veneza.desc",
+    color: "from-red-500/80 to-rose-700/80",
   },
 ];
 
@@ -53,37 +61,61 @@ export function Products() {
               transition={{ delay: index * 0.1 }}
               className="group"
             >
-              <div className="card-hover bg-card">
-                <div className="relative h-72 overflow-hidden">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute top-4 right-4 w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg p-2">
-                    <img 
-                      src={logoColor} 
-                      alt="Digitale" 
-                      className="w-full h-full object-contain"
+              <Link to={`/tecidos/${product.name.toLowerCase()}`} className="block">
+                <div className="relative bg-card rounded-2xl overflow-hidden shadow-lg transition-all duration-500 group-hover:shadow-2xl group-hover:-translate-y-3">
+                  {/* Image Container */}
+                  <div className="relative h-80 overflow-hidden">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-2"
                     />
+                    
+                    {/* Gradient Overlay on Hover */}
+                    <div className={`absolute inset-0 bg-gradient-to-t ${product.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                    
+                    {/* Logo Badge */}
+                    <div className="absolute top-4 right-4 w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg p-2 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12">
+                      <img 
+                        src={logoColor} 
+                        alt="Digitale" 
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+
+                    {/* Hover Content */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
+                      <motion.div 
+                        className="bg-white text-foreground px-6 py-3 rounded-full font-semibold shadow-xl flex items-center gap-2"
+                      >
+                        {t("products.viewMore")}
+                        <ArrowRight className="h-4 w-4" />
+                      </motion.div>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-6 bg-card relative">
+                    {/* Decorative Line */}
+                    <div className="absolute top-0 left-6 right-6 h-1 bg-gradient-to-r from-transparent via-accent to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
+                    
+                    <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-accent transition-colors duration-300">
+                      {product.name}
+                    </h3>
+                    <p className="text-muted-foreground text-sm line-clamp-2 transition-colors duration-300 group-hover:text-foreground">
+                      {t(product.description)}
+                    </p>
+                    
+                    {/* Arrow indicator */}
+                    <div className="mt-4 flex items-center gap-2 text-accent font-semibold text-sm">
+                      <span className="transform transition-all duration-300 group-hover:mr-2">
+                        {t("products.viewMore")}
+                      </span>
+                      <ArrowRight className="h-4 w-4 transition-all duration-300 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0" />
+                    </div>
                   </div>
                 </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-accent transition-colors">
-                    {product.name}
-                  </h3>
-                  <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
-                    {t(product.description)}
-                  </p>
-                  <Link
-                    to={`/tecidos/${product.name.toLowerCase()}`}
-                    className="inline-flex items-center gap-2 text-accent font-semibold text-sm"
-                  >
-                    {t("products.viewMore")}
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </Link>
-                </div>
-              </div>
+              </Link>
             </motion.div>
           ))}
         </div>
