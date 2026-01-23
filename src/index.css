@@ -2,95 +2,99 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap');
 
-/* Digitale Têxtil - Design baseado no site atual */
+/* Digitale Têxtil - Design Moderno Industrial Premium */
 
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 0 0% 20%;
+    --foreground: 220 30% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 20%;
+    --card-foreground: 220 30% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 20%;
+    --popover-foreground: 220 30% 15%;
 
-    --primary: 24 95% 53%;
+    /* Navy Blue Primary - Industrial Premium */
+    --primary: 220 60% 25%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 20%;
-
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
-
-    --accent: 24 95% 53%;
+    /* Orange Accent */
+    --accent: 25 95% 53%;
     --accent-foreground: 0 0% 100%;
+
+    --secondary: 220 15% 96%;
+    --secondary-foreground: 220 30% 15%;
+
+    --muted: 220 15% 96%;
+    --muted-foreground: 220 10% 45%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 24 95% 53%;
+    --border: 220 15% 90%;
+    --input: 220 15% 90%;
+    --ring: 25 95% 53%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    /* Custom Digitale colors */
-    --digitale-orange: 24 95% 53%;
-    --digitale-green: 145 63% 42%;
-    --digitale-blue: 200 80% 50%;
-    --digitale-gray: 0 0% 45%;
+    /* Custom brand colors */
+    --navy: 220 60% 20%;
+    --navy-light: 220 50% 30%;
+    --orange: 25 95% 53%;
+    --orange-light: 25 95% 60%;
+    --green: 145 63% 35%;
+    --gold: 40 80% 50%;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 0 0% 20%;
-    --sidebar-primary: 24 95% 53%;
+    --sidebar-background: 220 60% 15%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 25 95% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 95%;
-    --sidebar-accent-foreground: 0 0% 20%;
-    --sidebar-border: 0 0% 90%;
-    --sidebar-ring: 24 95% 53%;
+    --sidebar-accent: 220 50% 25%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 220 40% 25%;
+    --sidebar-ring: 25 95% 53%;
   }
 
   .dark {
-    --background: 0 0% 8%;
+    --background: 220 30% 8%;
     --foreground: 0 0% 95%;
 
-    --card: 0 0% 12%;
+    --card: 220 30% 12%;
     --card-foreground: 0 0% 95%;
 
-    --popover: 0 0% 12%;
+    --popover: 220 30% 12%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 24 95% 55%;
+    --primary: 220 50% 40%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 15%;
+    --accent: 25 95% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --secondary: 220 30% 18%;
     --secondary-foreground: 0 0% 90%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 60%;
-
-    --accent: 24 95% 55%;
-    --accent-foreground: 0 0% 100%;
+    --muted: 220 30% 18%;
+    --muted-foreground: 220 10% 60%;
 
     --destructive: 0 62% 40%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 24 95% 55%;
+    --border: 220 30% 22%;
+    --input: 220 30% 22%;
+    --ring: 25 95% 55%;
 
-    --sidebar-background: 0 0% 10%;
+    --sidebar-background: 220 40% 10%;
     --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 24 95% 55%;
+    --sidebar-primary: 25 95% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent: 220 40% 18%;
     --sidebar-accent-foreground: 0 0% 90%;
-    --sidebar-border: 0 0% 18%;
-    --sidebar-ring: 24 95% 55%;
+    --sidebar-border: 220 30% 18%;
+    --sidebar-ring: 25 95% 55%;
   }
 }
 
@@ -101,42 +105,129 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Poppins', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Poppins', system-ui, sans-serif;
+  h1, h2, h3 {
+    font-family: 'Playfair Display', Georgia, serif;
+    @apply font-semibold tracking-tight;
+  }
+
+  h4, h5, h6 {
+    font-family: 'Inter', system-ui, sans-serif;
     @apply font-semibold;
   }
 }
 
 @layer components {
   .section-title {
-    @apply text-3xl md:text-4xl font-semibold text-primary;
+    @apply text-3xl md:text-5xl font-bold text-foreground leading-tight;
   }
 
   .section-subtitle {
-    @apply text-sm uppercase tracking-widest text-muted-foreground font-medium;
+    @apply text-sm uppercase tracking-[0.25em] text-accent font-semibold;
   }
 
   .card-hover {
-    @apply bg-card rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl;
+    @apply bg-card rounded-xl overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+  }
+
+  .btn-primary {
+    @apply bg-accent text-accent-foreground px-8 py-4 rounded-full font-semibold 
+           transition-all duration-300 hover:opacity-90 hover:shadow-lg hover:shadow-accent/30
+           hover:-translate-y-0.5;
+  }
+
+  .btn-outline {
+    @apply border-2 border-primary text-primary px-8 py-4 rounded-full font-semibold 
+           transition-all duration-300 hover:bg-primary hover:text-primary-foreground;
+  }
+
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-lg border border-white/20 shadow-xl;
+  }
+
+  .navy-gradient {
+    background: linear-gradient(135deg, hsl(220, 60%, 20%) 0%, hsl(220, 50%, 30%) 100%);
+  }
+
+  .orange-gradient {
+    background: linear-gradient(135deg, hsl(25, 95%, 53%) 0%, hsl(35, 95%, 55%) 100%);
   }
 }
 
 @layer utilities {
   .animate-fade-up {
-    animation: fadeUp 0.5s ease-out forwards;
+    animation: fadeUp 0.6s ease-out forwards;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.8s ease-out forwards;
+  }
+
+  .animate-slide-in {
+    animation: slideIn 0.6s ease-out forwards;
   }
 
   @keyframes fadeUp {
     from {
       opacity: 0;
-      transform: translateY(20px);
+      transform: translateY(30px);
     }
     to {
       opacity: 1;
       transform: translateY(0);
     }
   }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary));
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--accent));
 }
