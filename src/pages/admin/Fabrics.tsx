@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -22,8 +23,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, GripVertical } from "lucide-react";
+import { Plus, Pencil, Trash2, GripVertical, Image, Palette } from "lucide-react";
 import { toast } from "sonner";
+import { ImageUpload } from "@/components/admin/ImageUpload";
+import { ColorVariantsEditor, ColorVariant } from "@/components/admin/ColorVariantsEditor";
 
 interface Fabric {
   id: string;
@@ -35,6 +38,7 @@ interface Fabric {
   features: string[];
   specifications: Record<string, string>;
   applications: string[];
+  color_variants: ColorVariant[];
   is_active: boolean;
   display_order: number;
 }
@@ -52,6 +56,7 @@ export default function AdminFabrics() {
     features: "",
     specifications: "",
     applications: "",
+    color_variants: [] as ColorVariant[],
     is_active: true,
     display_order: 0,
   });
@@ -65,7 +70,7 @@ export default function AdminFabrics() {
         .order("display_order");
 
       if (error) throw error;
-      return data as Fabric[];
+      return data as unknown as Fabric[];
     },
   });
 
@@ -80,6 +85,7 @@ export default function AdminFabrics() {
         features: data.features ? data.features.split("\n").filter(Boolean) : [],
         specifications: data.specifications ? JSON.parse(data.specifications) : {},
         applications: data.applications ? data.applications.split("\n").filter(Boolean) : [],
+        color_variants: data.color_variants as unknown as Record<string, unknown>[],
         is_active: data.is_active,
         display_order: data.display_order,
       };
@@ -87,11 +93,11 @@ export default function AdminFabrics() {
       if (editingFabric) {
         const { error } = await supabase
           .from("fabrics")
-          .update(fabricData)
+          .update(fabricData as any)
           .eq("id", editingFabric.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("fabrics").insert(fabricData);
+        const { error } = await supabase.from("fabrics").insert(fabricData as any);
         if (error) throw error;
       }
     },
@@ -130,6 +136,7 @@ export default function AdminFabrics() {
       features: "",
       specifications: '{\n  "composicao": "",\n  "gramatura": "",\n  "largura": ""\n}',
       applications: "",
+      color_variants: [],
       is_active: true,
       display_order: (fabrics?.length || 0) + 1,
     });
@@ -147,6 +154,7 @@ export default function AdminFabrics() {
       features: Array.isArray(fabric.features) ? fabric.features.join("\n") : "",
       specifications: JSON.stringify(fabric.specifications || {}, null, 2),
       applications: Array.isArray(fabric.applications) ? fabric.applications.join("\n") : "",
+      color_variants: Array.isArray(fabric.color_variants) ? fabric.color_variants : [],
       is_active: fabric.is_active,
       display_order: fabric.display_order,
     });
@@ -198,124 +206,157 @@ export default function AdminFabrics() {
                 Novo Tecido
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
                   {editingFabric ? "Editar Tecido" : "Novo Tecido"}
                 </DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Nome *</Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => {
-                        setFormData({
-                          ...formData,
-                          name: e.target.value,
-                          slug: editingFabric ? formData.slug : generateSlug(e.target.value),
-                        });
-                      }}
-                      required
+                <Tabs defaultValue="info" className="w-full">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="info">Informações</TabsTrigger>
+                    <TabsTrigger value="media" className="flex items-center gap-2">
+                      <Image className="h-4 w-4" />
+                      Imagem
+                    </TabsTrigger>
+                    <TabsTrigger value="colors" className="flex items-center gap-2">
+                      <Palette className="h-4 w-4" />
+                      Cores
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="info" className="space-y-4 mt-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="name">Nome *</Label>
+                        <Input
+                          id="name"
+                          value={formData.name}
+                          onChange={(e) => {
+                            setFormData({
+                              ...formData,
+                              name: e.target.value,
+                              slug: editingFabric ? formData.slug : generateSlug(e.target.value),
+                            });
+                          }}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="slug">Slug *</Label>
+                        <Input
+                          id="slug"
+                          value={formData.slug}
+                          onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="short_description">Descrição Curta</Label>
+                      <Textarea
+                        id="short_description"
+                        value={formData.short_description}
+                        onChange={(e) => setFormData({ ...formData, short_description: e.target.value })}
+                        rows={2}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="description">Descrição Completa</Label>
+                      <Textarea
+                        id="description"
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        rows={4}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="features">Características (uma por linha)</Label>
+                      <Textarea
+                        id="features"
+                        value={formData.features}
+                        onChange={(e) => setFormData({ ...formData, features: e.target.value })}
+                        rows={4}
+                        placeholder="Alto poder de compressão&#10;Proteção UV 50+&#10;Secagem rápida"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="specifications">Especificações (JSON)</Label>
+                      <Textarea
+                        id="specifications"
+                        value={formData.specifications}
+                        onChange={(e) => setFormData({ ...formData, specifications: e.target.value })}
+                        rows={4}
+                        className="font-mono text-sm"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="applications">Aplicações (uma por linha)</Label>
+                      <Textarea
+                        id="applications"
+                        value={formData.applications}
+                        onChange={(e) => setFormData({ ...formData, applications: e.target.value })}
+                        rows={3}
+                        placeholder="Leggings&#10;Shorts&#10;Tops esportivos"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="display_order">Ordem de Exibição</Label>
+                        <Input
+                          id="display_order"
+                          type="number"
+                          value={formData.display_order}
+                          onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) })}
+                        />
+                      </div>
+                      <div className="flex items-center gap-3 pt-8">
+                        <Switch
+                          id="is_active"
+                          checked={formData.is_active}
+                          onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                        />
+                        <Label htmlFor="is_active">Ativo</Label>
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="media" className="space-y-4 mt-4">
+                    <div className="space-y-2">
+                      <Label>Imagem Principal</Label>
+                      <ImageUpload
+                        bucket="fabrics"
+                        folder="main"
+                        value={formData.image_url}
+                        onChange={(url) => setFormData({ ...formData, image_url: url })}
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Ou insira uma URL manualmente:
+                      </p>
+                      <Input
+                        value={formData.image_url}
+                        onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                        placeholder="https://..."
+                      />
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="colors" className="space-y-4 mt-4">
+                    <ColorVariantsEditor
+                      value={formData.color_variants}
+                      onChange={(colors) => setFormData({ ...formData, color_variants: colors })}
                     />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="slug">Slug *</Label>
-                    <Input
-                      id="slug"
-                      value={formData.slug}
-                      onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                      required
-                    />
-                  </div>
-                </div>
+                  </TabsContent>
+                </Tabs>
 
-                <div className="space-y-2">
-                  <Label htmlFor="short_description">Descrição Curta</Label>
-                  <Textarea
-                    id="short_description"
-                    value={formData.short_description}
-                    onChange={(e) => setFormData({ ...formData, short_description: e.target.value })}
-                    rows={2}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="description">Descrição Completa</Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    rows={4}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="image_url">URL da Imagem</Label>
-                  <Input
-                    id="image_url"
-                    value={formData.image_url}
-                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                    placeholder="https://..."
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="features">Características (uma por linha)</Label>
-                  <Textarea
-                    id="features"
-                    value={formData.features}
-                    onChange={(e) => setFormData({ ...formData, features: e.target.value })}
-                    rows={4}
-                    placeholder="Alto poder de compressão&#10;Proteção UV 50+&#10;Secagem rápida"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="specifications">Especificações (JSON)</Label>
-                  <Textarea
-                    id="specifications"
-                    value={formData.specifications}
-                    onChange={(e) => setFormData({ ...formData, specifications: e.target.value })}
-                    rows={4}
-                    className="font-mono text-sm"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="applications">Aplicações (uma por linha)</Label>
-                  <Textarea
-                    id="applications"
-                    value={formData.applications}
-                    onChange={(e) => setFormData({ ...formData, applications: e.target.value })}
-                    rows={3}
-                    placeholder="Leggings&#10;Shorts&#10;Tops esportivos"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="display_order">Ordem de Exibição</Label>
-                    <Input
-                      id="display_order"
-                      type="number"
-                      value={formData.display_order}
-                      onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) })}
-                    />
-                  </div>
-                  <div className="flex items-center gap-3 pt-8">
-                    <Switch
-                      id="is_active"
-                      checked={formData.is_active}
-                      onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-                    />
-                    <Label htmlFor="is_active">Ativo</Label>
-                  </div>
-                </div>
-
-                <div className="flex justify-end gap-2 pt-4">
+                <div className="flex justify-end gap-2 pt-4 border-t">
                   <Button type="button" variant="outline" onClick={handleCloseDialog}>
                     Cancelar
                   </Button>
@@ -333,8 +374,9 @@ export default function AdminFabrics() {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12"></TableHead>
+                <TableHead>Imagem</TableHead>
                 <TableHead>Nome</TableHead>
-                <TableHead>Slug</TableHead>
+                <TableHead>Cores</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Ordem</TableHead>
                 <TableHead className="w-24">Ações</TableHead>
@@ -343,7 +385,7 @@ export default function AdminFabrics() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8">
+                  <TableCell colSpan={7} className="text-center py-8">
                     Carregando...
                   </TableCell>
                 </TableRow>
@@ -353,8 +395,42 @@ export default function AdminFabrics() {
                     <TableCell>
                       <GripVertical className="h-4 w-4 text-muted-foreground" />
                     </TableCell>
-                    <TableCell className="font-medium">{fabric.name}</TableCell>
-                    <TableCell className="text-muted-foreground">{fabric.slug}</TableCell>
+                    <TableCell>
+                      {fabric.image_url ? (
+                        <img
+                          src={fabric.image_url}
+                          alt={fabric.name}
+                          className="w-12 h-12 object-cover rounded"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 bg-muted rounded flex items-center justify-center">
+                          <Image className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div>
+                        <p className="font-medium">{fabric.name}</p>
+                        <p className="text-sm text-muted-foreground">{fabric.slug}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        {fabric.color_variants?.slice(0, 4).map((color, i) => (
+                          <div
+                            key={i}
+                            className="w-6 h-6 rounded-full border border-border"
+                            style={{ backgroundColor: color.hex }}
+                            title={color.name}
+                          />
+                        ))}
+                        {fabric.color_variants?.length > 4 && (
+                          <span className="text-xs text-muted-foreground ml-1">
+                            +{fabric.color_variants.length - 4}
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -393,7 +469,7 @@ export default function AdminFabrics() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                     Nenhum tecido cadastrado
                   </TableCell>
                 </TableRow>

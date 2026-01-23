@@ -172,6 +172,7 @@ export type Database = {
       fabrics: {
         Row: {
           applications: string[] | null
+          color_variants: Json | null
           created_at: string
           description: string | null
           display_order: number
@@ -188,6 +189,7 @@ export type Database = {
         }
         Insert: {
           applications?: string[] | null
+          color_variants?: Json | null
           created_at?: string
           description?: string | null
           display_order?: number
@@ -204,6 +206,7 @@ export type Database = {
         }
         Update: {
           applications?: string[] | null
+          color_variants?: Json | null
           created_at?: string
           description?: string | null
           display_order?: number
