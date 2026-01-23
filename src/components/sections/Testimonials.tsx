@@ -337,34 +337,6 @@ export function Testimonials() {
             ))}
           </div>
         )}
-
-        {/* Trust Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.3 }}
-          className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto"
-        >
-          {[
-            { value: "1000+", label: "Clientes Satisfeitos" },
-            { value: "25+", label: "Anos no Mercado" },
-            { value: "4.9", label: "Avaliação Média" },
-            { value: "98%", label: "Taxa de Recompra" },
-          ].map((stat, index) => (
-            <motion.div 
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.4 + index * 0.1 }}
-              className="text-center p-4 rounded-xl bg-primary-foreground/5 backdrop-blur-sm border border-primary-foreground/10"
-            >
-              <p className="text-2xl md:text-3xl font-bold text-accent">{stat.value}</p>
-              <p className="text-sm text-primary-foreground/70 mt-1">{stat.label}</p>
-            </motion.div>
-          ))}
-        </motion.div>
       </div>
     </section>
   );
