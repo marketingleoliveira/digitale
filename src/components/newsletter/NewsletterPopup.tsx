@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Mail, Sparkles, CheckCircle, Loader2 } from "lucide-react";
+import { X, Mail, CheckCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -13,6 +13,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import logoColor from "@/assets/logo-color.png";
 
 const POPUP_STORAGE_KEY = "newsletter_popup_shown";
 const POPUP_DELAY = 5000; // 5 seconds
@@ -78,8 +79,8 @@ export function NewsletterPopup() {
       <DialogContent className="sm:max-w-md bg-gradient-to-br from-primary to-primary/90 border-none text-primary-foreground">
         <DialogHeader>
           <div className="flex items-center justify-center mb-4">
-            <div className="w-16 h-16 rounded-full bg-accent/20 flex items-center justify-center">
-              <Sparkles className="h-8 w-8 text-accent" />
+            <div className="w-20 h-20 rounded-full bg-accent flex items-center justify-center p-3">
+              <img src={logoColor} alt="Digitale" className="w-full h-full object-contain" />
             </div>
           </div>
           <DialogTitle className="text-2xl font-display text-center text-primary-foreground">
