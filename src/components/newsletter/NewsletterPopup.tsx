@@ -79,7 +79,7 @@ export function NewsletterPopup() {
       <DialogContent className="sm:max-w-md bg-gradient-to-br from-primary to-primary/90 border-none text-primary-foreground">
         <DialogHeader>
           <div className="flex items-center justify-center mb-4">
-            <div className="w-20 h-20 rounded-full bg-accent flex items-center justify-center p-3">
+            <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center p-3 shadow-lg">
               <img src={logoColor} alt="Digitale" className="w-full h-full object-contain" />
             </div>
           </div>
