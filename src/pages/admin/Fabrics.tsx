@@ -23,10 +23,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, GripVertical, Image, Palette } from "lucide-react";
+import { Plus, Pencil, Trash2, GripVertical, Image, Palette, Images } from "lucide-react";
 import { toast } from "sonner";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { GalleryUpload } from "@/components/admin/GalleryUpload";
 import { ColorVariantsEditor, ColorVariant } from "@/components/admin/ColorVariantsEditor";
+
+interface GalleryImage {
+  url: string;
+  alt?: string;
+}
 
 interface Fabric {
   id: string;
@@ -35,6 +41,7 @@ interface Fabric {
   short_description: string | null;
   description: string | null;
   image_url: string | null;
+  gallery_images: GalleryImage[];
   features: string[];
   specifications: Record<string, string>;
   applications: string[];
@@ -53,6 +60,7 @@ export default function AdminFabrics() {
     short_description: "",
     description: "",
     image_url: "",
+    gallery_images: [] as GalleryImage[],
     features: "",
     specifications: "",
     applications: "",
@@ -82,6 +90,7 @@ export default function AdminFabrics() {
         short_description: data.short_description || null,
         description: data.description || null,
         image_url: data.image_url || null,
+        gallery_images: data.gallery_images as unknown as Record<string, unknown>[],
         features: data.features ? data.features.split("\n").filter(Boolean) : [],
         specifications: data.specifications ? JSON.parse(data.specifications) : {},
         applications: data.applications ? data.applications.split("\n").filter(Boolean) : [],
@@ -133,6 +142,7 @@ export default function AdminFabrics() {
       short_description: "",
       description: "",
       image_url: "",
+      gallery_images: [],
       features: "",
       specifications: '{\n  "composicao": "",\n  "gramatura": "",\n  "largura": ""\n}',
       applications: "",
@@ -151,6 +161,7 @@ export default function AdminFabrics() {
       short_description: fabric.short_description || "",
       description: fabric.description || "",
       image_url: fabric.image_url || "",
+      gallery_images: Array.isArray(fabric.gallery_images) ? fabric.gallery_images : [],
       features: Array.isArray(fabric.features) ? fabric.features.join("\n") : "",
       specifications: JSON.stringify(fabric.specifications || {}, null, 2),
       applications: Array.isArray(fabric.applications) ? fabric.applications.join("\n") : "",
@@ -214,11 +225,15 @@ export default function AdminFabrics() {
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <Tabs defaultValue="info" className="w-full">
-                  <TabsList className="grid w-full grid-cols-3">
+                  <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="info">Informações</TabsTrigger>
                     <TabsTrigger value="media" className="flex items-center gap-2">
                       <Image className="h-4 w-4" />
                       Imagem
+                    </TabsTrigger>
+                    <TabsTrigger value="gallery" className="flex items-center gap-2">
+                      <Images className="h-4 w-4" />
+                      Galeria
                     </TabsTrigger>
                     <TabsTrigger value="colors" className="flex items-center gap-2">
                       <Palette className="h-4 w-4" />
@@ -344,6 +359,22 @@ export default function AdminFabrics() {
                         value={formData.image_url}
                         onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
                         placeholder="https://..."
+                      />
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="gallery" className="space-y-4 mt-4">
+                    <div className="space-y-2">
+                      <Label>Galeria de Imagens</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Adicione imagens secundárias mostrando diferentes ângulos e texturas do tecido.
+                      </p>
+                      <GalleryUpload
+                        bucket="fabrics"
+                        folder="gallery"
+                        value={formData.gallery_images}
+                        onChange={(images) => setFormData({ ...formData, gallery_images: images })}
+                        maxImages={6}
                       />
                     </div>
                   </TabsContent>
