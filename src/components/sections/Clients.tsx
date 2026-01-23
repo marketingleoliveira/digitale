@@ -16,31 +16,37 @@ export function Clients() {
   const { t } = useLanguage();
 
   return (
-    <section className="py-20 bg-background overflow-hidden">
-      <div className="container mx-auto px-4">
+    <section className="py-20 bg-white overflow-hidden">
+      <div className="container mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-12"
+          className="text-center mb-16"
         >
           <span className="section-subtitle">{t("clients.label")}</span>
-          <h2 className="section-title mt-3">{t("clients.title")}</h2>
+          <h2 className="section-title mt-4">{t("clients.title")}</h2>
         </motion.div>
 
         {/* Infinite Scroll Effect */}
         <div className="relative">
-          <div className="flex animate-scroll gap-12 items-center">
+          {/* Gradient Masks */}
+          <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white to-transparent z-10" />
+          <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white to-transparent z-10" />
+          
+          <div className="flex animate-scroll gap-16 items-center py-8">
             {[...clients, ...clients].map((client, index) => (
               <div
                 key={`${client.name}-${index}`}
-                className="flex-shrink-0 grayscale hover:grayscale-0 opacity-60 hover:opacity-100 transition-all duration-300"
+                className="flex-shrink-0 group"
               >
-                <img
-                  src={client.logo}
-                  alt={client.name}
-                  className="h-12 md:h-16 w-auto object-contain"
-                />
+                <div className="w-40 h-20 flex items-center justify-center grayscale hover:grayscale-0 opacity-50 hover:opacity-100 transition-all duration-500">
+                  <img
+                    src={client.logo}
+                    alt={client.name}
+                    className="max-h-16 max-w-full object-contain transition-transform duration-300 group-hover:scale-110"
+                  />
+                </div>
               </div>
             ))}
           </div>
@@ -53,7 +59,7 @@ export function Clients() {
           100% { transform: translateX(-50%); }
         }
         .animate-scroll {
-          animation: scroll 30s linear infinite;
+          animation: scroll 40s linear infinite;
         }
         .animate-scroll:hover {
           animation-play-state: paused;

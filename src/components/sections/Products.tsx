@@ -1,39 +1,32 @@
 import { motion } from "framer-motion";
+import { ArrowRight, Star, Zap, Shield, Droplets } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const products = [
   {
-    id: "lyon",
+    name: "Milano",
+    image: "https://images.unsplash.com/photo-1558171813-4c088753af8f?w=600&h=700&fit=crop",
+    description: "products.milano.desc",
+    icon: Zap,
+  },
+  {
     name: "Lyon",
-    taglineKey: "products.lyon.tagline",
-    subtitleKey: "products.lyon.subtitle",
-    image: "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&q=80",
-    bgColor: "bg-sky-400",
+    image: "https://images.unsplash.com/photo-1620799140188-3b2a02fd9a77?w=600&h=700&fit=crop",
+    description: "products.lyon.desc",
+    icon: Star,
   },
   {
-    id: "aerodry",
     name: "Aerodry",
-    taglineKey: "products.aerodry.tagline",
-    subtitleKey: "products.aerodry.subtitle",
-    image: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80",
-    bgColor: "bg-gray-700",
+    image: "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=600&h=700&fit=crop",
+    description: "products.aerodry.desc",
+    icon: Droplets,
   },
   {
-    id: "veneza",
     name: "Veneza",
-    taglineKey: "products.veneza.tagline",
-    subtitleKey: "products.veneza.subtitle",
-    image: "https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?w=800&q=80",
-    bgColor: "bg-rose-400",
-  },
-  {
-    id: "milano",
-    name: "Milano Myst",
-    taglineKey: "products.milano.tagline",
-    subtitleKey: "products.milano.subtitle",
-    image: "https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=800&q=80",
-    bgColor: "bg-violet-600",
+    image: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600&h=700&fit=crop",
+    description: "products.veneza.desc",
+    icon: Shield,
   },
 ];
 
@@ -41,43 +34,55 @@ export function Products() {
   const { t } = useLanguage();
 
   return (
-    <section className="py-16 md:py-24 bg-background">
-      <div className="container mx-auto px-4">
-        <motion.h2
+    <section className="py-24 bg-secondary/30">
+      <div className="container mx-auto px-6">
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="section-title text-center mb-12"
+          className="text-center mb-16"
         >
-          {t("products.title")}
-        </motion.h2>
+          <span className="section-subtitle">{t("products.label")}</span>
+          <h2 className="section-title mt-4 mb-6">{t("products.title")}</h2>
+        </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {products.map((product, index) => (
             <motion.div
-              key={product.id}
+              key={product.name}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
+              className="group"
             >
-              <Link
-                to={`/tecidos/${product.id}`}
-                className="group block card-hover"
-              >
-                <div className={`${product.bgColor} relative aspect-[3/4] overflow-hidden`}>
+              <div className="card-hover bg-card">
+                <div className="relative h-72 overflow-hidden">
                   <img
                     src={product.image}
                     alt={product.name}
-                    className="w-full h-full object-cover mix-blend-overlay opacity-60 group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
-                  <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-6 text-center">
-                    <span className="text-sm opacity-80 mb-2">{t(product.taglineKey)}</span>
-                    <h3 className="text-3xl md:text-4xl font-bold mb-2">{product.name}</h3>
-                    <span className="text-sm opacity-80">{t(product.subtitleKey)}</span>
+                  <div className="absolute top-4 right-4 w-12 h-12 bg-card rounded-xl flex items-center justify-center shadow-lg">
+                    <product.icon className="h-6 w-6 text-accent" />
                   </div>
                 </div>
-              </Link>
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-accent transition-colors">
+                    {product.name}
+                  </h3>
+                  <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
+                    {t(product.description)}
+                  </p>
+                  <Link
+                    to={`/tecidos/${product.name.toLowerCase()}`}
+                    className="inline-flex items-center gap-2 text-accent font-semibold text-sm"
+                  >
+                    {t("products.viewMore")}
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </Link>
+                </div>
+              </div>
             </motion.div>
           ))}
         </div>
