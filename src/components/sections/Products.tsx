@@ -1,32 +1,29 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Star, Zap, Shield, Droplets } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import logoColor from "@/assets/logo-color.png";
 
 const products = [
   {
     name: "Milano",
     image: "https://images.unsplash.com/photo-1558171813-4c088753af8f?w=600&h=700&fit=crop",
     description: "products.milano.desc",
-    icon: Zap,
   },
   {
     name: "Lyon",
     image: "https://images.unsplash.com/photo-1620799140188-3b2a02fd9a77?w=600&h=700&fit=crop",
     description: "products.lyon.desc",
-    icon: Star,
   },
   {
     name: "Aerodry",
     image: "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=600&h=700&fit=crop",
     description: "products.aerodry.desc",
-    icon: Droplets,
   },
   {
     name: "Veneza",
     image: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600&h=700&fit=crop",
     description: "products.veneza.desc",
-    icon: Shield,
   },
 ];
 
@@ -63,8 +60,12 @@ export function Products() {
                     alt={product.name}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
-                  <div className="absolute top-4 right-4 w-12 h-12 bg-card rounded-xl flex items-center justify-center shadow-lg">
-                    <product.icon className="h-6 w-6 text-accent" />
+                  <div className="absolute top-4 right-4 w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg p-2">
+                    <img 
+                      src={logoColor} 
+                      alt="Digitale" 
+                      className="w-full h-full object-contain"
+                    />
                   </div>
                 </div>
                 <div className="p-6">
