@@ -28,6 +28,16 @@ export function Header() {
       ],
     },
     { name: t("nav.prints"), href: "/estampas" },
+    {
+      name: t("nav.segments"),
+      href: "/segmentos",
+      children: [
+        { name: "Moda Praia", href: "/segmentos#praia" },
+        { name: "Fitwear", href: "/segmentos#fitwear" },
+        { name: "Lingerie", href: "/segmentos#lingerie" },
+        { name: "Natação", href: "/segmentos#natacao" },
+      ],
+    },
     { name: t("nav.sustainability"), href: "/sustentabilidade" },
     { name: t("nav.blog"), href: "/blog" },
     { name: t("nav.contact"), href: "/contato" },
