@@ -124,9 +124,36 @@ const BlogPost = () => {
 
   const estimateReadTime = (content: string) => {
     const wordsPerMinute = 200;
-    const words = content.split(/\s+/).length;
+    // Strip HTML tags for word count
+    const textContent = content.replace(/<[^>]*>/g, '');
+    const words = textContent.split(/\s+/).length;
     const minutes = Math.ceil(words / wordsPerMinute);
     return minutes;
+  };
+
+  // Process content to ensure proper HTML formatting
+  const processContent = (content: string) => {
+    // Check if content already has HTML structure
+    const hasHtmlTags = /<(p|div|h[1-6]|ul|ol|blockquote|br)[\s>]/i.test(content);
+    
+    if (hasHtmlTags) {
+      // Content already has HTML, return as-is
+      return content;
+    }
+    
+    // Convert plain text to formatted HTML
+    // Split by double line breaks for paragraphs
+    const paragraphs = content.split(/\n\n+/).filter(p => p.trim());
+    
+    if (paragraphs.length === 0) {
+      return content;
+    }
+    
+    return paragraphs.map(paragraph => {
+      // Convert single line breaks to <br> within paragraphs
+      const formattedParagraph = paragraph.trim().replace(/\n/g, '<br>');
+      return `<p>${formattedParagraph}</p>`;
+    }).join('\n');
   };
 
   const handleShare = async () => {
@@ -296,7 +323,7 @@ const BlogPost = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
                 className="blog-content"
-                dangerouslySetInnerHTML={{ __html: post.content }}
+                dangerouslySetInnerHTML={{ __html: processContent(post.content) }}
               />
             </div>
           </div>
