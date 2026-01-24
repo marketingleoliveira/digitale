@@ -253,9 +253,57 @@ export type Database = {
         }
         Relationships: []
       }
+      print_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          parent_id: string | null
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          parent_id?: string | null
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          parent_id?: string | null
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "print_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "print_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prints: {
         Row: {
           category: string | null
+          category_id: string | null
           code: string
           created_at: string
           display_order: number
@@ -267,6 +315,7 @@ export type Database = {
         }
         Insert: {
           category?: string | null
+          category_id?: string | null
           code: string
           created_at?: string
           display_order?: number
@@ -278,6 +327,7 @@ export type Database = {
         }
         Update: {
           category?: string | null
+          category_id?: string | null
           code?: string
           created_at?: string
           display_order?: number
@@ -287,7 +337,15 @@ export type Database = {
           name?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "prints_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "print_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {

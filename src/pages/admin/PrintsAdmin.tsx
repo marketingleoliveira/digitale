@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -19,23 +20,39 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { ImageUpload } from "@/components/admin/ImageUpload";
-import { Plus, Pencil, Trash2, GripVertical, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, GripVertical, Loader2, FolderOpen } from "lucide-react";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+
+interface PrintCategory {
+  id: string;
+  name: string;
+  slug: string;
+  parent_id: string | null;
+}
 
 interface Print {
   id: string;
   code: string;
   name: string | null;
   image_url: string;
-  category: string | null;
+  category_id: string | null;
   is_active: boolean;
   display_order: number;
 }
 
 const PrintsAdmin = () => {
   const [prints, setPrints] = useState<Print[]>([]);
+  const [categories, setCategories] = useState<PrintCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPrint, setEditingPrint] = useState<Print | null>(null);
@@ -44,26 +61,38 @@ const PrintsAdmin = () => {
     code: "",
     name: "",
     image_url: "",
-    category: "",
+    category_id: "",
     is_active: true,
   });
 
   useEffect(() => {
-    fetchPrints();
+    fetchData();
   }, []);
 
-  const fetchPrints = async () => {
+  const fetchData = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("prints")
-      .select("*")
-      .order("display_order", { ascending: true });
+    
+    const [printsResult, categoriesResult] = await Promise.all([
+      supabase
+        .from("prints")
+        .select("*")
+        .order("display_order", { ascending: true }),
+      supabase
+        .from("print_categories")
+        .select("id, name, slug, parent_id")
+        .order("display_order", { ascending: true })
+    ]);
 
-    if (error) {
+    if (printsResult.error) {
       toast.error("Erro ao carregar estampas");
     } else {
-      setPrints(data || []);
+      setPrints(printsResult.data || []);
     }
+
+    if (!categoriesResult.error) {
+      setCategories(categoriesResult.data || []);
+    }
+
     setLoading(false);
   };
 
@@ -72,7 +101,7 @@ const PrintsAdmin = () => {
       code: "",
       name: "",
       image_url: "",
-      category: "",
+      category_id: "",
       is_active: true,
     });
     setEditingPrint(null);
@@ -84,7 +113,7 @@ const PrintsAdmin = () => {
       code: print.code,
       name: print.name || "",
       image_url: print.image_url,
-      category: print.category || "",
+      category_id: print.category_id || "",
       is_active: print.is_active,
     });
     setDialogOpen(true);
@@ -103,7 +132,7 @@ const PrintsAdmin = () => {
       code: form.code,
       name: form.name || null,
       image_url: form.image_url,
-      category: form.category || null,
+      category_id: form.category_id || null,
       is_active: form.is_active,
     };
 
@@ -128,7 +157,7 @@ const PrintsAdmin = () => {
       toast.success(editingPrint ? "Estampa atualizada!" : "Estampa criada!");
       setDialogOpen(false);
       resetForm();
-      fetchPrints();
+      fetchData();
     }
 
     setSaving(false);
@@ -143,7 +172,7 @@ const PrintsAdmin = () => {
       toast.error("Erro ao excluir estampa");
     } else {
       toast.success("Estampa excluída!");
-      fetchPrints();
+      fetchData();
     }
   };
 
@@ -156,17 +185,54 @@ const PrintsAdmin = () => {
     if (error) {
       toast.error("Erro ao atualizar status");
     } else {
-      fetchPrints();
+      fetchData();
     }
   };
+
+  // Build hierarchical category options
+  const getCategoryOptions = () => {
+    const parentCategories = categories.filter(c => !c.parent_id);
+    const options: { id: string; name: string; isSubcategory: boolean }[] = [];
+    
+    parentCategories.forEach(parent => {
+      options.push({ id: parent.id, name: parent.name, isSubcategory: false });
+      categories
+        .filter(c => c.parent_id === parent.id)
+        .forEach(sub => {
+          options.push({ id: sub.id, name: `${parent.name} → ${sub.name}`, isSubcategory: true });
+        });
+    });
+    
+    return options;
+  };
+
+  const getCategoryName = (categoryId: string | null) => {
+    if (!categoryId) return null;
+    const category = categories.find(c => c.id === categoryId);
+    if (!category) return null;
+    
+    if (category.parent_id) {
+      const parent = categories.find(c => c.id === category.parent_id);
+      return parent ? `${parent.name} → ${category.name}` : category.name;
+    }
+    return category.name;
+  };
+
+  const categoryOptions = getCategoryOptions();
 
   return (
     <AdminLayout title="Estampas">
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <p className="text-muted-foreground">
-            Gerencie as estampas exibidas na página de Estampas
-          </p>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <p className="text-muted-foreground">
+              Gerencie as estampas exibidas na página de Estampas
+            </p>
+            <Link to="/admin/print-categories" className="text-sm text-accent hover:underline">
+              <FolderOpen className="h-3 w-3 inline mr-1" />
+              Gerenciar Categorias
+            </Link>
+          </div>
           <Dialog open={dialogOpen} onOpenChange={(open) => {
             setDialogOpen(open);
             if (!open) resetForm();
@@ -206,13 +272,31 @@ const PrintsAdmin = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="category">Categoria (opcional)</Label>
-                  <Input
-                    id="category"
-                    value={form.category}
-                    onChange={(e) => setForm({ ...form, category: e.target.value })}
-                    placeholder="Ex: Tropical, Geométrico, Floral"
-                  />
+                  <Label htmlFor="category_id">Categoria</Label>
+                  <Select
+                    value={form.category_id}
+                    onValueChange={(value) => setForm({ ...form, category_id: value === "none" ? "" : value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione uma categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Sem categoria</SelectItem>
+                      {categoryOptions.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.id}>
+                          {cat.isSubcategory && <span className="text-muted-foreground">↳ </span>}
+                          {cat.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {categories.length === 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      <Link to="/admin/print-categories" className="text-accent hover:underline">
+                        Crie categorias primeiro
+                      </Link>
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -289,7 +373,15 @@ const PrintsAdmin = () => {
                     </TableCell>
                     <TableCell className="font-medium">{print.code}</TableCell>
                     <TableCell>{print.name || "-"}</TableCell>
-                    <TableCell>{print.category || "-"}</TableCell>
+                    <TableCell>
+                      {print.category_id ? (
+                        <Badge variant="secondary">
+                          {getCategoryName(print.category_id)}
+                        </Badge>
+                      ) : (
+                        <span className="text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <Switch
                         checked={print.is_active}
