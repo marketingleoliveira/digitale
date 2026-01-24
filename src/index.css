@@ -217,6 +217,30 @@
     @apply w-full rounded-xl my-8 shadow-lg;
   }
 
+  .blog-content video {
+    @apply w-full rounded-xl my-8 shadow-lg;
+  }
+
+  .blog-content .video-wrapper {
+    @apply my-8;
+  }
+
+  .blog-content .video-wrapper video {
+    @apply w-full rounded-xl shadow-lg;
+  }
+
+  .blog-content iframe[src*="youtube"] {
+    @apply w-full aspect-video rounded-xl my-8 shadow-lg;
+  }
+
+  .blog-content div[data-youtube-video] {
+    @apply my-8;
+  }
+
+  .blog-content div[data-youtube-video] iframe {
+    @apply w-full aspect-video rounded-xl shadow-lg;
+  }
+
   .blog-content hr {
     @apply border-t border-border my-10;
   }

@@ -4,6 +4,7 @@ import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import TextAlign from "@tiptap/extension-text-align";
 import Underline from "@tiptap/extension-underline";
+import Youtube from "@tiptap/extension-youtube";
 import { useEffect, useRef, useState } from "react";
 import {
   Bold,
@@ -26,6 +27,8 @@ import {
   Minus,
   Upload,
   Loader2,
+  Video,
+  Youtube as YoutubeIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
@@ -52,7 +55,9 @@ interface RichTextEditorProps {
 
 export function RichTextEditor({ content, onChange, placeholder }: RichTextEditorProps) {
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadType, setUploadType] = useState<"image" | "video" | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
   
   const editor = useEditor({
     extensions: [
@@ -71,6 +76,13 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
       Image.configure({
         HTMLAttributes: {
           class: "rounded-lg max-w-full mx-auto my-4",
+        },
+      }),
+      Youtube.configure({
+        controls: true,
+        nocookie: true,
+        HTMLAttributes: {
+          class: "w-full aspect-video rounded-lg my-4",
         },
       }),
       TextAlign.configure({
@@ -152,6 +164,68 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
       setIsUploading(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const addYoutubeVideo = () => {
+    const url = window.prompt("URL do vídeo do YouTube:");
+    if (url) {
+      editor.chain().focus().setYoutubeVideo({ src: url }).run();
+    }
+  };
+
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("video/")) {
+      toast.error("Por favor, selecione um vídeo");
+      return;
+    }
+
+    // 50MB limit for videos
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error("Vídeo muito grande (máximo 50MB)");
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadType("video");
+
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `videos/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("blog")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("blog")
+        .getPublicUrl(filePath);
+
+      // Insert video as HTML since Tiptap doesn't have native video support
+      editor.chain().focus().insertContent(`
+        <div class="video-wrapper my-4">
+          <video controls class="w-full rounded-lg">
+            <source src="${publicUrl}" type="${file.type}">
+            Seu navegador não suporta vídeos.
+          </video>
+        </div>
+      `).run();
+      
+      toast.success("Vídeo inserido com sucesso!");
+    } catch (error: any) {
+      toast.error("Erro ao fazer upload", { description: error.message });
+    } finally {
+      setIsUploading(false);
+      setUploadType(null);
+      if (videoInputRef.current) {
+        videoInputRef.current.value = "";
       }
     }
   };
@@ -342,6 +416,43 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
             <DropdownMenuItem onClick={addImageByUrl}>
               <LinkIcon className="h-4 w-4 mr-2" />
               Inserir por URL
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Video dropdown */}
+        <input
+          ref={videoInputRef}
+          type="file"
+          accept="video/*"
+          onChange={handleVideoUpload}
+          className="hidden"
+        />
+        <DropdownMenu>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenuTrigger asChild>
+                <Toggle size="sm" className="data-[state=on]:bg-accent data-[state=on]:text-white">
+                  {isUploading && uploadType === "video" ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Video className="h-4 w-4" />
+                  )}
+                </Toggle>
+              </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              <p>Inserir vídeo</p>
+            </TooltipContent>
+          </Tooltip>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem onClick={addYoutubeVideo}>
+              <YoutubeIcon className="h-4 w-4 mr-2" />
+              YouTube
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => videoInputRef.current?.click()}>
+              <Upload className="h-4 w-4 mr-2" />
+              Fazer upload
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
