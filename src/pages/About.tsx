@@ -5,7 +5,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Stats } from "@/components/sections/Stats";
 import { Clients } from "@/components/sections/Clients";
 import { useLanguage } from "@/contexts/LanguageContext";
-import athleteImg from "@/assets/athlete-model.jpg";
+import teamPhoto from "@/assets/team-photo.webp";
 
 const About = () => {
   const { t } = useLanguage();
@@ -97,7 +97,7 @@ const About = () => {
             >
               <div className="aspect-[4/5] rounded-3xl overflow-hidden">
                 <img
-                  src={athleteImg}
+                  src={teamPhoto}
                   alt={t("about.image.alt")}
                   className="w-full h-full object-cover"
                 />
