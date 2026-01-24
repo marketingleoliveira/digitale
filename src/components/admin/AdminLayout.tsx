@@ -13,6 +13,7 @@ import {
   Users,
   ChevronDown,
   Images,
+  Palette,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,7 @@ const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
   { icon: Images, label: "Carrossel", href: "/admin/carousel", adminOnly: true },
   { icon: FolderOpen, label: "Tecidos", href: "/admin/fabrics" },
+  { icon: Palette, label: "Estampas", href: "/admin/prints" },
   { icon: Quote, label: "Depoimentos", href: "/admin/testimonials" },
   { icon: FileText, label: "Posts", href: "/admin/posts" },
   { icon: FolderOpen, label: "Categorias", href: "/admin/categories" },
