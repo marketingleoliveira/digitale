@@ -4,7 +4,7 @@ import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import TextAlign from "@tiptap/extension-text-align";
 import Underline from "@tiptap/extension-underline";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Bold,
   Italic,
@@ -24,6 +24,8 @@ import {
   Undo,
   Redo,
   Minus,
+  Upload,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
@@ -33,6 +35,14 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface RichTextEditorProps {
   content: string;
@@ -41,6 +51,9 @@ interface RichTextEditorProps {
 }
 
 export function RichTextEditor({ content, onChange, placeholder }: RichTextEditorProps) {
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -93,10 +106,53 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
     }
   };
 
-  const addImage = () => {
+  const addImageByUrl = () => {
     const url = window.prompt("URL da imagem:");
     if (url) {
       editor.chain().focus().setImage({ src: url }).run();
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Por favor, selecione uma imagem");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Imagem muito grande (máximo 5MB)");
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `posts/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("blog")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("blog")
+        .getPublicUrl(filePath);
+
+      editor.chain().focus().setImage({ src: publicUrl }).run();
+      toast.success("Imagem inserida com sucesso!");
+    } catch (error: any) {
+      toast.error("Erro ao fazer upload", { description: error.message });
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
@@ -252,11 +308,44 @@ export function RichTextEditor({ content, onChange, placeholder }: RichTextEdito
           icon={LinkIcon}
           tooltip="Inserir link"
         />
-        <ToolbarButton
-          onClick={addImage}
-          icon={ImageIcon}
-          tooltip="Inserir imagem"
+        
+        {/* Image dropdown with upload option */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleImageUpload}
+          className="hidden"
         />
+        <DropdownMenu>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenuTrigger asChild>
+                <Toggle size="sm" className="data-[state=on]:bg-accent data-[state=on]:text-white">
+                  {isUploading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <ImageIcon className="h-4 w-4" />
+                  )}
+                </Toggle>
+              </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              <p>Inserir imagem</p>
+            </TooltipContent>
+          </Tooltip>
+          <DropdownMenuContent align="start">
+            <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
+              <Upload className="h-4 w-4 mr-2" />
+              Fazer upload
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={addImageByUrl}>
+              <LinkIcon className="h-4 w-4 mr-2" />
+              Inserir por URL
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        
         <ToolbarButton
           onClick={() => editor.chain().focus().setHorizontalRule().run()}
           icon={Minus}

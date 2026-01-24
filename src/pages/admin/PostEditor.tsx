@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Save, Eye } from "lucide-react";
+import { ArrowLeft, Save, Eye, EyeOff, Edit3 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { AdminLayout } from "@/components/admin/AdminLayout";
@@ -15,8 +15,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 
 interface Category {
   id: string;
@@ -32,6 +34,7 @@ const PostEditor = () => {
 
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [activeTab, setActiveTab] = useState<string>("editor");
   const [form, setForm] = useState({
     title: "",
     slug: "",
@@ -193,11 +196,57 @@ const PostEditor = () => {
 
               <div className="space-y-2">
                 <Label>Conteúdo</Label>
-                <RichTextEditor
-                  content={form.content}
-                  onChange={(content) => setForm({ ...form, content })}
-                  placeholder="Escreva o conteúdo do post..."
-                />
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <TabsList className="mb-4">
+                    <TabsTrigger value="editor" className="gap-2">
+                      <Edit3 className="h-4 w-4" />
+                      Editor
+                    </TabsTrigger>
+                    <TabsTrigger value="preview" className="gap-2">
+                      <Eye className="h-4 w-4" />
+                      Pré-visualização
+                    </TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="editor" className="mt-0">
+                    <RichTextEditor
+                      content={form.content}
+                      onChange={(content) => setForm({ ...form, content })}
+                      placeholder="Escreva o conteúdo do post..."
+                    />
+                  </TabsContent>
+                  
+                  <TabsContent value="preview" className="mt-0">
+                    <div className="border border-border rounded-xl bg-background p-6 min-h-[400px]">
+                      {form.content ? (
+                        <article className="blog-content">
+                          {form.title && (
+                            <h1 className="text-3xl font-display font-bold text-foreground mb-4">
+                              {form.title}
+                            </h1>
+                          )}
+                          {form.excerpt && (
+                            <p className="text-lg text-muted-foreground mb-6 pb-6 border-b border-border">
+                              {form.excerpt}
+                            </p>
+                          )}
+                          <div 
+                            className="prose prose-lg max-w-none"
+                            dangerouslySetInnerHTML={{ __html: form.content }} 
+                          />
+                        </article>
+                      ) : (
+                        <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+                          <div className="text-center">
+                            <EyeOff className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                            <p>Nenhum conteúdo para visualizar</p>
+                            <p className="text-sm">Comece a escrever no editor</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </div>
             </div>
 
@@ -272,22 +321,12 @@ const PostEditor = () => {
 
             <div className="bg-card rounded-2xl border border-border p-6 space-y-4">
               <h3 className="font-display font-semibold">Imagem Destacada</h3>
-              <div className="space-y-2">
-                <Label htmlFor="featured_image">URL da Imagem</Label>
-                <Input
-                  id="featured_image"
-                  value={form.featured_image}
-                  onChange={(e) => setForm({ ...form, featured_image: e.target.value })}
-                  placeholder="https://..."
-                />
-              </div>
-              {form.featured_image && (
-                <img
-                  src={form.featured_image}
-                  alt="Preview"
-                  className="w-full aspect-video object-cover rounded-xl"
-                />
-              )}
+              <ImageUpload
+                bucket="blog"
+                folder="featured"
+                value={form.featured_image}
+                onChange={(url) => setForm({ ...form, featured_image: url })}
+              />
             </div>
           </div>
         </div>
