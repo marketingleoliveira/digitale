@@ -31,6 +31,7 @@ import Carousel from "./pages/admin/Carousel";
 import AdminFabrics from "./pages/admin/Fabrics";
 import Newsletter from "./pages/admin/Newsletter";
 import AdminTestimonials from "./pages/admin/Testimonials";
+import PrintsAdmin from "./pages/admin/PrintsAdmin";
 import { NewsletterPopup } from "./components/newsletter/NewsletterPopup";
 
 const queryClient = new QueryClient();
@@ -84,6 +85,7 @@ const App = () => (
               <Route path="/admin/newsletter" element={<ProtectedRoute requireAdmin><Newsletter /></ProtectedRoute>} />
               <Route path="/admin/settings" element={<ProtectedRoute requireAdmin><Settings /></ProtectedRoute>} />
               <Route path="/admin/users" element={<ProtectedRoute requireAdmin><Users /></ProtectedRoute>} />
+              <Route path="/admin/prints" element={<ProtectedRoute><PrintsAdmin /></ProtectedRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
