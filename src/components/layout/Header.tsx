@@ -1,25 +1,38 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, X, Phone, Clock, Headphones } from "lucide-react";
+import { Menu, X, Phone, Clock, Headphones, ChevronDown } from "lucide-react";
 import logoWhite from "@/assets/logo-white.png";
 import logoColor from "@/assets/logo-color.png";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
 
+interface NavItem {
+  name: string;
+  href: string;
+  children?: { name: string; href: string }[];
+}
+
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
   const location = useLocation();
   const { t } = useLanguage();
 
-  const navigation = [
+  const navigation: NavItem[] = [
     { name: t("nav.home"), href: "/" },
-    { name: t("nav.about"), href: "/sobre" },
+    { 
+      name: t("nav.about"), 
+      href: "/sobre",
+      children: [
+        { name: t("nav.about"), href: "/sobre" },
+        { name: t("nav.sustainability"), href: "/sustentabilidade" },
+      ]
+    },
     { name: t("nav.fabrics"), href: "/tecidos" },
     { name: t("nav.prints"), href: "/estampas" },
     { name: t("nav.segments"), href: "/segmentos" },
-    { name: t("nav.sustainability"), href: "/sustentabilidade" },
     { name: t("nav.careers"), href: "/trabalhe-conosco" },
     { name: t("nav.contact"), href: "/contato" },
   ];
@@ -80,18 +93,63 @@ export function Header() {
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center">
               {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={`px-4 py-2 text-sm font-medium transition-colors relative group ${
-                    location.pathname === item.href
-                      ? "text-accent"
-                      : "text-foreground hover:text-accent"
-                  }`}
-                >
-                  {item.name}
-                  <span className="absolute bottom-0 left-4 right-4 h-0.5 bg-accent transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
-                </Link>
+                item.children ? (
+                  <div 
+                    key={item.name} 
+                    className="relative group"
+                    onMouseEnter={() => setOpenSubmenu(item.name)}
+                    onMouseLeave={() => setOpenSubmenu(null)}
+                  >
+                    <button
+                      className={`px-4 py-2 text-sm font-medium transition-colors flex items-center gap-1 ${
+                        location.pathname === item.href || item.children.some(c => location.pathname === c.href)
+                          ? "text-accent"
+                          : "text-foreground hover:text-accent"
+                      }`}
+                    >
+                      {item.name}
+                      <ChevronDown className={`h-4 w-4 transition-transform ${openSubmenu === item.name ? 'rotate-180' : ''}`} />
+                    </button>
+                    <AnimatePresence>
+                      {openSubmenu === item.name && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 10 }}
+                          transition={{ duration: 0.2 }}
+                          className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg border border-border py-2 min-w-[180px] z-50"
+                        >
+                          {item.children.map((child) => (
+                            <Link
+                              key={child.name}
+                              to={child.href}
+                              className={`block px-4 py-2 text-sm transition-colors ${
+                                location.pathname === child.href
+                                  ? "text-accent bg-accent/5"
+                                  : "text-foreground hover:text-accent hover:bg-accent/5"
+                              }`}
+                            >
+                              {child.name}
+                            </Link>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                ) : (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className={`px-4 py-2 text-sm font-medium transition-colors relative group ${
+                      location.pathname === item.href
+                        ? "text-accent"
+                        : "text-foreground hover:text-accent"
+                    }`}
+                  >
+                    {item.name}
+                    <span className="absolute bottom-0 left-4 right-4 h-0.5 bg-accent transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+                  </Link>
+                )
               ))}
             </nav>
 
@@ -152,16 +210,55 @@ export function Header() {
                 </a>
                 
                 {navigation.map((item) => (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className={`block py-3 font-medium border-b border-border/50 ${
-                      location.pathname === item.href ? "text-accent" : "text-foreground"
-                    }`}
-                  >
-                    {item.name}
-                  </Link>
+                  item.children ? (
+                    <div key={item.name}>
+                      <button
+                        onClick={() => setOpenSubmenu(openSubmenu === item.name ? null : item.name)}
+                        className={`flex items-center justify-between w-full py-3 font-medium border-b border-border/50 ${
+                          location.pathname === item.href || item.children.some(c => location.pathname === c.href)
+                            ? "text-accent"
+                            : "text-foreground"
+                        }`}
+                      >
+                        {item.name}
+                        <ChevronDown className={`h-4 w-4 transition-transform ${openSubmenu === item.name ? 'rotate-180' : ''}`} />
+                      </button>
+                      <AnimatePresence>
+                        {openSubmenu === item.name && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="overflow-hidden bg-muted/30"
+                          >
+                            {item.children.map((child) => (
+                              <Link
+                                key={child.name}
+                                to={child.href}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className={`block py-2.5 pl-6 text-sm border-b border-border/30 ${
+                                  location.pathname === child.href ? "text-accent" : "text-foreground"
+                                }`}
+                              >
+                                {child.name}
+                              </Link>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ) : (
+                    <Link
+                      key={item.name}
+                      to={item.href}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`block py-3 font-medium border-b border-border/50 ${
+                        location.pathname === item.href ? "text-accent" : "text-foreground"
+                      }`}
+                    >
+                      {item.name}
+                    </Link>
+                  )
                 ))}
                 <Link
                   to="/contato"
