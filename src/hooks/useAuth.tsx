@@ -119,6 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let isMounted = true;
     let localRefreshInterval: NodeJS.Timeout | null = null;
+    let initTimeout: NodeJS.Timeout | null = null;
 
     const stopLocalRefresh = () => {
       if (localRefreshInterval) {
@@ -141,13 +142,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }, TOKEN_REFRESH_INTERVAL);
     };
 
-    // Carregamento INICIAL
-    const initializeAuth = async () => {
+    // Carregamento INICIAL com retry
+    const initializeAuth = async (retryCount = 0) => {
       // Evita re-inicialização
       if (isInitializedRef.current) {
         setLoading(false);
         return;
       }
+      
+      // Timeout de segurança - evita loading infinito
+      if (initTimeout) clearTimeout(initTimeout);
+      initTimeout = setTimeout(() => {
+        if (isMounted && !isInitializedRef.current) {
+          console.warn("Auth initialization timed out, forcing completion");
+          setSession(null);
+          setUser(null);
+          setIsAdmin(false);
+          setIsEditor(false);
+          isInitializedRef.current = true;
+          setLoading(false);
+        }
+      }, 10000); // 10 segundos de timeout
       
       try {
         const { data: { session: initialSession }, error } = await supabase.auth.getSession();
@@ -156,11 +171,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         if (error) {
           console.error("Error getting session:", error);
+          
+          // Tenta novamente até 2 vezes
+          if (retryCount < 2) {
+            console.log(`Retrying auth initialization (attempt ${retryCount + 1})...`);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            return initializeAuth(retryCount + 1);
+          }
+          
           setSession(null);
           setUser(null);
           setIsAdmin(false);
           setIsEditor(false);
           isInitializedRef.current = true;
+          if (initTimeout) clearTimeout(initTimeout);
           setLoading(false);
           return;
         }
@@ -182,17 +206,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         
         isInitializedRef.current = true;
+        if (initTimeout) clearTimeout(initTimeout);
       } catch (error) {
         console.error("Error initializing auth:", error);
+        
+        // Tenta novamente até 2 vezes
+        if (retryCount < 2) {
+          console.log(`Retrying auth initialization after error (attempt ${retryCount + 1})...`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          if (isMounted) {
+            return initializeAuth(retryCount + 1);
+          }
+        }
+        
         if (isMounted) {
           setSession(null);
           setUser(null);
           setIsAdmin(false);
           setIsEditor(false);
           isInitializedRef.current = true;
+          if (initTimeout) clearTimeout(initTimeout);
         }
       } finally {
-        if (isMounted) {
+        if (isMounted && isInitializedRef.current) {
           setLoading(false);
         }
       }
@@ -296,6 +332,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       subscription.unsubscribe();
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       stopLocalRefresh();
+      if (initTimeout) clearTimeout(initTimeout);
     };
   }, []);
 
