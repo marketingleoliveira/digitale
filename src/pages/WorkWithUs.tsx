@@ -56,16 +56,14 @@ const WorkWithUs = () => {
     if (file) {
       if (file.type !== "application/pdf") {
         toast({
-          title: "Formato inválido",
-          description: "Por favor, envie apenas arquivos PDF.",
+          title: t("careers.form.invalidFormat"),
           variant: "destructive",
         });
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
         toast({
-          title: "Arquivo muito grande",
-          description: "O arquivo deve ter no máximo 5MB.",
+          title: t("careers.form.fileTooLarge"),
           variant: "destructive",
         });
         return;
@@ -79,8 +77,7 @@ const WorkWithUs = () => {
     
     if (!selectedFile) {
       toast({
-        title: "Currículo obrigatório",
-        description: "Por favor, anexe seu currículo em PDF.",
+        title: t("careers.form.resumeRequired"),
         variant: "destructive",
       });
       return;
@@ -88,8 +85,7 @@ const WorkWithUs = () => {
 
     if (!formData.jobId) {
       toast({
-        title: "Vaga obrigatória",
-        description: "Por favor, selecione uma vaga.",
+        title: t("careers.form.jobRequired"),
         variant: "destructive",
       });
       return;
@@ -98,22 +94,19 @@ const WorkWithUs = () => {
     setSubmitting(true);
 
     try {
-      // Upload resume
       const fileName = `${Date.now()}_${selectedFile.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from("resumes")
         .upload(fileName, selectedFile);
 
       if (uploadError) throw uploadError;
 
-      // Get public URL (for admin access later)
       const resumeUrl = `resumes/${fileName}`;
 
-      // Submit application
       const { error: insertError } = await supabase
         .from("job_applications")
         .insert({
-          job_opening_id: formData.jobId,
+          job_opening_id: formData.jobId === "banco-talentos" ? null : formData.jobId,
           name: formData.name.trim(),
           email: formData.email.trim().toLowerCase(),
           whatsapp: formData.whatsapp.trim(),
@@ -123,11 +116,10 @@ const WorkWithUs = () => {
       if (insertError) throw insertError;
 
       toast({
-        title: "Candidatura enviada!",
-        description: "Sua candidatura foi recebida com sucesso. Entraremos em contato em breve.",
+        title: t("careers.form.success"),
+        description: t("careers.form.successDesc"),
       });
 
-      // Reset form
       setFormData({ name: "", email: "", whatsapp: "", jobId: "" });
       setSelectedFile(null);
       const fileInput = document.getElementById("resume") as HTMLInputElement;
@@ -136,8 +128,7 @@ const WorkWithUs = () => {
     } catch (error: any) {
       console.error("Error submitting application:", error);
       toast({
-        title: "Erro ao enviar",
-        description: "Ocorreu um erro ao enviar sua candidatura. Tente novamente.",
+        title: t("careers.form.error"),
         variant: "destructive",
       });
     } finally {
@@ -151,7 +142,6 @@ const WorkWithUs = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Hero */}
       <section className="pt-32 lg:pt-40 pb-16 bg-gradient-to-br from-primary/10 to-accent/10 border-b border-border">
         <div className="container mx-auto px-6">
           <motion.div
@@ -159,10 +149,10 @@ const WorkWithUs = () => {
             animate={{ opacity: 1, y: 0 }}
             className="max-w-2xl"
           >
-            <span className="section-subtitle">Carreiras</span>
-            <h1 className="section-title mt-2 mb-4">Trabalhe Conosco</h1>
+            <span className="section-subtitle">{t("careers.label")}</span>
+            <h1 className="section-title mt-2 mb-4">{t("careers.title")}</h1>
             <p className="text-muted-foreground text-lg">
-              Faça parte da nossa equipe! Estamos sempre em busca de talentos que compartilhem nossa paixão por inovação e qualidade na indústria têxtil.
+              {t("careers.description")}
             </p>
           </motion.div>
         </div>
@@ -171,9 +161,8 @@ const WorkWithUs = () => {
       <section className="py-16">
         <div className="container mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-12">
-            {/* Job Listings */}
             <div>
-              <h2 className="text-2xl font-semibold mb-6">Vagas Disponíveis</h2>
+              <h2 className="text-2xl font-semibold mb-6">{t("careers.jobs.title")}</h2>
               
               {loading ? (
                 <div className="space-y-4">
@@ -223,7 +212,7 @@ const WorkWithUs = () => {
                           )}
                           {formData.jobId === job.id && job.requirements && (
                             <div className="mt-4 pt-4 border-t border-border">
-                              <h4 className="text-sm font-medium mb-2">Requisitos:</h4>
+                              <h4 className="text-sm font-medium mb-2">{t("careers.requirements")}</h4>
                               <p className="text-sm text-muted-foreground whitespace-pre-line">
                                 {job.requirements}
                               </p>
@@ -241,42 +230,39 @@ const WorkWithUs = () => {
                 <div className="card-clean p-8 text-center">
                   <Briefcase className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                   <p className="text-muted-foreground">
-                    No momento não há vagas abertas. Mas você pode enviar seu currículo para nosso banco de talentos!
+                    {t("careers.jobs.noJobs")}
                   </p>
                 </div>
               )}
             </div>
 
-            {/* Application Form */}
             <div>
-              <h2 className="text-2xl font-semibold mb-6">Envie sua Candidatura</h2>
+              <h2 className="text-2xl font-semibold mb-6">{t("careers.form.title")}</h2>
               
               <form onSubmit={handleSubmit} className="card-clean p-6 space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Nome Completo *</Label>
+                  <Label htmlFor="name">{t("careers.form.name")}</Label>
                   <Input
                     id="name"
                     required
-                    placeholder="Seu nome completo"
                     value={formData.name}
                     onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email">E-mail *</Label>
+                  <Label htmlFor="email">{t("careers.form.email")}</Label>
                   <Input
                     id="email"
                     type="email"
                     required
-                    placeholder="seu@email.com"
                     value={formData.email}
                     onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="whatsapp">WhatsApp *</Label>
+                  <Label htmlFor="whatsapp">{t("careers.form.whatsapp")}</Label>
                   <Input
                     id="whatsapp"
                     required
@@ -287,13 +273,13 @@ const WorkWithUs = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="job">Vaga Desejada *</Label>
+                  <Label htmlFor="job">{t("careers.form.job")}</Label>
                   <Select
                     value={formData.jobId}
                     onValueChange={(value) => setFormData((prev) => ({ ...prev, jobId: value }))}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecione uma vaga" />
+                      <SelectValue placeholder={t("careers.form.selectJob")} />
                     </SelectTrigger>
                     <SelectContent>
                       {jobs.map((job) => (
@@ -303,7 +289,7 @@ const WorkWithUs = () => {
                       ))}
                       {jobs.length === 0 && (
                         <SelectItem value="banco-talentos">
-                          Banco de Talentos (Cadastro Geral)
+                          {t("careers.form.talentPool")}
                         </SelectItem>
                       )}
                     </SelectContent>
@@ -311,7 +297,7 @@ const WorkWithUs = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="resume">Currículo (PDF) *</Label>
+                  <Label htmlFor="resume">{t("careers.form.resume")}</Label>
                   <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
                     <input
                       id="resume"
@@ -330,10 +316,10 @@ const WorkWithUs = () => {
                         <>
                           <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
                           <p className="text-sm text-muted-foreground">
-                            Clique para selecionar ou arraste seu currículo
+                            {t("careers.form.resumeUpload")}
                           </p>
                           <p className="text-xs text-muted-foreground mt-1">
-                            Apenas PDF • Máximo 5MB
+                            {t("careers.form.resumeFormat")}
                           </p>
                         </>
                       )}
@@ -341,7 +327,7 @@ const WorkWithUs = () => {
                   </div>
                   <div className="flex items-start gap-2 text-xs text-muted-foreground">
                     <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                    <span>Apenas arquivos PDF são aceitos. Certifique-se de que seu currículo está atualizado.</span>
+                    <span>{t("careers.form.resumeNote")}</span>
                   </div>
                 </div>
 
@@ -351,7 +337,7 @@ const WorkWithUs = () => {
                   size="lg"
                   disabled={submitting || !formData.jobId}
                 >
-                  {submitting ? "Enviando..." : "Enviar Candidatura"}
+                  {submitting ? t("careers.form.submitting") : t("careers.form.submit")}
                 </Button>
               </form>
             </div>
