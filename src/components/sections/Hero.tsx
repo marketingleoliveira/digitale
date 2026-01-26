@@ -62,15 +62,31 @@ export function Hero() {
       onMouseLeave={() => setIsAutoPlaying(true)}
     >
       {/* Carousel Container */}
-      <div className="absolute inset-0">
-        <AnimatePresence mode="popLayout">
+      <div className="absolute inset-0" style={{ perspective: "1500px" }}>
+        <AnimatePresence mode="popLayout" initial={false}>
           <motion.div
             key={slide.id}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1] }}
+            initial={{ 
+              rotateY: 90,
+              opacity: 0,
+              transformOrigin: "left center"
+            }}
+            animate={{ 
+              rotateY: 0,
+              opacity: 1,
+              transformOrigin: "left center"
+            }}
+            exit={{ 
+              rotateY: -90,
+              opacity: 0,
+              transformOrigin: "right center"
+            }}
+            transition={{ 
+              duration: 0.8, 
+              ease: [0.4, 0, 0.2, 1]
+            }}
             className="absolute inset-0"
+            style={{ backfaceVisibility: "hidden" }}
           >
             <img
               src={slide.image_url}
