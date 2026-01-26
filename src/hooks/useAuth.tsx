@@ -63,16 +63,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .select("role")
         .eq("user_id", userId);
 
+      console.log("fetchRoles - userId:", userId, "roles:", roles, "error:", error);
+
       if (error) {
         console.error("Error fetching roles:", error);
         return { admin: false, editor: false };
       }
 
-      const userRoles = roles?.map((r) => r.role) || [];
+      const userRoles = roles?.map((r) => String(r.role)) || [];
+      console.log("fetchRoles - userRoles array:", userRoles);
+      
       // Admin includes: admin, desenvolvedor
-      const admin = userRoles.includes("admin") || userRoles.includes("desenvolvedor");
+      const admin = userRoles.some(role => role === "admin" || role === "desenvolvedor");
       // Editor includes: editor, redator, vendedor, or any admin role
-      const editor = userRoles.includes("editor") || userRoles.includes("redator") || userRoles.includes("vendedor") || admin;
+      const editor = userRoles.some(role => 
+        role === "editor" || role === "redator" || role === "vendedor"
+      ) || admin;
+      
+      console.log("fetchRoles - computed: admin=", admin, "editor=", editor);
       
       return { admin, editor };
     } catch (error) {
