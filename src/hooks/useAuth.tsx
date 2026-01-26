@@ -19,51 +19,83 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [rolesLoaded, setRolesLoaded] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditor, setIsEditor] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchRoles = async (userId: string) => {
-      const { data: roles } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userId);
-      
-      const userRoles = roles?.map(r => r.role) || [];
-      setIsAdmin(userRoles.includes("admin"));
-      setIsEditor(userRoles.includes("editor") || userRoles.includes("admin"));
+      try {
+        const { data: roles, error } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", userId);
+
+        if (error) throw error;
+
+        const userRoles = roles?.map((r) => r.role) || [];
+        if (!isMounted) return;
+        setIsAdmin(userRoles.includes("admin"));
+        setIsEditor(userRoles.includes("editor") || userRoles.includes("admin"));
+      } catch {
+        if (!isMounted) return;
+        setIsAdmin(false);
+        setIsEditor(false);
+      } finally {
+        if (!isMounted) return;
+        setRolesLoaded(true);
+      }
     };
 
-    // Set up auth state listener BEFORE getting session
+    // Listener de mudanças contínuas (não controla o loading inicial)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
+        if (!isMounted) return;
+
         setSession(session);
         setUser(session?.user ?? null);
-        
+
         if (session?.user) {
+          setRolesLoaded(false);
           await fetchRoles(session.user.id);
         } else {
           setIsAdmin(false);
           setIsEditor(false);
+          setRolesLoaded(true);
         }
-        
-        setLoading(false);
       }
     );
 
-    // Get initial session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        await fetchRoles(session.user.id);
-      }
-      
-      setLoading(false);
-    });
+    // Carregamento inicial (controla o loading)
+    const initializeAuth = async () => {
+      try {
+        setLoading(true);
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!isMounted) return;
 
-    return () => subscription.unsubscribe();
+        setSession(session);
+        setUser(session?.user ?? null);
+
+        if (session?.user) {
+          setRolesLoaded(false);
+          await fetchRoles(session.user.id);
+        } else {
+          setRolesLoaded(true);
+        }
+      } finally {
+        if (!isMounted) return;
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
@@ -87,8 +119,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await supabase.auth.signOut();
   };
 
+  const effectiveLoading = loading || (!!user && !rolesLoaded);
+
   return (
-    <AuthContext.Provider value={{ user, session, loading, isAdmin, isEditor, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading: effectiveLoading, isAdmin, isEditor, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );
