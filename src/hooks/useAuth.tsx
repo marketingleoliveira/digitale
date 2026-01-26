@@ -118,6 +118,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let isMounted = true;
+    let localRefreshInterval: NodeJS.Timeout | null = null;
+
+    const stopLocalRefresh = () => {
+      if (localRefreshInterval) {
+        clearInterval(localRefreshInterval);
+        localRefreshInterval = null;
+      }
+    };
+
+    const startLocalRefresh = () => {
+      stopLocalRefresh();
+      localRefreshInterval = setInterval(async () => {
+        try {
+          const { data: { session: currentSession } } = await supabase.auth.getSession();
+          if (currentSession) {
+            await supabase.auth.refreshSession();
+          }
+        } catch (error) {
+          console.error("Error in refresh interval:", error);
+        }
+      }, TOKEN_REFRESH_INTERVAL);
+    };
 
     // Carregamento INICIAL
     const initializeAuth = async () => {
@@ -152,7 +174,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (isMounted) {
             setIsAdmin(admin);
             setIsEditor(editor);
-            startRefreshInterval();
+            startLocalRefresh();
           }
         } else {
           setIsAdmin(false);
@@ -196,12 +218,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (isMounted) {
             setIsAdmin(admin);
             setIsEditor(editor);
-            startRefreshInterval();
+            startLocalRefresh();
           }
         } else {
           setIsAdmin(false);
           setIsEditor(false);
-          stopRefreshInterval();
+          stopLocalRefresh();
         }
       }
     );
@@ -258,7 +280,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setIsAdmin(false);
           setIsEditor(false);
           currentUserIdRef.current = null;
-          stopRefreshInterval();
+          stopLocalRefresh();
         }
       } catch (error) {
         console.error("Error checking session on visibility change:", error);
@@ -273,9 +295,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isMounted = false;
       subscription.unsubscribe();
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      stopRefreshInterval();
+      stopLocalRefresh();
     };
-  }, [startRefreshInterval, stopRefreshInterval]);
+  }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
     try {
