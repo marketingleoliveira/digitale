@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback, createContext, useContext, useRef } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  reconnecting: boolean;
   isAdmin: boolean;
   isEditor: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
@@ -15,16 +17,21 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Intervalo de refresh do token (10 minutos)
+const TOKEN_REFRESH_INTERVAL = 10 * 60 * 1000;
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [reconnecting, setReconnecting] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditor, setIsEditor] = useState(false);
   
   // Refs para controlar estados de inicialização e evitar race conditions
   const isInitialized = useRef(false);
   const isFetchingRoles = useRef(false);
+  const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchRoles = useCallback(async (userId: string): Promise<{ admin: boolean; editor: boolean }> => {
     if (isFetchingRoles.current) {
@@ -56,6 +63,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isFetchingRoles.current = false;
     }
   }, [isAdmin, isEditor]);
+
+  // Função para refresh do token
+  const refreshSession = useCallback(async (showToast = false) => {
+    try {
+      const { data: { session: refreshedSession }, error } = await supabase.auth.refreshSession();
+      
+      if (error) {
+        console.error("Error refreshing session:", error);
+        return null;
+      }
+      
+      if (refreshedSession && showToast) {
+        toast.success("Sessão renovada", { duration: 2000 });
+      }
+      
+      return refreshedSession;
+    } catch (error) {
+      console.error("Error refreshing session:", error);
+      return null;
+    }
+  }, []);
+
+  // Inicia o intervalo de refresh automático
+  const startRefreshInterval = useCallback(() => {
+    if (refreshIntervalRef.current) {
+      clearInterval(refreshIntervalRef.current);
+    }
+    
+    refreshIntervalRef.current = setInterval(async () => {
+      const currentSession = await supabase.auth.getSession();
+      if (currentSession.data.session) {
+        await refreshSession(false);
+      }
+    }, TOKEN_REFRESH_INTERVAL);
+  }, [refreshSession]);
+
+  // Para o intervalo de refresh
+  const stopRefreshInterval = useCallback(() => {
+    if (refreshIntervalRef.current) {
+      clearInterval(refreshIntervalRef.current);
+      refreshIntervalRef.current = null;
+    }
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -90,6 +140,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (isMounted) {
             setIsAdmin(admin);
             setIsEditor(editor);
+            startRefreshInterval();
           }
         } else {
           setIsAdmin(false);
@@ -129,10 +180,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (isMounted) {
             setIsAdmin(admin);
             setIsEditor(editor);
+            startRefreshInterval();
           }
         } else {
           setIsAdmin(false);
           setIsEditor(false);
+          stopRefreshInterval();
         }
       }
     );
@@ -141,29 +194,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const handleVisibilityChange = async () => {
       if (document.visibilityState === "visible" && isMounted) {
         try {
-          // Verifica a sessão ao retornar à aba
           const { data: { session: currentSession } } = await supabase.auth.getSession();
           
           if (!isMounted) return;
           
-          // Apenas atualiza se a sessão mudou
-          if (currentSession?.user?.id !== user?.id) {
-            setSession(currentSession);
-            setUser(currentSession?.user ?? null);
+          // Verifica se há uma sessão ativa
+          if (currentSession?.user) {
+            // Mostra indicador de reconexão apenas se já estava logado
+            if (user?.id) {
+              setReconnecting(true);
+              toast.loading("Reconectando...", { id: "reconnecting", duration: 2000 });
+            }
             
-            if (currentSession?.user) {
-              const { admin, editor } = await fetchRoles(currentSession.user.id);
+            // Refresh da sessão ao retornar à aba
+            const refreshedSession = await refreshSession(false);
+            
+            if (!isMounted) return;
+            
+            if (refreshedSession) {
+              setSession(refreshedSession);
+              setUser(refreshedSession.user);
+              
+              // Revalida roles
+              const { admin, editor } = await fetchRoles(refreshedSession.user.id);
               if (isMounted) {
                 setIsAdmin(admin);
                 setIsEditor(editor);
               }
-            } else {
-              setIsAdmin(false);
-              setIsEditor(false);
+              
+              toast.success("Sessão ativa", { id: "reconnecting", duration: 2000 });
             }
+            
+            setReconnecting(false);
+          } else if (user?.id) {
+            // Usuário estava logado mas sessão expirou
+            toast.error("Sessão expirada", { 
+              description: "Por favor, faça login novamente.",
+              duration: 4000 
+            });
+            setUser(null);
+            setSession(null);
+            setIsAdmin(false);
+            setIsEditor(false);
+            stopRefreshInterval();
           }
         } catch (error) {
           console.error("Error checking session on visibility change:", error);
+          setReconnecting(false);
         }
       }
     };
@@ -175,13 +252,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isMounted = false;
       subscription.unsubscribe();
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+      stopRefreshInterval();
     };
-  }, [fetchRoles, user?.id]);
+  }, [fetchRoles, user?.id, refreshSession, startRefreshInterval, stopRefreshInterval]);
 
   const signIn = useCallback(async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (!error) {
+      startRefreshInterval();
+    }
     return { error: error as Error | null };
-  }, []);
+  }, [startRefreshInterval]);
 
   const signUp = useCallback(async (email: string, password: string, fullName: string) => {
     const { error } = await supabase.auth.signUp({
@@ -196,15 +277,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
+    stopRefreshInterval();
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
     setIsAdmin(false);
     setIsEditor(false);
-  }, []);
+    toast.info("Você saiu da sua conta");
+  }, [stopRefreshInterval]);
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, isAdmin, isEditor, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, reconnecting, isAdmin, isEditor, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );
