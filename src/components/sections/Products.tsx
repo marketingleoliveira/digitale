@@ -39,19 +39,19 @@ export function Products() {
   const { t } = useLanguage();
 
   return (
-    <section className="py-24 bg-secondary/30">
-      <div className="container mx-auto px-6">
+    <section className="py-16 md:py-24 bg-secondary/30">
+      <div className="container mx-auto px-4 md:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-10 md:mb-16"
         >
           <span className="section-subtitle">{t("products.label")}</span>
-          <h2 className="section-title mt-4 mb-6">{t("products.title")}</h2>
+          <h2 className="section-title mt-3 md:mt-4 mb-4 md:mb-6">{t("products.title")}</h2>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
           {products.map((product, index) => (
             <motion.div
               key={product.name}
@@ -62,9 +62,9 @@ export function Products() {
               className="group"
             >
               <Link to={`/tecidos/${product.name.toLowerCase()}`} className="block">
-                <div className="relative bg-card rounded-2xl overflow-hidden shadow-lg transition-all duration-500 group-hover:shadow-2xl group-hover:-translate-y-3">
+                <div className="relative bg-card rounded-xl md:rounded-2xl overflow-hidden shadow-md md:shadow-lg transition-all duration-500 group-hover:shadow-2xl group-hover:-translate-y-2 md:group-hover:-translate-y-3">
                   {/* Image Container */}
-                  <div className="relative h-80 overflow-hidden">
+                  <div className="relative h-48 md:h-80 overflow-hidden">
                     <img
                       src={product.image}
                       alt={product.name}
@@ -72,10 +72,10 @@ export function Products() {
                     />
                     
                     {/* Gradient Overlay on Hover */}
-                    <div className={`absolute inset-0 bg-gradient-to-t ${product.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                    <div className={`absolute inset-0 bg-gradient-to-t ${product.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500 hidden md:block`} />
                     
                     {/* Logo Badge */}
-                    <div className="absolute top-4 right-4 w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg p-2 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12">
+                    <div className="absolute top-2 right-2 md:top-4 md:right-4 w-8 h-8 md:w-12 md:h-12 bg-white rounded-lg md:rounded-xl flex items-center justify-center shadow-lg p-1.5 md:p-2 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12">
                       <img 
                         src={logoColor} 
                         alt="Digitale" 
@@ -83,8 +83,8 @@ export function Products() {
                       />
                     </div>
 
-                    {/* Hover Content */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
+                    {/* Hover Content - Desktop Only */}
+                    <div className="absolute inset-0 hidden md:flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
                       <motion.div 
                         className="bg-white text-foreground px-6 py-3 rounded-full font-semibold shadow-xl flex items-center gap-2"
                       >
@@ -95,19 +95,19 @@ export function Products() {
                   </div>
 
                   {/* Content */}
-                  <div className="p-6 bg-card relative">
+                  <div className="p-4 md:p-6 bg-card relative">
                     {/* Decorative Line */}
-                    <div className="absolute top-0 left-6 right-6 h-1 bg-gradient-to-r from-transparent via-accent to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
+                    <div className="absolute top-0 left-4 right-4 md:left-6 md:right-6 h-1 bg-gradient-to-r from-transparent via-accent to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 hidden md:block" />
                     
-                    <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-accent transition-colors duration-300">
+                    <h3 className="text-base md:text-xl font-bold text-foreground mb-1 md:mb-2 group-hover:text-accent transition-colors duration-300">
                       {product.name}
                     </h3>
-                    <p className="text-muted-foreground text-sm line-clamp-2 transition-colors duration-300 group-hover:text-foreground">
+                    <p className="text-muted-foreground text-xs md:text-sm line-clamp-2 transition-colors duration-300 group-hover:text-foreground">
                       {t(product.description)}
                     </p>
                     
-                    {/* Arrow indicator */}
-                    <div className="mt-4 flex items-center gap-2 text-accent font-semibold text-sm">
+                    {/* Arrow indicator - Desktop Only */}
+                    <div className="hidden md:flex mt-4 items-center gap-2 text-accent font-semibold text-sm">
                       <span className="transform transition-all duration-300 group-hover:mr-2">
                         {t("products.viewMore")}
                       </span>

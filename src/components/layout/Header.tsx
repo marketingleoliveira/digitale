@@ -51,21 +51,21 @@ export function Header() {
 
   return (
     <>
-      {/* Top Bar */}
-      <div className="bg-primary text-primary-foreground text-sm hidden lg:block">
-        <div className="container mx-auto px-6">
-          <div className="flex items-center justify-between h-10">
-            <div className="flex items-center gap-6">
+      {/* Top Bar - Desktop */}
+      <div className="bg-primary text-primary-foreground text-xs md:text-sm hidden md:block">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="flex items-center justify-between h-9 md:h-10">
+            <div className="flex items-center gap-4 md:gap-6">
               <a 
                 href="https://wa.me/551120649662?text=Ol%C3%A1%2C%20vim%20do%20site%2C%20quero%20contato%20do%20time%20comercial"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 hover:text-accent transition-colors"
+                className="flex items-center gap-1.5 md:gap-2 hover:text-accent transition-colors"
               >
-                <Phone className="h-3.5 w-3.5" />
+                <Phone className="h-3 w-3 md:h-3.5 md:w-3.5" />
                 <span>Falar com Comercial</span>
               </a>
-              <div className="flex items-center gap-2 text-primary-foreground/70">
+              <div className="hidden lg:flex items-center gap-2 text-primary-foreground/70">
                 <Clock className="h-3.5 w-3.5" />
                 <span>Seg-Sex: 08:00 - 18:00</span>
               </div>
@@ -82,17 +82,17 @@ export function Header() {
         className={`sticky top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled 
             ? "bg-white shadow-lg py-2" 
-            : "bg-white/95 backdrop-blur-md py-4"
+            : "bg-white/95 backdrop-blur-md py-3 md:py-4"
         }`}
       >
-        <div className="container mx-auto px-6">
+        <div className="container mx-auto px-4 md:px-6">
           <div className="flex items-center justify-between">
             {/* Logo */}
             <Link to="/" className="flex-shrink-0">
               <img 
                 src={logoColor} 
                 alt="Digitale Têxtil" 
-                className={`transition-all duration-300 ${isScrolled ? "h-12" : "h-14 md:h-16"}`} 
+                className={`transition-all duration-300 ${isScrolled ? "h-10 md:h-12" : "h-11 md:h-14 lg:h-16"}`} 
               />
             </Link>
 
@@ -159,11 +159,14 @@ export function Header() {
             </div>
 
             {/* Mobile: Language + Menu Button */}
-            <div className="lg:hidden flex items-center gap-3">
-              <LanguageSwitcher />
+            <div className="lg:hidden flex items-center gap-2">
+              <div className="md:hidden">
+                <LanguageSwitcher />
+              </div>
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="p-2 text-foreground hover:text-accent transition-colors"
+                aria-label="Menu"
               >
                 {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
@@ -178,15 +181,26 @@ export function Header() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="lg:hidden bg-white border-t border-border"
+              className="lg:hidden bg-white border-t border-border overflow-hidden"
             >
-              <nav className="container mx-auto px-6 py-6">
+              <nav className="container mx-auto px-4 py-4">
+                {/* WhatsApp Link for Mobile */}
+                <a 
+                  href="https://wa.me/551120649662?text=Ol%C3%A1%2C%20vim%20do%20site%2C%20quero%20contato%20do%20time%20comercial"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 py-3 text-accent font-medium border-b border-border/50"
+                >
+                  <Phone className="h-4 w-4" />
+                  <span>Falar com Comercial</span>
+                </a>
+                
                 {navigation.map((item) => (
                   <div key={item.name}>
                     <Link
                       to={item.href}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className={`block py-3 font-medium text-lg border-b border-border/50 ${
+                      className={`block py-3 font-medium border-b border-border/50 ${
                         location.pathname === item.href ? "text-accent" : "text-foreground"
                       }`}
                     >
@@ -199,7 +213,7 @@ export function Header() {
                             key={child.name}
                             to={child.href}
                             onClick={() => setIsMobileMenuOpen(false)}
-                            className="block py-2.5 text-muted-foreground hover:text-accent"
+                            className="block py-2 text-sm text-muted-foreground hover:text-accent"
                           >
                             {child.name}
                           </Link>
@@ -211,7 +225,7 @@ export function Header() {
                 <Link
                   to="/contato"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="block mt-4 btn-primary text-center"
+                  className="block mt-4 btn-primary text-center text-sm py-3"
                 >
                   {t("cta.button")}
                 </Link>
