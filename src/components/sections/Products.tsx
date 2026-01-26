@@ -146,21 +146,6 @@ export function Products() {
           </div>
         )}
 
-        {/* View All Fabrics Button */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16 md:mb-20"
-        >
-          <Link
-            to="/tecidos"
-            className="inline-flex items-center gap-2 text-accent hover:text-accent/80 font-semibold transition-colors group"
-          >
-            {t("products.viewAll")}
-            <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-          </Link>
-        </motion.div>
 
         {/* Prints Section */}
         <motion.div
@@ -213,21 +198,6 @@ export function Products() {
           </div>
         )}
 
-        {/* View All Prints Button */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center"
-        >
-          <Link
-            to="/estampas"
-            className="inline-flex items-center gap-2 text-accent hover:text-accent/80 font-semibold transition-colors group"
-          >
-            Ver Todas as Estampas
-            <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-          </Link>
-        </motion.div>
       </div>
     </section>
   );
