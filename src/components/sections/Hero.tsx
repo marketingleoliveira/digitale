@@ -63,13 +63,13 @@ export function Hero() {
     >
       {/* Carousel Container */}
       <div className="absolute inset-0">
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="popLayout">
           <motion.div
             key={slide.id}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.6, ease: "easeInOut" }}
+            transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1] }}
             className="absolute inset-0"
           >
             <img
