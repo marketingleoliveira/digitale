@@ -29,6 +29,7 @@ interface SeoSettings {
 
 const Settings = () => {
   const [loading, setLoading] = useState(false);
+  const [whatsappNumber, setWhatsappNumber] = useState("");
   const [general, setGeneral] = useState<GeneralSettings>({
     site_name: "",
     tagline: "",
@@ -54,16 +55,22 @@ const Settings = () => {
 
     if (data) {
       data.forEach((setting) => {
-        const value = setting.value as Record<string, string>;
         switch (setting.key) {
           case "general":
-            setGeneral(value as unknown as GeneralSettings);
+            setGeneral(setting.value as unknown as GeneralSettings);
             break;
           case "social":
-            setSocial(value as unknown as SocialSettings);
+            setSocial(setting.value as unknown as SocialSettings);
             break;
           case "seo":
-            setSeo(value as unknown as SeoSettings);
+            setSeo(setting.value as unknown as SeoSettings);
+            break;
+          case "whatsapp_number":
+            // Remove quotes if stored as JSON string
+            const value = typeof setting.value === "string" 
+              ? setting.value.replace(/^"|"$/g, "") 
+              : String(setting.value);
+            setWhatsappNumber(value);
             break;
         }
       });
@@ -75,8 +82,7 @@ const Settings = () => {
 
     const { error } = await supabase
       .from("site_settings")
-      .update({ value: value as any })
-      .eq("key", key);
+      .upsert({ key, value: value as any }, { onConflict: "key" });
 
     if (error) {
       toast.error("Erro ao salvar configurações");
@@ -87,11 +93,31 @@ const Settings = () => {
     setLoading(false);
   };
 
+  const saveWhatsappNumber = async () => {
+    setLoading(true);
+
+    // Remove non-numeric characters for storage
+    const cleanNumber = whatsappNumber.replace(/\D/g, "");
+
+    const { error } = await supabase
+      .from("site_settings")
+      .upsert({ key: "whatsapp_number", value: cleanNumber }, { onConflict: "key" });
+
+    if (error) {
+      toast.error("Erro ao salvar número do WhatsApp");
+    } else {
+      toast.success("Número do WhatsApp salvo!");
+    }
+
+    setLoading(false);
+  };
+
   return (
     <AdminLayout title="Configurações">
       <Tabs defaultValue="general" className="space-y-6">
         <TabsList>
           <TabsTrigger value="general">Geral</TabsTrigger>
+          <TabsTrigger value="whatsapp">WhatsApp</TabsTrigger>
           <TabsTrigger value="social">Redes Sociais</TabsTrigger>
           <TabsTrigger value="seo">SEO</TabsTrigger>
         </TabsList>
@@ -135,6 +161,34 @@ const Settings = () => {
                 />
               </div>
               <Button onClick={() => saveSettings("general", general)} disabled={loading}>
+                <Save className="h-4 w-4 mr-2" />
+                Salvar
+              </Button>
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* WhatsApp Settings */}
+        <TabsContent value="whatsapp">
+          <div className="bg-card rounded-2xl border border-border p-6">
+            <h3 className="font-display text-lg font-semibold mb-2">Configurações do WhatsApp</h3>
+            <p className="text-sm text-muted-foreground mb-6">
+              Este número será usado em todas as áreas de contato do site: botão flutuante, header, footer e página de contato.
+            </p>
+            <div className="space-y-4 max-w-xl">
+              <div className="space-y-2">
+                <Label htmlFor="whatsapp_number">Número do WhatsApp</Label>
+                <Input
+                  id="whatsapp_number"
+                  value={whatsappNumber}
+                  onChange={(e) => setWhatsappNumber(e.target.value)}
+                  placeholder="551120649662"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Digite o número completo com código do país (55) e DDD. Exemplo: 551120649662
+                </p>
+              </div>
+              <Button onClick={saveWhatsappNumber} disabled={loading}>
                 <Save className="h-4 w-4 mr-2" />
                 Salvar
               </Button>

@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, X, Phone, Clock, Headphones, ChevronDown } from "lucide-react";
-import logoWhite from "@/assets/logo-white.png";
+import { Menu, X, Clock, Headphones, ChevronDown } from "lucide-react";
 import logoColor from "@/assets/logo-color.png";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 
 interface NavItem {
   name: string;
@@ -19,6 +20,7 @@ export function Header() {
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
   const location = useLocation();
   const { t } = useLanguage();
+  const { whatsappLink } = useSiteSettings();
 
   const navigation: NavItem[] = [
     { name: t("nav.home"), href: "/" },
@@ -43,6 +45,8 @@ export function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const commercialWhatsappLink = whatsappLink("Olá, vim do site, quero contato do time comercial");
+
   return (
     <>
       {/* Top Bar - Desktop */}
@@ -51,12 +55,12 @@ export function Header() {
           <div className="flex items-center justify-between h-9 md:h-10">
             <div className="flex items-center gap-4 md:gap-6">
               <a 
-                href="https://wa.me/551120649662?text=Ol%C3%A1%2C%20vim%20do%20site%2C%20quero%20contato%20do%20time%20comercial"
+                href={commercialWhatsappLink}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1.5 md:gap-2 hover:text-accent transition-colors"
               >
-                <Phone className="h-3 w-3 md:h-3.5 md:w-3.5" />
+                <WhatsAppIcon className="h-3.5 w-3.5" />
                 <span>Falar com Comercial</span>
               </a>
               <div className="hidden lg:flex items-center gap-2 text-primary-foreground/70">
@@ -200,12 +204,12 @@ export function Header() {
               <nav className="container mx-auto px-4 py-4">
                 {/* WhatsApp Link for Mobile */}
                 <a 
-                  href="https://wa.me/551120649662?text=Ol%C3%A1%2C%20vim%20do%20site%2C%20quero%20contato%20do%20time%20comercial"
+                  href={commercialWhatsappLink}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 py-3 text-accent font-medium border-b border-border/50"
                 >
-                  <Phone className="h-4 w-4" />
+                  <WhatsAppIcon className="h-4 w-4" />
                   <span>Falar com Comercial</span>
                 </a>
                 

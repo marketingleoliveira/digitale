@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
-import { MessageCircle, X } from "lucide-react";
+import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
-
-const WHATSAPP_NUMBER = "551120649662";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 
 export function WhatsAppButton() {
   const { t } = useLanguage();
+  const { whatsappLink } = useSiteSettings();
   const [isVisible, setIsVisible] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
 
@@ -29,8 +30,7 @@ export function WhatsAppButton() {
   }, []);
 
   const handleClick = () => {
-    const message = encodeURIComponent(t("whatsapp.defaultMessage"));
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, "_blank");
+    window.open(whatsappLink(t("whatsapp.defaultMessage")), "_blank");
   };
 
   return (
@@ -81,7 +81,7 @@ export function WhatsAppButton() {
             onClick={() => setShowTooltip(!showTooltip)}
             className="group relative bg-green-500 hover:bg-green-600 text-white rounded-full p-4 shadow-lg shadow-green-500/30 transition-colors"
           >
-            <MessageCircle className="h-6 w-6" />
+            <WhatsAppIcon className="h-6 w-6" />
             
             {/* Pulse animation */}
             <span className="absolute inset-0 rounded-full bg-green-500 animate-ping opacity-25" />

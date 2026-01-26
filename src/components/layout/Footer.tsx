@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
-import { Instagram, Youtube, Linkedin, Facebook, MapPin, Mail, Phone, ArrowRight } from "lucide-react";
+import { Instagram, Youtube, Linkedin, Facebook, MapPin, Mail } from "lucide-react";
 import logoWhite from "@/assets/logo-white.png";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { NewsletterForm } from "@/components/newsletter/NewsletterForm";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 
 const socialLinks = [
   { name: "Instagram", icon: Instagram, href: "https://www.instagram.com/digitale.textil/" },
@@ -13,6 +15,19 @@ const socialLinks = [
 
 export function Footer() {
   const { t } = useLanguage();
+  const { whatsappNumber, whatsappLink } = useSiteSettings();
+
+  // Format phone number for display
+  const formatPhoneNumber = (number: string) => {
+    // Assuming Brazilian format: 55 + DDD + number
+    if (number.startsWith("55") && number.length >= 12) {
+      const ddd = number.slice(2, 4);
+      const part1 = number.slice(4, 8);
+      const part2 = number.slice(8);
+      return `+55 ${ddd} ${part1}-${part2}`;
+    }
+    return number;
+  };
 
   const footerLinks = {
     empresa: [
@@ -115,9 +130,14 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href="tel:+551120649662" className="flex items-start gap-2 md:gap-3 hover:text-accent transition-colors">
-                  <Phone className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0 mt-0.5" />
-                  <span>+55 11 2064-9662</span>
+                <a 
+                  href={whatsappLink()} 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-start gap-2 md:gap-3 hover:text-accent transition-colors"
+                >
+                  <WhatsAppIcon className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0 mt-0.5" />
+                  <span>{formatPhoneNumber(whatsappNumber)}</span>
                 </a>
               </li>
               <li className="flex items-start gap-2 md:gap-3">
