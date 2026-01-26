@@ -57,41 +57,55 @@ export function Hero() {
   return (
     <section
       className="relative w-full overflow-hidden bg-background"
-      style={{ height: "clamp(280px, 50vw, 450px)" }}
+      style={{ height: "500px", maxWidth: "1900px", margin: "0 auto" }}
       onMouseEnter={() => setIsAutoPlaying(false)}
       onMouseLeave={() => setIsAutoPlaying(true)}
     >
       {/* Carousel Container */}
-      <div className="absolute inset-0" style={{ perspective: "1500px" }}>
+      <div className="absolute inset-0" style={{ perspective: "2000px" }}>
         <AnimatePresence mode="popLayout" initial={false}>
           <motion.div
             key={slide.id}
             initial={{ 
-              rotateY: 90,
+              rotateY: 45,
               opacity: 0,
-              transformOrigin: "left center"
+              x: "10%",
+              boxShadow: "0 0 0 rgba(0,0,0,0)"
             }}
             animate={{ 
               rotateY: 0,
               opacity: 1,
-              transformOrigin: "left center"
+              x: "0%",
+              boxShadow: "0 0 0 rgba(0,0,0,0)"
             }}
             exit={{ 
-              rotateY: -90,
+              rotateY: -45,
               opacity: 0,
-              transformOrigin: "right center"
+              x: "-10%",
+              boxShadow: "-30px 0 60px rgba(0,0,0,0.4)"
             }}
             transition={{ 
-              duration: 0.8, 
-              ease: [0.4, 0, 0.2, 1]
+              duration: 1, 
+              ease: [0.25, 0.1, 0.25, 1]
             }}
             className="absolute inset-0"
-            style={{ backfaceVisibility: "hidden" }}
+            style={{ 
+              backfaceVisibility: "hidden",
+              transformStyle: "preserve-3d"
+            }}
           >
             <img
               src={slide.image_url}
               alt={slide.alt_text || "Slide"}
               className="w-full h-full object-cover"
+            />
+            {/* Shadow overlay for 3D depth */}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-black/20 pointer-events-none"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0 }}
+              exit={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
             />
           </motion.div>
         </AnimatePresence>
