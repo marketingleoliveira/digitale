@@ -83,7 +83,7 @@ const translations: Record<Language, Record<string, string>> = {
     // CTA
     "cta.title": "Pronto para Revolucionar Seus Produtos?",
     "cta.description": "Entre em contato com nossa equipe e descubra como nossos tecidos podem elevar a qualidade dos seus produtos.",
-    "cta.button": "Solicitar Orçamento",
+    "cta.button": "Solicitar Atendimento",
     
     // Footer
     "footer.description": "Há mais de 25 anos desenvolvendo tecidos inovadores e sustentáveis para o mercado esportivo brasileiro.",
@@ -649,7 +649,7 @@ const translations: Record<Language, Record<string, string>> = {
     // CTA
     "cta.title": "Ready to Revolutionize Your Products?",
     "cta.description": "Contact our team and discover how our fabrics can elevate the quality of your products.",
-    "cta.button": "Request a Quote",
+    "cta.button": "Request Service",
     
     // Footer
     "footer.description": "For over 25 years developing innovative and sustainable fabrics for the Brazilian sports market.",
