@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, X, ChevronDown, Phone, Clock, Headphones } from "lucide-react";
+import { Menu, X, Phone, Clock, Headphones } from "lucide-react";
 import logoWhite from "@/assets/logo-white.png";
 import logoColor from "@/assets/logo-color.png";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -10,8 +10,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const [openMobileDropdown, setOpenMobileDropdown] = useState<string | null>(null);
   const location = useLocation();
   const { t } = useLanguage();
 
@@ -20,14 +18,7 @@ export function Header() {
     { name: t("nav.about"), href: "/sobre" },
     { name: t("nav.fabrics"), href: "/tecidos" },
     { name: t("nav.prints"), href: "/estampas" },
-    {
-      name: t("nav.segments"),
-      href: "/segmentos",
-      children: [
-        { name: "Praia", href: "/segmentos#praia" },
-        { name: "Esportivo", href: "/segmentos#esportivo" },
-      ],
-    },
+    { name: t("nav.segments"), href: "/segmentos" },
     { name: t("nav.sustainability"), href: "/sustentabilidade" },
     { name: t("nav.blog"), href: "/blog" },
     { name: t("nav.contact"), href: "/contato" },
@@ -89,49 +80,18 @@ export function Header() {
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center">
               {navigation.map((item) => (
-                <div
+                <Link
                   key={item.name}
-                  className="relative"
-                  onMouseEnter={() => item.children && setOpenDropdown(item.name)}
-                  onMouseLeave={() => setOpenDropdown(null)}
+                  to={item.href}
+                  className={`px-4 py-2 text-sm font-medium transition-colors relative group ${
+                    location.pathname === item.href
+                      ? "text-accent"
+                      : "text-foreground hover:text-accent"
+                  }`}
                 >
-                  <Link
-                    to={item.href}
-                    className={`px-4 py-2 text-sm font-medium transition-colors flex items-center gap-1 relative group ${
-                      location.pathname === item.href
-                        ? "text-accent"
-                        : "text-foreground hover:text-accent"
-                    }`}
-                  >
-                    {item.name}
-                    {item.children && <ChevronDown className="h-3.5 w-3.5" />}
-                    <span className="absolute bottom-0 left-4 right-4 h-0.5 bg-accent transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
-                  </Link>
-                  
-                  {item.children && (
-                    <AnimatePresence>
-                      {openDropdown === item.name && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: 10 }}
-                          transition={{ duration: 0.2 }}
-                          className="absolute top-full left-0 mt-0 py-3 bg-white rounded-lg shadow-xl border border-border min-w-[200px]"
-                        >
-                          {item.children.map((child) => (
-                            <Link
-                              key={child.name}
-                              to={child.href}
-                              className="block px-5 py-3 text-sm text-foreground hover:text-accent hover:bg-muted/50 transition-colors"
-                            >
-                              {child.name}
-                            </Link>
-                          ))}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  )}
-                </div>
+                  {item.name}
+                  <span className="absolute bottom-0 left-4 right-4 h-0.5 bg-accent transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+                </Link>
               ))}
             </nav>
 
@@ -192,66 +152,16 @@ export function Header() {
                 </a>
                 
                 {navigation.map((item) => (
-                  <div key={item.name} className="border-b border-border/50">
-                    {item.children ? (
-                      <>
-                        <button
-                          onClick={() => setOpenMobileDropdown(openMobileDropdown === item.name ? null : item.name)}
-                          className={`w-full flex items-center justify-between py-3 font-medium ${
-                            location.pathname === item.href ? "text-accent" : "text-foreground"
-                          }`}
-                        >
-                          <span>{item.name}</span>
-                          <ChevronDown 
-                            className={`h-4 w-4 transition-transform duration-200 ${
-                              openMobileDropdown === item.name ? "rotate-180" : ""
-                            }`} 
-                          />
-                        </button>
-                        <AnimatePresence>
-                          {openMobileDropdown === item.name && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.2 }}
-                              className="overflow-hidden"
-                            >
-                              <div className="pl-4 pb-3">
-                                <Link
-                                  to={item.href}
-                                  onClick={() => setIsMobileMenuOpen(false)}
-                                  className="block py-2 text-sm text-muted-foreground hover:text-accent"
-                                >
-                                  Ver todos
-                                </Link>
-                                {item.children.map((child) => (
-                                  <Link
-                                    key={child.name}
-                                    to={child.href}
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    className="block py-2 text-sm text-muted-foreground hover:text-accent"
-                                  >
-                                    {child.name}
-                                  </Link>
-                                ))}
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </>
-                    ) : (
-                      <Link
-                        to={item.href}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className={`block py-3 font-medium ${
-                          location.pathname === item.href ? "text-accent" : "text-foreground"
-                        }`}
-                      >
-                        {item.name}
-                      </Link>
-                    )}
-                  </div>
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`block py-3 font-medium border-b border-border/50 ${
+                      location.pathname === item.href ? "text-accent" : "text-foreground"
+                    }`}
+                  >
+                    {item.name}
+                  </Link>
                 ))}
                 <Link
                   to="/contato"
