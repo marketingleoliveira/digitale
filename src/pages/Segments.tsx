@@ -2,47 +2,62 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { ArrowRight, Waves, Dumbbell } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
 
-const segments = [
+const segmentCategories = [
   {
     id: "praia",
-    name: "Moda Praia",
+    name: "Praia",
+    icon: Waves,
     description: "Tecidos de alta performance para moda praia, com proteção UV, secagem rápida e cores vibrantes que não desbotam com o sol e a água salgada.",
     image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80",
     features: ["Proteção UV 50+", "Secagem Rápida", "Resistente ao Cloro", "Cores Vibrantes"],
-    fabrics: ["Milano", "Veneza", "Lyon"],
+    fabrics: ["Milano", "Veneza", "Lyon", "Oceanic"],
+    subcategories: [
+      { name: "Biquínis", description: "Tecidos com alta elasticidade e resistência ao cloro e sal" },
+      { name: "Maiôs", description: "Malhas com compressão modeladora e secagem ultra-rápida" },
+      { name: "Sungas", description: "Tecidos resistentes com excelente caimento" },
+      { name: "Saídas de Praia", description: "Tecidos leves e fluidos com proteção UV" },
+      { name: "Camisetas Proteção UV", description: "Malhas com FPU 50+ e tecnologia antibacteriana" },
+      { name: "Infantil", description: "Tecidos macios e seguros para a pele sensível das crianças" },
+    ],
   },
   {
-    id: "fitwear",
-    name: "Fitwear",
-    description: "Malhas tecnológicas para roupas fitness e esportivas, com elasticidade superior, zero transparência e tecnologias de conforto térmico.",
+    id: "esportivo",
+    name: "Esportivo",
+    icon: Dumbbell,
+    description: "Malhas tecnológicas desenvolvidas para alta performance esportiva, com elasticidade superior, zero transparência e tecnologias de conforto térmico.",
     image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&q=80",
     features: ["Zero Transparência", "Alta Elasticidade", "Antibacteriano", "Conforto Térmico"],
-    fabrics: ["Milano", "Aerodry", "Lyon"],
-  },
-  {
-    id: "lingerie",
-    name: "Lingerie",
-    description: "Tecidos macios e delicados para lingerie e pijamas, com toque suave, boa elasticidade e acabamento premium.",
-    image: "https://images.unsplash.com/photo-1616530940355-351fabd9524b?w=800&q=80",
-    features: ["Toque Suave", "Elasticidade", "Conforto", "Durabilidade"],
-    fabrics: ["Veneza", "Milano"],
-  },
-  {
-    id: "natacao",
-    name: "Natação",
-    description: "Tecidos específicos para competição e treino de natação, com resistência ao cloro, hidrodinâmica e durabilidade excepcional.",
-    image: "https://images.unsplash.com/photo-1530549387789-4c1017266635?w=800&q=80",
-    features: ["Resistente ao Cloro", "Hidrodinâmico", "Compressão", "Longa Durabilidade"],
-    fabrics: ["Milano", "Lyon"],
+    fabrics: ["Milano", "Aerodry", "Lyon", "Velocity", "Flow"],
+    subcategories: [
+      { name: "Academia", description: "Tecidos com compressão e respirabilidade para treinos intensos" },
+      { name: "Natação", description: "Malhas hidrodinâmicas resistentes ao cloro" },
+      { name: "Corrida", description: "Tecidos ultraleves com gestão de umidade" },
+      { name: "Beach Tennis", description: "Proteção UV com secagem rápida" },
+      { name: "Ciclismo", description: "Tecidos aerodinâmicos com alta elasticidade" },
+    ],
   },
 ];
 
 const Segments = () => {
   const { t } = useLanguage();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash) {
+      const id = location.hash.replace("#", "");
+      const element = document.getElementById(id);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 100);
+      }
+    }
+  }, [location.hash]);
 
   return (
     <div className="min-h-screen">
@@ -69,87 +84,140 @@ const Segments = () => {
               </p>
             </motion.div>
           </div>
+          
+          {/* Quick Navigation */}
+          <div className="container mx-auto px-6 mt-12 relative z-10">
+            <div className="flex flex-wrap justify-center gap-4">
+              {segmentCategories.map((segment) => (
+                <a
+                  key={segment.id}
+                  href={`#${segment.id}`}
+                  className="flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-sm rounded-full text-white hover:bg-white/20 transition-colors"
+                >
+                  <segment.icon className="h-5 w-5" />
+                  <span className="font-medium">{segment.name}</span>
+                </a>
+              ))}
+            </div>
+          </div>
         </section>
 
-        {/* Segments Grid */}
+        {/* Segments */}
         <section className="py-20 md:py-28">
           <div className="container mx-auto px-6">
-            <div className="space-y-24">
-              {segments.map((segment, index) => (
-                <motion.div
-                  key={segment.id}
-                  initial={{ opacity: 0, y: 40 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6 }}
-                  viewport={{ once: true }}
-                  className={`grid lg:grid-cols-2 gap-12 items-center ${
-                    index % 2 === 1 ? "lg:flex-row-reverse" : ""
-                  }`}
-                >
-                  <div className={index % 2 === 1 ? "lg:order-2" : ""}>
-                    <div className="relative aspect-[4/3] rounded-3xl overflow-hidden group">
-                      <img
-                        src={segment.image}
-                        alt={segment.name}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                      <div className="absolute bottom-6 left-6">
-                        <span className="px-4 py-2 bg-accent text-accent-foreground rounded-full text-sm font-medium">
+            <div className="space-y-32">
+              {segmentCategories.map((segment, index) => (
+                <div key={segment.id} id={segment.id} className="scroll-mt-24">
+                  <motion.div
+                    initial={{ opacity: 0, y: 40 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6 }}
+                    viewport={{ once: true }}
+                    className={`grid lg:grid-cols-2 gap-12 items-start ${
+                      index % 2 === 1 ? "lg:flex-row-reverse" : ""
+                    }`}
+                  >
+                    {/* Image Side */}
+                    <div className={index % 2 === 1 ? "lg:order-2" : ""}>
+                      <div className="relative aspect-[4/3] rounded-3xl overflow-hidden group sticky top-24">
+                        <img
+                          src={segment.image}
+                          alt={segment.name}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                        <div className="absolute bottom-6 left-6 flex items-center gap-3">
+                          <div className="p-3 bg-accent rounded-xl">
+                            <segment.icon className="h-6 w-6 text-accent-foreground" />
+                          </div>
+                          <span className="text-2xl font-bold text-white">
+                            {segment.name}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Content Side */}
+                    <div className={index % 2 === 1 ? "lg:order-1" : ""}>
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-accent/10 rounded-lg">
+                          <segment.icon className="h-6 w-6 text-accent" />
+                        </div>
+                        <h2 className="text-3xl md:text-4xl font-bold text-foreground">
                           {segment.name}
-                        </span>
+                        </h2>
                       </div>
-                    </div>
-                  </div>
+                      
+                      <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
+                        {segment.description}
+                      </p>
 
-                  <div className={index % 2 === 1 ? "lg:order-1" : ""}>
-                    <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-                      {segment.name}
-                    </h2>
-                    <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-                      {segment.description}
-                    </p>
-
-                    <div className="mb-8">
-                      <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">
-                        Características
-                      </h3>
-                      <div className="flex flex-wrap gap-3">
-                        {segment.features.map((feature) => (
-                          <span
-                            key={feature}
-                            className="px-4 py-2 bg-muted rounded-full text-sm text-foreground"
-                          >
-                            {feature}
-                          </span>
-                        ))}
+                      {/* Subcategories Grid */}
+                      <div className="mb-8">
+                        <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">
+                          Aplicações
+                        </h3>
+                        <div className="grid sm:grid-cols-2 gap-4">
+                          {segment.subcategories.map((sub) => (
+                            <motion.div
+                              key={sub.name}
+                              whileHover={{ scale: 1.02 }}
+                              className="p-4 bg-muted/50 rounded-xl border border-border/50 hover:border-accent/30 hover:bg-muted transition-all"
+                            >
+                              <h4 className="font-semibold text-foreground mb-1">
+                                {sub.name}
+                              </h4>
+                              <p className="text-sm text-muted-foreground">
+                                {sub.description}
+                              </p>
+                            </motion.div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="mb-8">
-                      <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">
-                        Tecidos Recomendados
-                      </h3>
-                      <div className="flex flex-wrap gap-3">
-                        {segment.fabrics.map((fabric) => (
-                          <span
-                            key={fabric}
-                            className="px-4 py-2 bg-accent/10 border border-accent/30 rounded-full text-sm text-accent font-medium"
-                          >
-                            {fabric}
-                          </span>
-                        ))}
+                      {/* Features */}
+                      <div className="mb-8">
+                        <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">
+                          Características
+                        </h3>
+                        <div className="flex flex-wrap gap-3">
+                          {segment.features.map((feature) => (
+                            <span
+                              key={feature}
+                              className="px-4 py-2 bg-muted rounded-full text-sm text-foreground"
+                            >
+                              {feature}
+                            </span>
+                          ))}
+                        </div>
                       </div>
-                    </div>
 
-                    <Link to="/tecidos">
-                      <Button className="bg-accent hover:bg-accent/90 text-accent-foreground">
-                        Ver Tecidos
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </Link>
-                  </div>
-                </motion.div>
+                      {/* Recommended Fabrics */}
+                      <div className="mb-8">
+                        <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">
+                          Tecidos Recomendados
+                        </h3>
+                        <div className="flex flex-wrap gap-3">
+                          {segment.fabrics.map((fabric) => (
+                            <span
+                              key={fabric}
+                              className="px-4 py-2 bg-accent/10 border border-accent/30 rounded-full text-sm text-accent font-medium"
+                            >
+                              {fabric}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <Link to="/tecidos">
+                        <Button className="bg-accent hover:bg-accent/90 text-accent-foreground">
+                          Ver Tecidos
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </motion.div>
+                </div>
               ))}
             </div>
           </div>

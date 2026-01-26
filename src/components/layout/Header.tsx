@@ -24,10 +24,8 @@ export function Header() {
       name: t("nav.segments"),
       href: "/segmentos",
       children: [
-        { name: "Moda Praia", href: "/segmentos#praia" },
-        { name: "Fitwear", href: "/segmentos#fitwear" },
-        { name: "Lingerie", href: "/segmentos#lingerie" },
-        { name: "Natação", href: "/segmentos#natacao" },
+        { name: "Praia", href: "/segmentos#praia" },
+        { name: "Esportivo", href: "/segmentos#esportivo" },
       ],
     },
     { name: t("nav.sustainability"), href: "/sustentabilidade" },
