@@ -56,9 +56,14 @@ export function Header() {
         <div className="container mx-auto px-6">
           <div className="flex items-center justify-between h-10">
             <div className="flex items-center gap-6">
-              <a href="tel:+551120649662" className="flex items-center gap-2 hover:text-accent transition-colors">
+              <a 
+                href="https://wa.me/551120649662?text=Ol%C3%A1%2C%20vim%20do%20site%2C%20quero%20contato%20do%20time%20comercial"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 hover:text-accent transition-colors"
+              >
                 <Phone className="h-3.5 w-3.5" />
-                <span>+55 11 2064-9662</span>
+                <span>Falar com Comercial</span>
               </a>
               <div className="flex items-center gap-2 text-primary-foreground/70">
                 <Clock className="h-3.5 w-3.5" />
