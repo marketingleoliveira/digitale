@@ -10,10 +10,24 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
   const { user, loading, isAdmin, isEditor, reconnecting } = useAuth();
   const [showTimeout, setShowTimeout] = useState(false);
+  const [rolesChecked, setRolesChecked] = useState(false);
+
+  // Aguarda as roles serem verificadas após o loading terminar
+  useEffect(() => {
+    if (!loading && user) {
+      // Pequeno delay para garantir que as roles foram atualizadas
+      const timer = setTimeout(() => {
+        setRolesChecked(true);
+      }, 100);
+      return () => clearTimeout(timer);
+    } else if (!loading && !user) {
+      setRolesChecked(true);
+    }
+  }, [loading, user, isAdmin, isEditor]);
 
   // Timeout de segurança para evitar tela branca infinita
   useEffect(() => {
-    if (!loading) {
+    if (!loading && rolesChecked) {
       setShowTimeout(false);
       return;
     }
@@ -23,9 +37,10 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
     }, 8000); // 8 segundos
 
     return () => clearTimeout(timeout);
-  }, [loading]);
+  }, [loading, rolesChecked]);
 
-  if (loading) {
+  // Mostra loading enquanto carrega ou enquanto verifica roles
+  if (loading || (!rolesChecked && user)) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-muted/30 gap-4">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -53,6 +68,7 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
 
   // Check if user has at least editor role (redator, vendedor, editor, or admin)
   if (!isAdmin && !isEditor) {
+    console.log("ProtectedRoute: Access denied - isAdmin:", isAdmin, "isEditor:", isEditor);
     return <Navigate to="/" replace />;
   }
 
