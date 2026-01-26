@@ -82,6 +82,8 @@ export function Products() {
       if (error) throw error;
       return data;
     },
+    refetchOnWindowFocus: true,
+    staleTime: 1000 * 60 * 2,
   });
 
   const { data: prints, isLoading: printsLoading } = useQuery({
@@ -97,6 +99,8 @@ export function Products() {
       if (error) throw error;
       return data;
     },
+    refetchOnWindowFocus: true,
+    staleTime: 1000 * 60 * 2,
   });
 
   const displayFabrics = fabrics && fabrics.length > 0 ? fabrics : fallbackFabrics;
