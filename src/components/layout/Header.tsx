@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, X, ChevronDown, Phone, Clock, Search } from "lucide-react";
+import { Menu, X, ChevronDown, Phone, Clock, Search, Headphones } from "lucide-react";
 import logoWhite from "@/assets/logo-white.png";
 import logoColor from "@/assets/logo-color.png";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -145,11 +145,20 @@ export function Header() {
               ))}
             </nav>
 
-            {/* CTA + Search */}
-            <div className="hidden lg:flex items-center gap-4">
+            {/* CTA + SAC + Search */}
+            <div className="hidden lg:flex items-center gap-3">
               <button className="p-2 text-muted-foreground hover:text-accent transition-colors">
                 <Search className="h-5 w-5" />
               </button>
+              <a
+                href="https://sac.digitaletextil.com.br"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold border-2 border-accent text-accent rounded-full hover:bg-accent hover:text-white transition-colors"
+              >
+                <Headphones className="h-4 w-4" />
+                SAC
+              </a>
               <Link
                 to="/contato"
                 className="btn-primary text-sm"
