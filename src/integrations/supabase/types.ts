@@ -169,9 +169,43 @@ export type Database = {
         }
         Relationships: []
       }
+      fabric_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       fabrics: {
         Row: {
           applications: string[] | null
+          category_id: string | null
           color_variants: Json | null
           created_at: string
           description: string | null
@@ -189,6 +223,7 @@ export type Database = {
         }
         Insert: {
           applications?: string[] | null
+          category_id?: string | null
           color_variants?: Json | null
           created_at?: string
           description?: string | null
@@ -206,6 +241,7 @@ export type Database = {
         }
         Update: {
           applications?: string[] | null
+          category_id?: string | null
           color_variants?: Json | null
           created_at?: string
           description?: string | null
@@ -221,7 +257,15 @@ export type Database = {
           specifications?: Json | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fabrics_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "fabric_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       newsletter_subscribers: {
         Row: {
