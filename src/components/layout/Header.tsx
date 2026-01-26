@@ -20,7 +20,7 @@ export function Header() {
     { name: t("nav.prints"), href: "/estampas" },
     { name: t("nav.segments"), href: "/segmentos" },
     { name: t("nav.sustainability"), href: "/sustentabilidade" },
-    { name: t("nav.blog"), href: "/blog" },
+    { name: "Trabalhe Conosco", href: "/trabalhe-conosco" },
     { name: t("nav.contact"), href: "/contato" },
   ];
 
