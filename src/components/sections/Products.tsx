@@ -67,8 +67,8 @@ export function Products() {
           viewport={{ once: true }}
           className="text-center mb-10 md:mb-12"
         >
-          <span className="section-subtitle">{t("products.label")}</span>
-          <h2 className="section-title mt-3 md:mt-4">Últimos Lançamentos</h2>
+          <h2 className="section-title">Últimos Lançamentos</h2>
+          <span className="inline-block mt-3 text-accent font-semibold text-sm md:text-base tracking-wide uppercase">Tecidos</span>
         </motion.div>
 
         {/* Fabrics Grid */}
@@ -152,10 +152,10 @@ export function Products() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-10 md:mb-12"
+          className="text-center mb-10 md:mb-12 mt-16 md:mt-20"
         >
-          <span className="section-subtitle">Nossas Estampas</span>
-          <h2 className="section-title mt-3 md:mt-4">Últimos Lançamentos</h2>
+          <h2 className="section-title">Últimos Lançamentos</h2>
+          <span className="inline-block mt-3 text-accent font-semibold text-sm md:text-base tracking-wide uppercase">Estampas</span>
         </motion.div>
 
         {/* Prints Grid */}
