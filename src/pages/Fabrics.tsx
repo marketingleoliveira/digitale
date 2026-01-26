@@ -1,32 +1,16 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Search, ArrowUpDown, X, Heart, ChevronDown } from "lucide-react";
+import { ChevronDown, Heart, Eye } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { FabricFilters, FilterState } from "@/components/fabric/FabricFilters";
-import { 
-  CompareProvider, 
-  CompareButton, 
-  CompareFloatingBar, 
-  CompareModal 
-} from "@/components/fabric/FabricCompare";
 import { FavoriteButton } from "@/components/fabric/FavoriteButton";
 import { FavoritesDrawer } from "@/components/fabric/FavoritesDrawer";
-import { FabricSkeletonGrid, LoadingMoreSkeleton } from "@/components/fabric/FabricSkeleton";
+import { FabricSkeletonGrid } from "@/components/fabric/FabricSkeleton";
 import { FavoritesProvider, useFavorites } from "@/contexts/FavoritesContext";
+import { FabricDetailModal } from "@/components/fabric/FabricDetailModal";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import fabricMilano from "@/assets/fabric-milano.jpg";
 import fabricLyon from "@/assets/fabric-lyon.jpg";
@@ -40,7 +24,6 @@ import fabricCorsega from "@/assets/fabric-corsega.jpg";
 import fabricVelocity from "@/assets/fabric-velocity.jpg";
 import fabricFlow from "@/assets/fabric-flow.jpg";
 import fabricCaribe from "@/assets/fabric-caribe.jpg";
-import fabricParis from "@/assets/fabric-paris.jpg";
 
 const defaultImages: Record<string, string> = {
   milano: fabricMilano,
@@ -55,13 +38,14 @@ const defaultImages: Record<string, string> = {
   velocity: fabricVelocity,
   flow: fabricFlow,
   caribe: fabricCaribe,
-  paris: fabricParis,
 };
 
 function FabricsContent() {
   const { t } = useLanguage();
   const { isFavorite } = useFavorites();
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
+  const [selectedFabric, setSelectedFabric] = useState<any>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   // Fetch categories
   const { data: categories, isLoading: categoriesLoading } = useQuery({
@@ -108,6 +92,11 @@ function FabricsContent() {
     );
   };
 
+  const handleFabricClick = (fabric: any) => {
+    setSelectedFabric(fabric);
+    setModalOpen(true);
+  };
+
   // Group fabrics by category
   const fabricsByCategory = useMemo(() => {
     if (!fabrics || !categories) return new Map();
@@ -133,20 +122,15 @@ function FabricsContent() {
         {/* Hero */}
         <section className="py-16 bg-primary text-white">
           <div className="container mx-auto px-6 text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <span className="text-accent font-semibold uppercase tracking-widest text-sm">
-                {t("products.label")}
-              </span>
-              <h1 className="text-4xl md:text-5xl font-bold mt-4 mb-6">
-                Nossos Tecidos
-              </h1>
-              <p className="text-white/70 text-lg max-w-2xl mx-auto">
-                Conheça nossa linha completa de tecidos de alta performance para moda esportiva e fitness.
-              </p>
-            </motion.div>
+            <span className="text-accent font-semibold uppercase tracking-widest text-sm">
+              {t("products.label")}
+            </span>
+            <h1 className="text-4xl md:text-5xl font-bold mt-4 mb-6">
+              Nossos Tecidos
+            </h1>
+            <p className="text-white/70 text-lg max-w-2xl mx-auto">
+              Conheça nossa linha completa de tecidos de alta performance para moda esportiva e fitness.
+            </p>
           </div>
         </section>
 
@@ -157,17 +141,12 @@ function FabricsContent() {
               <FabricSkeletonGrid count={6} />
             ) : categories && categories.length > 0 ? (
               <div className="space-y-8">
-                {categories.map((category, categoryIndex) => {
+                {categories.map((category) => {
                   const categoryFabrics = fabricsByCategory.get(category.id) || [];
                   const isExpanded = expandedCategories.includes(category.id);
                   
                   return (
-                    <motion.div
-                      key={category.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: categoryIndex * 0.1 }}
-                    >
+                    <div key={category.id}>
                       <Collapsible
                         open={isExpanded}
                         onOpenChange={() => toggleCategory(category.id)}
@@ -199,66 +178,64 @@ function FabricsContent() {
                         </CollapsibleTrigger>
                         
                         <CollapsibleContent>
-                          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6">
-                            {categoryFabrics.map((fabric, index) => (
-                              <motion.div
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-6">
+                            {categoryFabrics.map((fabric) => (
+                              <div
                                 key={fabric.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.05 }}
+                                className="group relative"
                               >
-                                <Link
-                                  to={`/tecidos/${fabric.slug}`}
-                                  className="group block bg-card rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-500 hover:-translate-y-2"
+                                <Button
+                                  variant="outline"
+                                  className="w-full h-auto flex flex-col items-stretch p-0 overflow-hidden border-2 hover:border-accent transition-all"
+                                  onClick={() => handleFabricClick(fabric)}
                                 >
+                                  {/* Image preview */}
                                   <div className="aspect-[4/3] overflow-hidden relative">
                                     <img
                                       src={fabric.image_url || defaultImages[fabric.slug] || fabricMilano}
                                       alt={fabric.name}
-                                      className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
+                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                      loading="lazy"
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                                    
-                                    {/* Action buttons */}
-                                    <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                      <FavoriteButton 
-                                        fabric={fabric} 
-                                        size="sm"
-                                      />
-                                      <CompareButton fabric={fabric as any} />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <Eye className="h-5 w-5 text-white" />
                                     </div>
-
+                                    
                                     {/* Favorite indicator */}
                                     {isFavorite(fabric.id) && (
-                                      <div className="absolute top-3 left-3 group-hover:opacity-0 transition-opacity">
-                                        <div className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center shadow-lg">
-                                          <Heart className="h-4 w-4 text-white fill-white" />
+                                      <div className="absolute top-2 left-2">
+                                        <div className="w-6 h-6 rounded-full bg-destructive flex items-center justify-center shadow">
+                                          <Heart className="h-3 w-3 text-white fill-white" />
                                         </div>
                                       </div>
                                     )}
-
-                                    <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500">
-                                      <span className="inline-flex items-center gap-2 bg-white text-foreground px-4 py-2 rounded-full font-semibold text-sm">
-                                        Ver detalhes
-                                        <ArrowRight className="h-4 w-4" />
-                                      </span>
-                                    </div>
                                   </div>
-                                  <div className="p-5">
-                                    <h3 className="text-lg font-bold text-foreground group-hover:text-accent transition-colors">
+                                  
+                                  {/* Fabric name */}
+                                  <div className="p-3 text-left bg-card">
+                                    <h3 className="font-semibold text-foreground group-hover:text-accent transition-colors">
                                       {fabric.name}
                                     </h3>
-                                    <p className="text-muted-foreground text-sm mt-1 line-clamp-2">
+                                    <p className="text-xs text-muted-foreground line-clamp-1 mt-1">
                                       {fabric.short_description}
                                     </p>
                                   </div>
-                                </Link>
-                              </motion.div>
+                                </Button>
+                                
+                                {/* Quick favorite button */}
+                                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                  <FavoriteButton 
+                                    fabric={fabric} 
+                                    size="sm"
+                                  />
+                                </div>
+                              </div>
                             ))}
                           </div>
                         </CollapsibleContent>
                       </Collapsible>
-                    </motion.div>
+                    </div>
                   );
                 })}
               </div>
@@ -274,9 +251,15 @@ function FabricsContent() {
       </main>
       <Footer />
       
-      {/* Compare Components */}
-      <CompareFloatingBar />
-      <CompareModal defaultImages={defaultImages} />
+      {/* Fabric Detail Modal */}
+      <FabricDetailModal
+        fabric={selectedFabric}
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        defaultImages={defaultImages}
+        fallbackImage={fabricMilano}
+      />
+      
       <FavoritesDrawer defaultImages={defaultImages} />
     </div>
   );
@@ -285,9 +268,7 @@ function FabricsContent() {
 const Fabrics = () => {
   return (
     <FavoritesProvider>
-      <CompareProvider>
-        <FabricsContent />
-      </CompareProvider>
+      <FabricsContent />
     </FavoritesProvider>
   );
 };
