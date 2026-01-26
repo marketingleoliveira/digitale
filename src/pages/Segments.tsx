@@ -197,12 +197,20 @@ const Segments = () => {
                         </div>
                       </div>
                       
-                      <Link to="/tecidos">
-                        <Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
-                          Ver Todos os Tecidos
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </Button>
-                      </Link>
+                      <div className="flex gap-3">
+                        <Link to={`/segmentos/${segment.id}`} className="flex-1">
+                          <Button variant="outline" className="w-full border-accent text-accent hover:bg-accent hover:text-accent-foreground">
+                            Ver Detalhes
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                          </Button>
+                        </Link>
+                        <Link to="/tecidos" className="flex-1">
+                          <Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
+                            Ver Tecidos
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                          </Button>
+                        </Link>
+                      </div>
                     </motion.div>
                   )}
                 </motion.div>

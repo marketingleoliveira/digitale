@@ -16,6 +16,7 @@ import FabricDetail from "./pages/FabricDetail";
 import Prints from "./pages/Prints";
 import PrintsCatalog from "./pages/PrintsCatalog";
 import Segments from "./pages/Segments";
+import SegmentDetail from "./pages/SegmentDetail";
 import Sustainability from "./pages/Sustainability";
 import Privacy from "./pages/Privacy";
 import BlogPost from "./pages/BlogPost";
@@ -69,6 +70,7 @@ const App = () => (
               <Route path="/estampados" element={<Navigate to="/estampas" replace />} />
               <Route path="/prints" element={<Navigate to="/estampas" replace />} />
               <Route path="/segmentos" element={<Segments />} />
+              <Route path="/segmentos/:slug" element={<SegmentDetail />} />
               <Route path="/segments" element={<Navigate to="/segmentos" replace />} />
               <Route path="/sustentabilidade" element={<Sustainability />} />
               <Route path="/sostenibilidad" element={<Navigate to="/sustentabilidade" replace />} />
