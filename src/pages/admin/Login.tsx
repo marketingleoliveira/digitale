@@ -27,12 +27,14 @@ const Login = () => {
       toast.error("Erro ao fazer login", {
         description: "Verifique suas credenciais e tente novamente."
       });
+      setLoading(false);
     } else {
       toast.success("Login realizado com sucesso!");
-      navigate("/admin");
+      // Aguarda um momento para as roles serem carregadas antes de redirecionar
+      setTimeout(() => {
+        navigate("/admin");
+      }, 500);
     }
-
-    setLoading(false);
   };
 
   return (

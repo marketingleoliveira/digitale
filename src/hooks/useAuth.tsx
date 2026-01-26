@@ -348,8 +348,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = useCallback(async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (!error) {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (!error && data.user) {
+        // Busca as roles imediatamente após o login
+        const { admin, editor } = await fetchRoles(data.user.id);
+        setIsAdmin(admin);
+        setIsEditor(editor);
+        setUser(data.user);
+        setSession(data.session);
+        currentUserIdRef.current = data.user.id;
         startRefreshInterval();
       }
       return { error: error as Error | null };
