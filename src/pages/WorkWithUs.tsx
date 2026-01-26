@@ -83,13 +83,7 @@ const WorkWithUs = () => {
       return;
     }
 
-    if (!formData.jobId) {
-      toast({
-        title: t("careers.form.jobRequired"),
-        variant: "destructive",
-      });
-      return;
-    }
+    // jobId is optional - if empty, default to talent pool
 
     setSubmitting(true);
 
@@ -106,7 +100,7 @@ const WorkWithUs = () => {
       const { error: insertError } = await supabase
         .from("job_applications")
         .insert({
-          job_opening_id: formData.jobId === "banco-talentos" ? null : formData.jobId,
+          job_opening_id: !formData.jobId || formData.jobId === "banco-talentos" ? null : formData.jobId,
           name: formData.name.trim(),
           email: formData.email.trim().toLowerCase(),
           whatsapp: formData.whatsapp.trim(),
@@ -282,16 +276,14 @@ const WorkWithUs = () => {
                       <SelectValue placeholder={t("careers.form.selectJob")} />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="banco-talentos">
+                        {t("careers.form.talentPool")}
+                      </SelectItem>
                       {jobs.map((job) => (
                         <SelectItem key={job.id} value={job.id}>
                           {job.title}
                         </SelectItem>
                       ))}
-                      {jobs.length === 0 && (
-                        <SelectItem value="banco-talentos">
-                          {t("careers.form.talentPool")}
-                        </SelectItem>
-                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -335,7 +327,7 @@ const WorkWithUs = () => {
                   type="submit"
                   className="w-full"
                   size="lg"
-                  disabled={submitting || !formData.jobId}
+                  disabled={submitting}
                 >
                   {submitting ? t("careers.form.submitting") : t("careers.form.submit")}
                 </Button>
