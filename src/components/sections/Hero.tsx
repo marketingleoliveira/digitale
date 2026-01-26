@@ -16,7 +16,7 @@ export function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
-  const { data: dbSlides } = useQuery({
+  const { data: dbSlides, isLoading } = useQuery({
     queryKey: ["carousel-slides"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -30,13 +30,16 @@ export function Hero() {
     },
   });
 
-  const slides = dbSlides && dbSlides.length > 0 ? dbSlides : fallbackSlides;
+  // Only use fallback if loading is complete and no slides exist
+  const slides = isLoading ? [] : (dbSlides && dbSlides.length > 0 ? dbSlides : fallbackSlides);
 
   const nextSlide = useCallback(() => {
+    if (slides.length === 0) return;
     setCurrentSlide((prev) => (prev + 1) % slides.length);
   }, [slides.length]);
 
   const prevSlide = useCallback(() => {
+    if (slides.length === 0) return;
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   }, [slides.length]);
 
@@ -47,10 +50,15 @@ export function Hero() {
   }, [isAutoPlaying, nextSlide, slides.length]);
 
   useEffect(() => {
-    if (currentSlide >= slides.length) {
+    if (slides.length > 0 && currentSlide >= slides.length) {
       setCurrentSlide(0);
     }
   }, [slides.length, currentSlide]);
+
+  // Don't render anything while loading
+  if (isLoading || slides.length === 0) {
+    return null;
+  }
 
   const slide = slides[currentSlide];
 
