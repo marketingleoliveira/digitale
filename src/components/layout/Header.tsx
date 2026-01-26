@@ -17,16 +17,7 @@ export function Header() {
   const navigation = [
     { name: t("nav.home"), href: "/" },
     { name: t("nav.about"), href: "/sobre" },
-    {
-      name: t("nav.fabrics"),
-      href: "/tecidos",
-      children: [
-        { name: "Milano", href: "/tecidos/milano" },
-        { name: "Lyon", href: "/tecidos/lyon" },
-        { name: "Aerodry", href: "/tecidos/aerodry" },
-        { name: "Veneza", href: "/tecidos/veneza" },
-      ],
-    },
+    { name: t("nav.fabrics"), href: "/tecidos" },
     { name: t("nav.prints"), href: "/estampas" },
     {
       name: t("nav.segments"),
