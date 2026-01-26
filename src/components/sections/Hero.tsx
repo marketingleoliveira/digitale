@@ -57,7 +57,11 @@ export function Hero() {
   return (
     <section
       className="relative w-full overflow-hidden bg-background"
-      style={{ height: "500px", maxWidth: "1900px", margin: "0 auto" }}
+      style={{ 
+        aspectRatio: "1900 / 500",
+        maxHeight: "500px",
+        minHeight: "200px"
+      }}
       onMouseEnter={() => setIsAutoPlaying(false)}
       onMouseLeave={() => setIsAutoPlaying(true)}
     >
@@ -97,7 +101,7 @@ export function Hero() {
             <img
               src={slide.image_url}
               alt={slide.alt_text || "Slide"}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover object-center"
             />
             {/* Shadow overlay for 3D depth */}
             <motion.div
