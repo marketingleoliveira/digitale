@@ -15,14 +15,18 @@ const clients = [
 export function Clients() {
   const { t } = useLanguage();
 
+  // Duplicate clients multiple times for seamless infinite scroll
+  const duplicatedClients = [...clients, ...clients, ...clients, ...clients];
+
   return (
-    <section className="py-20 bg-gradient-to-b from-background to-secondary/20 overflow-hidden">
-      <div className="container mx-auto px-6">
+    <section className="py-16 md:py-20 bg-gradient-to-b from-background to-secondary/20 overflow-hidden">
+      {/* Header */}
+      <div className="container mx-auto px-6 mb-10 md:mb-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-12"
+          className="text-center"
         >
           <span className="section-subtitle">{t("clients.label")}</span>
           <h2 className="section-title mt-4">{t("clients.title")}</h2>
@@ -30,62 +34,41 @@ export function Clients() {
             Grandes marcas escolhem a Digitale pela qualidade, inovação e compromisso com a excelência.
           </p>
         </motion.div>
+      </div>
 
-        {/* Desktop: Static Grid */}
-        <div className="hidden md:block">
-          <div className="grid grid-cols-4 gap-8 max-w-4xl mx-auto">
-            {clients.map((client, index) => (
-              <motion.div
-                key={client.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="group"
-              >
-                <div className="bg-card rounded-2xl p-6 border border-border hover:border-accent/30 hover:shadow-lg transition-all duration-300 flex items-center justify-center h-24">
-                  <img
-                    src={client.logo}
-                    alt={client.name}
-                    className="max-h-12 max-w-full object-contain grayscale group-hover:grayscale-0 opacity-60 group-hover:opacity-100 transition-all duration-300 group-hover:scale-110"
-                  />
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        {/* Mobile: Infinite Scroll */}
-        <div className="md:hidden relative">
-          {/* Gradient Masks */}
-          <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-background to-transparent z-10" />
-          <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-background to-transparent z-10" />
-          
-          <div className="flex animate-scroll gap-8 items-center py-4">
-            {[...clients, ...clients].map((client, index) => (
-              <div
-                key={`${client.name}-${index}`}
-                className="flex-shrink-0"
-              >
-                <div className="w-32 h-16 bg-card rounded-xl border border-border flex items-center justify-center px-4">
-                  <img
-                    src={client.logo}
-                    alt={client.name}
-                    className="max-h-10 max-w-full object-contain grayscale opacity-60"
-                  />
-                </div>
+      {/* Full-width Marquee */}
+      <div className="relative w-full">
+        {/* Gradient Masks - Full width */}
+        <div className="absolute left-0 top-0 bottom-0 w-24 md:w-40 bg-gradient-to-r from-background via-background/80 to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-24 md:w-40 bg-gradient-to-l from-background via-background/80 to-transparent z-10 pointer-events-none" />
+        
+        {/* Marquee Track */}
+        <div className="flex marquee-track gap-8 md:gap-12 items-center py-6">
+          {duplicatedClients.map((client, index) => (
+            <div
+              key={`${client.name}-${index}`}
+              className="flex-shrink-0 group"
+            >
+              <div className="w-36 md:w-44 h-20 md:h-24 bg-card rounded-2xl border border-border hover:border-accent/30 hover:shadow-lg transition-all duration-300 flex items-center justify-center px-4 md:px-6">
+                <img
+                  src={client.logo}
+                  alt={client.name}
+                  className="max-h-10 md:max-h-12 max-w-full object-contain grayscale group-hover:grayscale-0 opacity-50 group-hover:opacity-100 transition-all duration-500 group-hover:scale-110"
+                />
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
+      </div>
 
-        {/* Trust Badges */}
+      {/* Trust Badges */}
+      <div className="container mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.5 }}
-          className="mt-12 flex flex-wrap items-center justify-center gap-6 md:gap-10"
+          transition={{ delay: 0.3 }}
+          className="mt-10 md:mt-12 flex flex-wrap items-center justify-center gap-4 md:gap-10"
         >
           {[
             "Qualidade Certificada",
@@ -95,9 +78,9 @@ export function Clients() {
           ].map((badge, index) => (
             <div 
               key={index}
-              className="flex items-center gap-2 text-sm text-muted-foreground"
+              className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground"
             >
-              <div className="w-2 h-2 rounded-full bg-accent" />
+              <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-accent" />
               <span>{badge}</span>
             </div>
           ))}
@@ -105,12 +88,16 @@ export function Clients() {
       </div>
 
       <style>{`
-        @keyframes scroll {
+        @keyframes marquee {
           0% { transform: translateX(0); }
           100% { transform: translateX(-50%); }
         }
-        .animate-scroll {
-          animation: scroll 30s linear infinite;
+        .marquee-track {
+          animation: marquee 40s linear infinite;
+          width: fit-content;
+        }
+        .marquee-track:hover {
+          animation-play-state: paused;
         }
       `}</style>
     </section>
