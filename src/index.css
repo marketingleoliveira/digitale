@@ -4,6 +4,15 @@
 
 /* Digitale Têxtil - Design Moderno Industrial Premium */
 
+/* Custom Font - Helvetica Neue Thin Extended */
+@font-face {
+  font-family: 'Helvetica Neue Custom';
+  src: url('/fonts/HelveticaNeue-ThinExt.otf') format('opentype');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -103,12 +112,35 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Helvetica Neue Custom', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-weight: 300;
+    letter-spacing: 0.01em;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  /* Títulos principais - mais peso e tracking apertado */
+  h1 {
+    font-family: 'Helvetica Neue Custom', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     @apply font-bold tracking-tight;
+    letter-spacing: -0.02em;
+  }
+
+  /* Subtítulos - peso médio */
+  h2, h3 {
+    font-family: 'Helvetica Neue Custom', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    @apply font-semibold tracking-tight;
+    letter-spacing: -0.01em;
+  }
+
+  /* Títulos menores */
+  h4, h5, h6 {
+    font-family: 'Helvetica Neue Custom', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    @apply font-medium;
+    letter-spacing: 0;
+  }
+
+  /* Parágrafos e texto comum */
+  p, span, li, a, label, input, textarea, button {
+    font-family: 'Helvetica Neue Custom', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   }
 }
 
