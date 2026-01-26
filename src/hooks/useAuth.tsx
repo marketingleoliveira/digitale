@@ -69,8 +69,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const userRoles = roles?.map((r) => r.role) || [];
-      const admin = userRoles.includes("admin");
-      const editor = userRoles.includes("editor") || admin;
+      // Admin includes: admin, desenvolvedor
+      const admin = userRoles.includes("admin") || userRoles.includes("desenvolvedor");
+      // Editor includes: editor, redator, vendedor, or any admin role
+      const editor = userRoles.includes("editor") || userRoles.includes("redator") || userRoles.includes("vendedor") || admin;
       
       return { admin, editor };
     } catch (error) {

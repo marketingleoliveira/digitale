@@ -51,7 +51,7 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
     return <Navigate to="/admin/login" replace />;
   }
 
-  // Check if user has at least editor role
+  // Check if user has at least editor role (redator, vendedor, editor, or admin)
   if (!isAdmin && !isEditor) {
     return <Navigate to="/" replace />;
   }

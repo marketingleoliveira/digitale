@@ -52,6 +52,13 @@ interface UserWithRole {
   } | null;
 }
 
+// New role definitions
+const ROLES = [
+  { value: "desenvolvedor", label: "Desenvolvedor", description: "Acesso total ao sistema" },
+  { value: "redator", label: "Redator", description: "Gerencia conteúdo e blog" },
+  { value: "vendedor", label: "Vendedor", description: "Acesso a contatos e pedidos" },
+];
+
 const Users = () => {
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<UserWithRole[]>([]);
@@ -59,7 +66,7 @@ const Users = () => {
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState("");
-  const [newUserRole, setNewUserRole] = useState<string>("editor");
+  const [newUserRole, setNewUserRole] = useState<string>("redator");
   const [newUserPassword, setNewUserPassword] = useState("");
   const [newUserName, setNewUserName] = useState("");
 
@@ -120,29 +127,29 @@ const Users = () => {
       ]);
 
       if (roleError) {
-        toast.error("Erro ao atribuir função", { description: roleError.message });
+        toast.error("Erro ao atribuir cargo", { description: roleError.message });
       } else {
         toast.success("Usuário criado com sucesso!");
         setDialogOpen(false);
         setNewUserEmail("");
         setNewUserPassword("");
         setNewUserName("");
-        setNewUserRole("editor");
+        setNewUserRole("redator");
         fetchUsers();
       }
     }
   };
 
-  const handleUpdateRole = async (userId: string, newRole: "admin" | "editor" | "user") => {
+  const handleUpdateRole = async (userId: string, newRole: string) => {
     const { error } = await supabase
       .from("user_roles")
-      .update({ role: newRole })
+      .update({ role: newRole as any })
       .eq("user_id", userId);
 
     if (error) {
-      toast.error("Erro ao atualizar função");
+      toast.error("Erro ao atualizar cargo");
     } else {
-      toast.success("Função atualizada!");
+      toast.success("Cargo atualizado!");
       fetchUsers();
     }
   };
@@ -162,15 +169,23 @@ const Users = () => {
   const getRoleBadge = (role: string) => {
     switch (role) {
       case "admin":
+      case "desenvolvedor":
         return "bg-purple-100 text-purple-700";
+      case "redator":
       case "editor":
         return "bg-blue-100 text-blue-700";
+      case "vendedor":
+        return "bg-green-100 text-green-700";
       default:
         return "bg-gray-100 text-gray-700";
     }
   };
 
   const getRoleLabel = (role: string) => {
+    const roleConfig = ROLES.find(r => r.value === role);
+    if (roleConfig) return roleConfig.label;
+    
+    // Fallback for legacy roles
     switch (role) {
       case "admin":
         return "Administrador";
@@ -245,14 +260,20 @@ const Users = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="role">Função</Label>
+                  <Label htmlFor="role">Cargo</Label>
                   <Select value={newUserRole} onValueChange={setNewUserRole}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="admin">Administrador</SelectItem>
-                      <SelectItem value="editor">Editor</SelectItem>
+                      {ROLES.map(role => (
+                        <SelectItem key={role.value} value={role.value}>
+                          <div className="flex flex-col">
+                            <span>{role.label}</span>
+                            <span className="text-xs text-muted-foreground">{role.description}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -277,9 +298,9 @@ const Users = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Nome</TableHead>
-                <TableHead>Função</TableHead>
+                <TableHead>Cargo</TableHead>
                 <TableHead>Desde</TableHead>
-                <TableHead className="w-[100px]">Ações</TableHead>
+                <TableHead className="w-[150px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -300,16 +321,19 @@ const Users = () => {
                     <div className="flex items-center gap-1">
                       <Select
                         value={u.role}
-                        onValueChange={(value) => handleUpdateRole(u.user_id, value as "admin" | "editor" | "user")}
+                        onValueChange={(value) => handleUpdateRole(u.user_id, value)}
                         disabled={u.user_id === currentUser?.id}
                       >
-                        <SelectTrigger className="w-28 h-8">
+                        <SelectTrigger className="w-32 h-8">
                           <Shield className="h-3 w-3 mr-1" />
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="admin">Admin</SelectItem>
-                          <SelectItem value="editor">Editor</SelectItem>
+                          {ROLES.map(role => (
+                            <SelectItem key={role.value} value={role.value}>
+                              {role.label}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       {u.user_id !== currentUser?.id && (
