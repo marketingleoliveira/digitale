@@ -33,11 +33,11 @@ export function Footer() {
     <footer className="bg-primary text-white">
       {/* Newsletter Section */}
       <div className="border-b border-white/10">
-        <div className="container mx-auto px-6 py-12">
-          <div className="grid lg:grid-cols-2 gap-8 items-center">
-            <div>
-              <h3 className="text-2xl font-bold mb-2">{t("newsletter.title")}</h3>
-              <p className="text-white/70">{t("newsletter.subtitle")}</p>
+        <div className="container mx-auto px-4 md:px-6 py-8 md:py-12">
+          <div className="grid lg:grid-cols-2 gap-6 md:gap-8 items-center">
+            <div className="text-center lg:text-left">
+              <h3 className="text-xl md:text-2xl font-bold mb-2">{t("newsletter.title")}</h3>
+              <p className="text-white/70 text-sm md:text-base">{t("newsletter.subtitle")}</p>
             </div>
             <div className="lg:max-w-md lg:ml-auto">
               <NewsletterForm />
@@ -47,24 +47,24 @@ export function Footer() {
       </div>
 
       {/* Main Footer */}
-      <div className="container mx-auto px-6 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+      <div className="container mx-auto px-4 md:px-6 py-10 md:py-16">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
           {/* Brand */}
-          <div className="lg:col-span-1">
-            <img src={logoWhite} alt="Digitale Têxtil" className="h-14 mb-6" />
-            <p className="text-white/70 text-sm leading-relaxed mb-6">
+          <div className="col-span-2 md:col-span-2 lg:col-span-1">
+            <img src={logoWhite} alt="Digitale Têxtil" className="h-10 md:h-14 mb-4 md:mb-6" />
+            <p className="text-white/70 text-sm leading-relaxed mb-4 md:mb-6">
               {t("footer.description")}
             </p>
-            <div className="flex gap-3">
+            <div className="flex gap-2 md:gap-3">
               {socialLinks.map((social) => (
                 <a
                   key={social.name}
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/70 hover:text-white hover:bg-accent transition-all duration-300"
+                  className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/10 flex items-center justify-center text-white/70 hover:text-white hover:bg-accent transition-all duration-300"
                 >
-                  <social.icon className="h-5 w-5" />
+                  <social.icon className="h-4 w-4 md:h-5 md:w-5" />
                 </a>
               ))}
             </div>
@@ -72,15 +72,14 @@ export function Footer() {
 
           {/* Empresa */}
           <div>
-            <h4 className="font-semibold text-lg mb-6">{t("footer.navigation")}</h4>
-            <ul className="space-y-3">
+            <h4 className="font-semibold text-base md:text-lg mb-4 md:mb-6">{t("footer.navigation")}</h4>
+            <ul className="space-y-2 md:space-y-3">
               {footerLinks.empresa.map((link) => (
                 <li key={link.name}>
                   <Link 
                     to={link.href} 
-                    className="text-white/70 hover:text-accent transition-colors text-sm flex items-center gap-2 group"
+                    className="text-white/70 hover:text-accent transition-colors text-sm"
                   >
-                    <ArrowRight className="h-3 w-3 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
                     {link.name}
                   </Link>
                 </li>
@@ -90,15 +89,14 @@ export function Footer() {
 
           {/* Tecidos */}
           <div>
-            <h4 className="font-semibold text-lg mb-6">{t("nav.fabrics")}</h4>
-            <ul className="space-y-3">
+            <h4 className="font-semibold text-base md:text-lg mb-4 md:mb-6">{t("nav.fabrics")}</h4>
+            <ul className="space-y-2 md:space-y-3">
               {footerLinks.produtos.map((link) => (
                 <li key={link.name}>
                   <Link 
                     to={link.href} 
-                    className="text-white/70 hover:text-accent transition-colors text-sm flex items-center gap-2 group"
+                    className="text-white/70 hover:text-accent transition-colors text-sm"
                   >
-                    <ArrowRight className="h-3 w-3 opacity-0 -ml-5 group-hover:opacity-100 group-hover:ml-0 transition-all" />
                     {link.name}
                   </Link>
                 </li>
@@ -107,23 +105,23 @@ export function Footer() {
           </div>
 
           {/* Contato */}
-          <div>
-            <h4 className="font-semibold text-lg mb-6">{t("footer.contact")}</h4>
-            <ul className="space-y-4 text-sm text-white/70">
+          <div className="col-span-2 md:col-span-1">
+            <h4 className="font-semibold text-base md:text-lg mb-4 md:mb-6">{t("footer.contact")}</h4>
+            <ul className="space-y-3 md:space-y-4 text-sm text-white/70">
               <li>
-                <a href="mailto:atendimento@digitaletextil.com.br" className="flex items-start gap-3 hover:text-accent transition-colors">
-                  <Mail className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                  <span>atendimento@digitaletextil.com.br</span>
+                <a href="mailto:atendimento@digitaletextil.com.br" className="flex items-start gap-2 md:gap-3 hover:text-accent transition-colors">
+                  <Mail className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0 mt-0.5" />
+                  <span className="break-all">atendimento@digitaletextil.com.br</span>
                 </a>
               </li>
               <li>
-                <a href="tel:+551120649662" className="flex items-start gap-3 hover:text-accent transition-colors">
-                  <Phone className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                <a href="tel:+551120649662" className="flex items-start gap-2 md:gap-3 hover:text-accent transition-colors">
+                  <Phone className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0 mt-0.5" />
                   <span>+55 11 2064-9662</span>
                 </a>
               </li>
-              <li className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 flex-shrink-0 mt-0.5" />
+              <li className="flex items-start gap-2 md:gap-3">
+                <MapPin className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0 mt-0.5" />
                 <span>
                   Av. Henry Ford, 354<br />
                   São Paulo-SP, 03109-000
@@ -136,10 +134,10 @@ export function Footer() {
 
       {/* Bottom Bar */}
       <div className="border-t border-white/10">
-        <div className="container mx-auto px-6 py-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-white/50">
-            <p>© {new Date().getFullYear()} Digitale Têxtil. {t("footer.rights")}</p>
-            <div className="flex items-center gap-6">
+        <div className="container mx-auto px-4 md:px-6 py-4 md:py-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4 text-xs md:text-sm text-white/50">
+            <p className="text-center md:text-left">© {new Date().getFullYear()} Digitale Têxtil. {t("footer.rights")}</p>
+            <div className="flex items-center gap-4 md:gap-6">
               <Link 
                 to="/politica-de-privacidade" 
                 className="hover:text-white/80 transition-colors"

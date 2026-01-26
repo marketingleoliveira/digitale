@@ -7,7 +7,7 @@ export function CTA() {
   const { t } = useLanguage();
 
   return (
-    <section className="py-24 relative overflow-hidden">
+    <section className="py-16 md:py-24 relative overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 navy-gradient" />
       
@@ -21,58 +21,58 @@ export function CTA() {
         />
       </div>
 
-      <div className="container mx-auto px-6 relative z-10">
+      <div className="container mx-auto px-4 md:px-6 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <span className="inline-block px-4 py-2 bg-accent/20 text-accent rounded-full text-sm font-semibold mb-6">
+            <span className="inline-block px-3 py-1.5 md:px-4 md:py-2 bg-accent/20 text-accent rounded-full text-xs md:text-sm font-semibold mb-4 md:mb-6">
               {t("cta.label")}
             </span>
             
-            <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-6 font-serif leading-tight">
+            <h2 className="text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-4 md:mb-6 font-serif leading-tight px-2">
               {t("cta.title")}
             </h2>
             
-            <p className="text-white/70 text-lg md:text-xl mb-10 max-w-2xl mx-auto">
+            <p className="text-white/70 text-base md:text-lg lg:text-xl mb-8 md:mb-10 max-w-2xl mx-auto px-2">
               {t("cta.description")}
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center mb-8 md:mb-12 px-2">
               <Link
                 to="/contato"
-                className="inline-flex items-center justify-center gap-3 bg-accent hover:bg-orange-light text-white px-10 py-5 rounded-full font-semibold text-lg transition-all duration-300 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-1"
+                className="inline-flex items-center justify-center gap-2 md:gap-3 bg-accent hover:bg-orange-light text-white px-6 md:px-10 py-4 md:py-5 rounded-full font-semibold text-sm md:text-lg transition-all duration-300 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-1"
               >
-                <MessageCircle className="h-5 w-5" />
+                <MessageCircle className="h-4 w-4 md:h-5 md:w-5" />
                 {t("cta.button")}
               </Link>
               <a
                 href="tel:+551120649662"
-                className="inline-flex items-center justify-center gap-3 border-2 border-white/30 text-white px-10 py-5 rounded-full font-semibold text-lg hover:bg-white/10 transition-all duration-300"
+                className="inline-flex items-center justify-center gap-2 md:gap-3 border-2 border-white/30 text-white px-6 md:px-10 py-4 md:py-5 rounded-full font-semibold text-sm md:text-lg hover:bg-white/10 transition-all duration-300"
               >
-                <Phone className="h-5 w-5" />
+                <Phone className="h-4 w-4 md:h-5 md:w-5" />
                 {t("nav.contact")}
               </a>
             </div>
 
             {/* Contact Info */}
-            <div className="flex flex-col sm:flex-row justify-center gap-8 text-white/60">
+            <div className="flex flex-col sm:flex-row justify-center gap-4 md:gap-8 text-white/60 text-sm md:text-base">
               <a 
                 href="tel:+551120649662" 
-                className="flex items-center justify-center gap-3 hover:text-accent transition-colors"
+                className="flex items-center justify-center gap-2 md:gap-3 hover:text-accent transition-colors"
               >
-                <Phone className="h-5 w-5" />
+                <Phone className="h-4 w-4 md:h-5 md:w-5" />
                 <span>+55 11 2064-9662</span>
               </a>
               <a 
                 href="mailto:atendimento@digitaletextil.com.br" 
-                className="flex items-center justify-center gap-3 hover:text-accent transition-colors"
+                className="flex items-center justify-center gap-2 md:gap-3 hover:text-accent transition-colors"
               >
-                <Mail className="h-5 w-5" />
-                <span>atendimento@digitaletextil.com.br</span>
+                <Mail className="h-4 w-4 md:h-5 md:w-5" />
+                <span className="text-xs md:text-base">atendimento@digitaletextil.com.br</span>
               </a>
             </div>
           </motion.div>

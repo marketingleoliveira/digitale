@@ -44,7 +44,7 @@ const menuItems = [
 export function AdminLayout({ children, title }: AdminLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, signOut, isAdmin } = useAuth();
+  const { user, signOut, isAdmin, loading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleSignOut = async () => {
@@ -54,14 +54,23 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
 
   const filteredMenuItems = menuItems.filter(item => !item.adminOnly || isAdmin);
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted/30">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-muted/30">
       {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-primary z-50 flex items-center justify-between px-4">
-        <button onClick={() => setSidebarOpen(true)} className="text-primary-foreground">
+      <header className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-primary z-50 flex items-center justify-between px-4">
+        <button onClick={() => setSidebarOpen(true)} className="text-primary-foreground p-1">
           <Menu className="h-6 w-6" />
         </button>
-        <img src={logoWhite} alt="Digitale" className="h-8" />
+        <img src={logoWhite} alt="Digitale" className="h-7" />
         <div className="w-6" />
       </header>
 
@@ -74,18 +83,18 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="h-20 flex items-center justify-between px-6 border-b border-primary-foreground/10">
-            <img src={logoWhite} alt="Digitale" className="h-10" />
+          <div className="h-16 lg:h-20 flex items-center justify-between px-4 lg:px-6 border-b border-primary-foreground/10">
+            <img src={logoWhite} alt="Digitale" className="h-8 lg:h-10" />
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden text-primary-foreground/70 hover:text-primary-foreground"
+              className="lg:hidden text-primary-foreground/70 hover:text-primary-foreground p-1"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 py-6 px-3 space-y-1">
+          <nav className="flex-1 py-4 lg:py-6 px-2 lg:px-3 space-y-1 overflow-y-auto">
             {filteredMenuItems.map((item) => {
               const isActive = location.pathname === item.href;
               return (
@@ -94,29 +103,29 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
                   to={item.href}
                   onClick={() => setSidebarOpen(false)}
                   className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors",
+                    "flex items-center gap-3 px-3 lg:px-4 py-2.5 lg:py-3 rounded-xl text-sm font-medium transition-colors",
                     isActive
                       ? "bg-primary-foreground text-primary"
                       : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
                   )}
                 >
-                  <item.icon className="h-5 w-5" />
-                  {item.label}
+                  <item.icon className="h-5 w-5 flex-shrink-0" />
+                  <span className="truncate">{item.label}</span>
                 </Link>
               );
             })}
           </nav>
 
           {/* User */}
-          <div className="p-4 border-t border-primary-foreground/10">
-            <div className="flex items-center gap-3 px-3 mb-3">
-              <div className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center">
-                <span className="text-primary-foreground font-medium">
+          <div className="p-3 lg:p-4 border-t border-primary-foreground/10">
+            <div className="flex items-center gap-2 lg:gap-3 px-2 lg:px-3 mb-2 lg:mb-3">
+              <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center flex-shrink-0">
+                <span className="text-primary-foreground font-medium text-sm lg:text-base">
                   {user?.email?.charAt(0).toUpperCase()}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-primary-foreground truncate">
+                <p className="text-xs lg:text-sm font-medium text-primary-foreground truncate">
                   {user?.email}
                 </p>
                 <p className="text-xs text-primary-foreground/60">
@@ -127,10 +136,10 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-start text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+              className="w-full justify-start text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10 text-sm"
               onClick={handleSignOut}
             >
-              <LogOut className="h-4 w-4 mr-2" />
+              <LogOut className="h-4 w-4 mr-2 flex-shrink-0" />
               Sair
             </Button>
           </div>
@@ -146,13 +155,13 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
       )}
 
       {/* Main Content */}
-      <main className="lg:ml-64 pt-16 lg:pt-0 min-h-screen">
-        <div className="p-6 lg:p-8">
+      <main className="lg:ml-64 pt-14 lg:pt-0 min-h-screen">
+        <div className="p-4 md:p-6 lg:p-8">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <h1 className="font-display text-2xl lg:text-3xl font-semibold text-foreground mb-6">
+            <h1 className="font-display text-xl md:text-2xl lg:text-3xl font-semibold text-foreground mb-4 md:mb-6">
               {title}
             </h1>
             {children}
