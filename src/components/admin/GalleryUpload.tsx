@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, DragEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Upload, X, Loader2, Plus, Image } from "lucide-react";
@@ -25,12 +25,33 @@ export function GalleryUpload({
   maxImages = 6 
 }: GalleryUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
 
+  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      processFiles(files);
+    }
+  };
+
+  const processFiles = async (files: File[]) => {
     const remainingSlots = maxImages - value.length;
     const filesToUpload = files.slice(0, remainingSlots);
 
@@ -43,13 +64,11 @@ export function GalleryUpload({
 
     try {
       for (const file of filesToUpload) {
-        // Validate file type
         if (!file.type.startsWith("image/")) {
           toast.error(`${file.name} não é uma imagem válida.`);
           continue;
         }
 
-        // Validate file size (max 5MB)
         if (file.size > 5 * 1024 * 1024) {
           toast.error(`${file.name} é muito grande (máx 5MB).`);
           continue;
@@ -88,6 +107,12 @@ export function GalleryUpload({
     }
   };
 
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    processFiles(files);
+  };
+
   const handleRemove = (index: number) => {
     const updated = value.filter((_, i) => i !== index);
     onChange(updated);
@@ -100,7 +125,12 @@ export function GalleryUpload({
   };
 
   return (
-    <div className="space-y-4">
+    <div 
+      className="space-y-4"
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       <input
         ref={inputRef}
         type="file"
@@ -111,7 +141,9 @@ export function GalleryUpload({
       />
 
       {/* Gallery Grid */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className={`grid grid-cols-3 gap-3 p-3 rounded-lg border-2 border-dashed transition-colors ${
+        isDragging ? "border-primary bg-primary/5" : "border-transparent"
+      }`}>
         {value.map((image, index) => (
           <div key={index} className="relative group">
             <img
@@ -130,34 +162,41 @@ export function GalleryUpload({
         ))}
 
         {/* Add button */}
-        {value.length < maxImages && (
-          <Button
-            type="button"
-            variant="outline"
-            className="aspect-square flex flex-col gap-2 h-auto"
+        {value.length < maxImages && value.length > 0 && (
+          <div
             onClick={() => inputRef.current?.click()}
-            disabled={isUploading}
+            className={`aspect-square flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
+              isDragging 
+                ? "border-primary bg-primary/10" 
+                : "border-muted-foreground/25 hover:border-primary/50"
+            } ${isUploading ? "pointer-events-none opacity-50" : ""}`}
           >
             {isUploading ? (
-              <Loader2 className="h-6 w-6 animate-spin" />
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             ) : (
               <>
-                <Plus className="h-6 w-6" />
-                <span className="text-xs">Adicionar</span>
+                <Plus className={`h-6 w-6 ${isDragging ? "text-primary" : "text-muted-foreground"}`} />
+                <span className="text-xs text-muted-foreground">
+                  {isDragging ? "Solte aqui" : "Adicionar"}
+                </span>
               </>
             )}
-          </Button>
+          </div>
         )}
       </div>
 
       {value.length === 0 && (
         <div 
-          className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-accent/50 transition-colors"
+          className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
+            isDragging 
+              ? "border-primary bg-primary/5" 
+              : "hover:border-accent/50"
+          }`}
           onClick={() => inputRef.current?.click()}
         >
-          <Image className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
+          <Image className={`h-10 w-10 mx-auto mb-3 ${isDragging ? "text-primary" : "text-muted-foreground"}`} />
           <p className="text-sm text-muted-foreground">
-            Clique para adicionar imagens da galeria
+            {isDragging ? "Solte as imagens aqui" : "Arraste ou clique para adicionar imagens"}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
             Máximo de {maxImages} imagens, 5MB cada
