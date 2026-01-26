@@ -215,6 +215,7 @@ export type Database = {
           id: string
           image_url: string | null
           is_active: boolean
+          is_featured: boolean
           name: string
           short_description: string | null
           slug: string
@@ -233,6 +234,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean
+          is_featured?: boolean
           name: string
           short_description?: string | null
           slug: string
@@ -251,6 +253,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean
+          is_featured?: boolean
           name?: string
           short_description?: string | null
           slug?: string

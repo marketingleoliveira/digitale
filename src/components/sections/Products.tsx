@@ -56,10 +56,27 @@ const fallbackFabrics = [
 export function Products() {
   const { t } = useLanguage();
 
-  // Fetch latest fabrics from database
+  // Fetch featured fabrics from database (or fallback to latest if none featured)
   const { data: fabrics, isLoading: fabricsLoading } = useQuery({
-    queryKey: ["latest-fabrics-home"],
+    queryKey: ["featured-fabrics-home"],
     queryFn: async () => {
+      // First try to get featured fabrics
+      const { data: featuredData, error: featuredError } = await supabase
+        .from("fabrics")
+        .select("id, name, slug, image_url, short_description")
+        .eq("is_active", true)
+        .eq("is_featured", true)
+        .order("display_order", { ascending: true })
+        .limit(4);
+      
+      if (featuredError) throw featuredError;
+      
+      // If we have featured fabrics, return them
+      if (featuredData && featuredData.length > 0) {
+        return featuredData;
+      }
+      
+      // Otherwise, fallback to latest fabrics
       const { data, error } = await supabase
         .from("fabrics")
         .select("id, name, slug, image_url, short_description")

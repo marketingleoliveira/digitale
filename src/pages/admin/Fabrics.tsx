@@ -23,7 +23,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, GripVertical, Image, Palette, Images } from "lucide-react";
+import { Plus, Pencil, Trash2, GripVertical, Image, Palette, Images, Star } from "lucide-react";
 import { toast } from "sonner";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import { GalleryUpload } from "@/components/admin/GalleryUpload";
@@ -47,6 +47,7 @@ interface Fabric {
   applications: string[];
   color_variants: ColorVariant[];
   is_active: boolean;
+  is_featured: boolean;
   display_order: number;
 }
 
@@ -131,6 +132,24 @@ export default function AdminFabrics() {
     },
     onError: (error) => {
       toast.error("Erro ao excluir: " + error.message);
+    },
+  });
+
+  const toggleFeaturedMutation = useMutation({
+    mutationFn: async ({ id, is_featured }: { id: string; is_featured: boolean }) => {
+      const { error } = await supabase
+        .from("fabrics")
+        .update({ is_featured } as any)
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: (_, { is_featured }) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-fabrics"] });
+      queryClient.invalidateQueries({ queryKey: ["featured-fabrics-home"] });
+      toast.success(is_featured ? "Tecido destacado na home!" : "Tecido removido dos destaques");
+    },
+    onError: (error) => {
+      toast.error("Erro ao atualizar: " + error.message);
     },
   });
 
@@ -408,6 +427,7 @@ export default function AdminFabrics() {
                 <TableHead>Imagem</TableHead>
                 <TableHead>Nome</TableHead>
                 <TableHead>Cores</TableHead>
+                <TableHead>Destaque</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Ordem</TableHead>
                 <TableHead className="w-24">Ações</TableHead>
@@ -416,7 +436,7 @@ export default function AdminFabrics() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8">
+                  <TableCell colSpan={8} className="text-center py-8">
                     Carregando...
                   </TableCell>
                 </TableRow>
@@ -463,6 +483,22 @@ export default function AdminFabrics() {
                       </div>
                     </TableCell>
                     <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => toggleFeaturedMutation.mutate({ id: fabric.id, is_featured: !fabric.is_featured })}
+                        title={fabric.is_featured ? "Remover destaque" : "Destacar na home"}
+                      >
+                        <Star
+                          className={`h-5 w-5 transition-colors ${
+                            fabric.is_featured
+                              ? "fill-yellow-400 text-yellow-400"
+                              : "text-muted-foreground hover:text-yellow-400"
+                          }`}
+                        />
+                      </Button>
+                    </TableCell>
+                    <TableCell>
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-medium ${
                           fabric.is_active
@@ -500,7 +536,7 @@ export default function AdminFabrics() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                     Nenhum tecido cadastrado
                   </TableCell>
                 </TableRow>
