@@ -7,9 +7,9 @@ import { ArrowRight, Waves, Dumbbell, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
-// Import segment images (using generated assets)
-import segmentPraiaImg from "@/assets/hero-bg.jpg";
-import segmentEsportivoImg from "@/assets/athlete-model.jpg";
+// Import segment images
+import segmentPraiaImg from "@/assets/segment-praia.jpg";
+import segmentEsportivoImg from "@/assets/segment-esportivo.jpg";
 
 const segmentCategories = [
   {
