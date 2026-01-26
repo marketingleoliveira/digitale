@@ -560,6 +560,63 @@ export type Database = {
           },
         ]
       }
+      segments: {
+        Row: {
+          benefits: Json | null
+          created_at: string
+          description: string | null
+          display_order: number
+          fabrics: Json | null
+          features: Json | null
+          gallery_images: Json | null
+          hero_image: string | null
+          icon: string
+          id: string
+          is_active: boolean
+          long_description: string | null
+          name: string
+          slug: string
+          subcategories: Json | null
+          updated_at: string
+        }
+        Insert: {
+          benefits?: Json | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          fabrics?: Json | null
+          features?: Json | null
+          gallery_images?: Json | null
+          hero_image?: string | null
+          icon?: string
+          id?: string
+          is_active?: boolean
+          long_description?: string | null
+          name: string
+          slug: string
+          subcategories?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          benefits?: Json | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          fabrics?: Json | null
+          features?: Json | null
+          gallery_images?: Json | null
+          hero_image?: string | null
+          icon?: string
+          id?: string
+          is_active?: boolean
+          long_description?: string | null
+          name?: string
+          slug?: string
+          subcategories?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       site_settings: {
         Row: {
           id: string

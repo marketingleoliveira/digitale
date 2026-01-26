@@ -27,11 +27,14 @@ interface AdminLayoutProps {
 
 import { Mail, Quote, Briefcase, FileCheck, ShieldCheck } from "lucide-react";
 
+import { Layers } from "lucide-react";
+
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
   { icon: Images, label: "Carrossel", href: "/admin/carousel", adminOnly: true },
   { icon: FolderOpen, label: "Tecidos", href: "/admin/fabrics" },
   { icon: Palette, label: "Estampas", href: "/admin/prints" },
+  { icon: Layers, label: "Segmentos", href: "/admin/segments" },
   { icon: Quote, label: "Depoimentos", href: "/admin/testimonials" },
   { icon: Briefcase, label: "Vagas", href: "/admin/job-openings" },
   { icon: FileCheck, label: "Candidaturas", href: "/admin/job-applications" },
