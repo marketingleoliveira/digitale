@@ -13,12 +13,34 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
+  clearCache: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Intervalo de refresh do token (10 minutos)
 const TOKEN_REFRESH_INTERVAL = 10 * 60 * 1000;
+
+// Limpa o cache de autenticação do localStorage
+const clearAuthCache = () => {
+  // Remove todos os itens de autenticação do Supabase
+  const keysToRemove: string[] = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && (key.startsWith('sb-') || key.includes('supabase'))) {
+      keysToRemove.push(key);
+    }
+  }
+  keysToRemove.forEach(key => localStorage.removeItem(key));
+  
+  // Também limpa sessionStorage
+  for (let i = 0; i < sessionStorage.length; i++) {
+    const key = sessionStorage.key(i);
+    if (key && (key.startsWith('sb-') || key.includes('supabase'))) {
+      sessionStorage.removeItem(key);
+    }
+  }
+};
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -28,18 +50,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditor, setIsEditor] = useState(false);
   
-  // Refs para controlar estados de inicialização e evitar race conditions
-  const isInitialized = useRef(false);
-  const isFetchingRoles = useRef(false);
+  // Refs para controlar estados
+  const isInitializedRef = useRef(false);
   const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const currentUserIdRef = useRef<string | null>(null);
 
-  const fetchRoles = useCallback(async (userId: string): Promise<{ admin: boolean; editor: boolean }> => {
-    if (isFetchingRoles.current) {
-      return { admin: isAdmin, editor: isEditor };
-    }
-    
-    isFetchingRoles.current = true;
-    
+  // Função para buscar roles - sem dependências externas problemáticas
+  const fetchRoles = async (userId: string): Promise<{ admin: boolean; editor: boolean }> => {
     try {
       const { data: roles, error } = await supabase
         .from("user_roles")
@@ -59,45 +76,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Error fetching roles:", error);
       return { admin: false, editor: false };
-    } finally {
-      isFetchingRoles.current = false;
     }
-  }, [isAdmin, isEditor]);
-
-  // Função para refresh do token
-  const refreshSession = useCallback(async (showToast = false) => {
-    try {
-      const { data: { session: refreshedSession }, error } = await supabase.auth.refreshSession();
-      
-      if (error) {
-        console.error("Error refreshing session:", error);
-        return null;
-      }
-      
-      if (refreshedSession && showToast) {
-        toast.success("Sessão renovada", { duration: 2000 });
-      }
-      
-      return refreshedSession;
-    } catch (error) {
-      console.error("Error refreshing session:", error);
-      return null;
-    }
-  }, []);
-
-  // Inicia o intervalo de refresh automático
-  const startRefreshInterval = useCallback(() => {
-    if (refreshIntervalRef.current) {
-      clearInterval(refreshIntervalRef.current);
-    }
-    
-    refreshIntervalRef.current = setInterval(async () => {
-      const currentSession = await supabase.auth.getSession();
-      if (currentSession.data.session) {
-        await refreshSession(false);
-      }
-    }, TOKEN_REFRESH_INTERVAL);
-  }, [refreshSession]);
+  };
 
   // Para o intervalo de refresh
   const stopRefreshInterval = useCallback(() => {
@@ -107,36 +87,68 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Inicia o intervalo de refresh automático
+  const startRefreshInterval = useCallback(() => {
+    stopRefreshInterval();
+    
+    refreshIntervalRef.current = setInterval(async () => {
+      try {
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        if (currentSession) {
+          await supabase.auth.refreshSession();
+        }
+      } catch (error) {
+        console.error("Error in refresh interval:", error);
+      }
+    }, TOKEN_REFRESH_INTERVAL);
+  }, [stopRefreshInterval]);
+
+  // Função para limpar cache e fazer logout
+  const clearCache = useCallback(() => {
+    stopRefreshInterval();
+    clearAuthCache();
+    setUser(null);
+    setSession(null);
+    setIsAdmin(false);
+    setIsEditor(false);
+    isInitializedRef.current = false;
+    currentUserIdRef.current = null;
+    toast.info("Cache limpo com sucesso");
+  }, [stopRefreshInterval]);
+
   useEffect(() => {
     let isMounted = true;
 
-    // Carregamento INICIAL - controla o loading
+    // Carregamento INICIAL
     const initializeAuth = async () => {
-      if (isInitialized.current) return;
-      isInitialized.current = true;
+      // Evita re-inicialização
+      if (isInitializedRef.current) {
+        setLoading(false);
+        return;
+      }
       
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        
+        if (!isMounted) return;
         
         if (error) {
           console.error("Error getting session:", error);
-          if (isMounted) {
-            setSession(null);
-            setUser(null);
-            setIsAdmin(false);
-            setIsEditor(false);
-          }
+          setSession(null);
+          setUser(null);
+          setIsAdmin(false);
+          setIsEditor(false);
+          isInitializedRef.current = true;
+          setLoading(false);
           return;
         }
 
-        if (!isMounted) return;
+        setSession(initialSession);
+        setUser(initialSession?.user ?? null);
+        currentUserIdRef.current = initialSession?.user?.id ?? null;
 
-        setSession(session);
-        setUser(session?.user ?? null);
-
-        // Busca roles ANTES de definir loading como false
-        if (session?.user) {
-          const { admin, editor } = await fetchRoles(session.user.id);
+        if (initialSession?.user) {
+          const { admin, editor } = await fetchRoles(initialSession.user.id);
           if (isMounted) {
             setIsAdmin(admin);
             setIsEditor(editor);
@@ -146,6 +158,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setIsAdmin(false);
           setIsEditor(false);
         }
+        
+        isInitializedRef.current = true;
       } catch (error) {
         console.error("Error initializing auth:", error);
         if (isMounted) {
@@ -153,6 +167,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(null);
           setIsAdmin(false);
           setIsEditor(false);
+          isInitializedRef.current = true;
         }
       } finally {
         if (isMounted) {
@@ -161,21 +176,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
-    // Listener para mudanças contínuas (NÃO controla o loading)
+    // Listener para mudanças de auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
         if (!isMounted) return;
 
-        // Ignora eventos durante a inicialização
-        if (!isInitialized.current) return;
+        // Só processa após inicialização
+        if (!isInitializedRef.current) return;
 
         console.log("Auth state changed:", event);
 
+        // Atualiza estado
         setSession(newSession);
         setUser(newSession?.user ?? null);
+        currentUserIdRef.current = newSession?.user?.id ?? null;
 
         if (newSession?.user) {
-          // Busca roles sem bloquear o loading
           const { admin, editor } = await fetchRoles(newSession.user.id);
           if (isMounted) {
             setIsAdmin(admin);
@@ -190,58 +206,63 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     );
 
-    // Handler para quando a aba fica visível novamente
+    // Handler para visibilidade
     const handleVisibilityChange = async () => {
-      if (document.visibilityState === "visible" && isMounted) {
-        try {
-          const { data: { session: currentSession } } = await supabase.auth.getSession();
+      if (document.visibilityState !== "visible" || !isMounted) return;
+      
+      // Só faz algo se já inicializou e tem usuário
+      if (!isInitializedRef.current) return;
+      
+      const userId = currentUserIdRef.current;
+      
+      try {
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        
+        if (!isMounted) return;
+        
+        if (currentSession?.user) {
+          // Usuário ainda tem sessão
+          if (userId) {
+            setReconnecting(true);
+          }
+          
+          // Refresh silencioso
+          const { data: { session: refreshedSession } } = await supabase.auth.refreshSession();
           
           if (!isMounted) return;
           
-          // Verifica se há uma sessão ativa
-          if (currentSession?.user) {
-            // Mostra indicador de reconexão apenas se já estava logado
-            if (user?.id) {
-              setReconnecting(true);
-              toast.loading("Reconectando...", { id: "reconnecting", duration: 2000 });
-            }
+          if (refreshedSession) {
+            setSession(refreshedSession);
+            setUser(refreshedSession.user);
+            currentUserIdRef.current = refreshedSession.user.id;
             
-            // Refresh da sessão ao retornar à aba
-            const refreshedSession = await refreshSession(false);
-            
-            if (!isMounted) return;
-            
-            if (refreshedSession) {
-              setSession(refreshedSession);
-              setUser(refreshedSession.user);
-              
-              // Revalida roles
-              const { admin, editor } = await fetchRoles(refreshedSession.user.id);
-              if (isMounted) {
-                setIsAdmin(admin);
-                setIsEditor(editor);
+            const { admin, editor } = await fetchRoles(refreshedSession.user.id);
+            if (isMounted) {
+              setIsAdmin(admin);
+              setIsEditor(editor);
+              if (userId) {
+                toast.success("Sessão ativa", { id: "reconnecting", duration: 1500 });
               }
-              
-              toast.success("Sessão ativa", { id: "reconnecting", duration: 2000 });
             }
-            
-            setReconnecting(false);
-          } else if (user?.id) {
-            // Usuário estava logado mas sessão expirou
-            toast.error("Sessão expirada", { 
-              description: "Por favor, faça login novamente.",
-              duration: 4000 
-            });
-            setUser(null);
-            setSession(null);
-            setIsAdmin(false);
-            setIsEditor(false);
-            stopRefreshInterval();
           }
-        } catch (error) {
-          console.error("Error checking session on visibility change:", error);
+          
           setReconnecting(false);
+        } else if (userId) {
+          // Tinha usuário mas sessão expirou
+          toast.error("Sessão expirada", { 
+            description: "Por favor, faça login novamente.",
+            duration: 4000 
+          });
+          setUser(null);
+          setSession(null);
+          setIsAdmin(false);
+          setIsEditor(false);
+          currentUserIdRef.current = null;
+          stopRefreshInterval();
         }
+      } catch (error) {
+        console.error("Error checking session on visibility change:", error);
+        setReconnecting(false);
       }
     };
 
@@ -254,40 +275,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       stopRefreshInterval();
     };
-  }, [fetchRoles, user?.id, refreshSession, startRefreshInterval, stopRefreshInterval]);
+  }, [startRefreshInterval, stopRefreshInterval]);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (!error) {
-      startRefreshInterval();
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (!error) {
+        startRefreshInterval();
+      }
+      return { error: error as Error | null };
+    } catch (error) {
+      return { error: error as Error };
     }
-    return { error: error as Error | null };
   }, [startRefreshInterval]);
 
   const signUp = useCallback(async (email: string, password: string, fullName: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: window.location.origin,
-        data: { full_name: fullName }
-      }
-    });
-    return { error: error as Error | null };
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: { full_name: fullName }
+        }
+      });
+      return { error: error as Error | null };
+    } catch (error) {
+      return { error: error as Error };
+    }
   }, []);
 
   const signOut = useCallback(async () => {
     stopRefreshInterval();
     await supabase.auth.signOut();
+    clearAuthCache();
     setUser(null);
     setSession(null);
     setIsAdmin(false);
     setIsEditor(false);
+    currentUserIdRef.current = null;
+    isInitializedRef.current = false;
     toast.info("Você saiu da sua conta");
   }, [stopRefreshInterval]);
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, reconnecting, isAdmin, isEditor, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      session, 
+      loading, 
+      reconnecting, 
+      isAdmin, 
+      isEditor, 
+      signIn, 
+      signUp, 
+      signOut,
+      clearCache 
+    }}>
       {children}
     </AuthContext.Provider>
   );
