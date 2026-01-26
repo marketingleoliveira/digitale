@@ -3,6 +3,8 @@ import { Footer } from "@/components/layout/Footer";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { PrintsGallery } from "@/components/prints/PrintsGallery";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   Palette, 
   Sparkles, 
@@ -20,9 +22,35 @@ import {
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+
+interface PrintCategory {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  image_url: string | null;
+  display_order: number;
+}
 
 const Prints = () => {
   const { t } = useLanguage();
+
+  // Fetch categories from database
+  const { data: dbCategories, isLoading: categoriesLoading } = useQuery({
+    queryKey: ["print-categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("print_categories")
+        .select("*")
+        .eq("is_active", true)
+        .is("parent_id", null)
+        .order("display_order", { ascending: true });
+
+      if (error) throw error;
+      return data as PrintCategory[];
+    },
+  });
 
   const services = [
     {
@@ -91,38 +119,33 @@ const Prints = () => {
     },
   ];
 
-  const categories = [
+  // Fallback static categories for hero section
+  const fallbackHeroCategories = [
     {
       name: t("prints.category.tropical"),
-      count: "120+",
       image: "https://images.unsplash.com/photo-1557971370-e7298ee473fb?w=600&q=80",
     },
     {
       name: t("prints.category.geometric"),
-      count: "85+",
       image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80",
     },
     {
       name: t("prints.category.abstract"),
-      count: "95+",
       image: "https://images.unsplash.com/photo-1541123603104-512919d6a96c?w=600&q=80",
     },
     {
       name: t("prints.category.floral"),
-      count: "150+",
       image: "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=600&q=80",
     },
-    {
-      name: t("prints.category.animal"),
-      count: "70+",
-      image: "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=600&q=80",
-    },
-    {
-      name: t("prints.category.ethnic"),
-      count: "60+",
-      image: "https://images.unsplash.com/photo-1530521954074-e64f6810b32d?w=600&q=80",
-    },
   ];
+
+  // Use DB categories if available for hero
+  const heroCategories = dbCategories && dbCategories.length >= 4 
+    ? dbCategories.slice(0, 4).map(cat => ({
+        name: cat.name,
+        image: cat.image_url || "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80",
+      }))
+    : fallbackHeroCategories;
 
   const stats = [
     { value: "4000+", label: t("prints.stat.patterns") },
@@ -177,7 +200,7 @@ const Prints = () => {
                 className="hidden lg:block"
               >
                 <div className="grid grid-cols-2 gap-4">
-                  {categories.slice(0, 4).map((cat, index) => (
+                  {heroCategories.map((cat, index) => (
                     <motion.div
                       key={cat.name}
                       initial={{ opacity: 0, y: 20 }}
@@ -193,7 +216,6 @@ const Prints = () => {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                       <div className="absolute bottom-4 left-4 text-white">
                         <p className="font-semibold">{cat.name}</p>
-                        <p className="text-sm text-white/70">{cat.count} {t("prints.designs")}</p>
                       </div>
                     </motion.div>
                   ))}
@@ -371,7 +393,7 @@ const Prints = () => {
           </div>
         </section>
 
-        {/* Categories Gallery */}
+        {/* Categories Gallery - Dynamic from Database */}
         <section className="py-20 md:py-28">
           <div className="container mx-auto px-6">
             <motion.div
@@ -392,31 +414,43 @@ const Prints = () => {
               </p>
             </motion.div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {categories.map((category, index) => (
-                <motion.div
-                  key={category.name}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  className="group relative overflow-hidden rounded-2xl aspect-[4/3] cursor-pointer"
-                >
-                  <img
-                    src={category.image}
-                    alt={category.name}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-                  <div className="absolute inset-0 p-6 flex flex-col justify-end">
-                    <Badge className="w-fit mb-3 bg-accent text-accent-foreground">
-                      {category.count} {t("prints.designs")}
-                    </Badge>
-                    <h3 className="text-2xl font-bold text-white">{category.name}</h3>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+            {categoriesLoading ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="aspect-[4/3] rounded-2xl" />
+                ))}
+              </div>
+            ) : dbCategories && dbCategories.length > 0 ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {dbCategories.map((category, index) => (
+                  <motion.div
+                    key={category.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    viewport={{ once: true }}
+                    className="group relative overflow-hidden rounded-2xl aspect-[4/3] cursor-pointer"
+                  >
+                    <img
+                      src={category.image_url || "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80"}
+                      alt={category.name}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                    <div className="absolute inset-0 p-6 flex flex-col justify-end">
+                      <h3 className="text-2xl font-bold text-white">{category.name}</h3>
+                      {category.description && (
+                        <p className="text-sm text-white/70 mt-2 line-clamp-2">{category.description}</p>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 text-muted-foreground">
+                <p>Nenhuma categoria cadastrada ainda.</p>
+              </div>
+            )}
           </div>
         </section>
 
