@@ -23,6 +23,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isEditor, setIsEditor] = useState(false);
 
   useEffect(() => {
+    const fetchRoles = async (userId: string) => {
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId);
+      
+      const userRoles = roles?.map(r => r.role) || [];
+      setIsAdmin(userRoles.includes("admin"));
+      setIsEditor(userRoles.includes("editor") || userRoles.includes("admin"));
+    };
+
     // Set up auth state listener BEFORE getting session
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
@@ -30,17 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Check roles
-          setTimeout(async () => {
-            const { data: roles } = await supabase
-              .from("user_roles")
-              .select("role")
-              .eq("user_id", session.user.id);
-            
-            const userRoles = roles?.map(r => r.role) || [];
-            setIsAdmin(userRoles.includes("admin"));
-            setIsEditor(userRoles.includes("editor") || userRoles.includes("admin"));
-          }, 0);
+          await fetchRoles(session.user.id);
         } else {
           setIsAdmin(false);
           setIsEditor(false);
@@ -51,9 +52,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
 
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        await fetchRoles(session.user.id);
+      }
+      
       setLoading(false);
     });
 
