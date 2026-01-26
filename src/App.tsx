@@ -8,7 +8,6 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
 import { ProtectedRoute } from "@/components/admin/ProtectedRoute";
 import Index from "./pages/Index";
-import Blog from "./pages/Blog";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Fabrics from "./pages/Fabrics";
@@ -19,7 +18,7 @@ import Segments from "./pages/Segments";
 import SegmentDetail from "./pages/SegmentDetail";
 import Sustainability from "./pages/Sustainability";
 import Privacy from "./pages/Privacy";
-import BlogPost from "./pages/BlogPost";
+import WorkWithUs from "./pages/WorkWithUs";
 import NotFound from "./pages/NotFound";
 import { WhatsAppButton } from "./components/chat/WhatsAppButton";
 import Login from "./pages/admin/Login";
@@ -36,6 +35,8 @@ import Newsletter from "./pages/admin/Newsletter";
 import AdminTestimonials from "./pages/admin/Testimonials";
 import PrintsAdmin from "./pages/admin/PrintsAdmin";
 import PrintCategories from "./pages/admin/PrintCategories";
+import JobOpenings from "./pages/admin/JobOpenings";
+import JobApplications from "./pages/admin/JobApplications";
 import { NewsletterPopup } from "./components/newsletter/NewsletterPopup";
 
 const queryClient = new QueryClient();
@@ -53,8 +54,8 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/inicio" element={<Navigate to="/" replace />} />
               <Route path="/home" element={<Navigate to="/" replace />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/blog/:slug" element={<BlogPost />} />
+              <Route path="/trabalhe-conosco" element={<WorkWithUs />} />
+              <Route path="/careers" element={<Navigate to="/trabalhe-conosco" replace />} />
               <Route path="/sobre" element={<About />} />
               <Route path="/nosotros" element={<Navigate to="/sobre" replace />} />
               <Route path="/about" element={<Navigate to="/sobre" replace />} />
@@ -86,6 +87,8 @@ const App = () => (
               <Route path="/admin/carousel" element={<ProtectedRoute requireAdmin><Carousel /></ProtectedRoute>} />
               <Route path="/admin/fabrics" element={<ProtectedRoute><AdminFabrics /></ProtectedRoute>} />
               <Route path="/admin/testimonials" element={<ProtectedRoute><AdminTestimonials /></ProtectedRoute>} />
+              <Route path="/admin/job-openings" element={<ProtectedRoute><JobOpenings /></ProtectedRoute>} />
+              <Route path="/admin/job-applications" element={<ProtectedRoute><JobApplications /></ProtectedRoute>} />
               <Route path="/admin/posts" element={<ProtectedRoute><Posts /></ProtectedRoute>} />
               <Route path="/admin/posts/:id" element={<ProtectedRoute><PostEditor /></ProtectedRoute>} />
               <Route path="/admin/categories" element={<ProtectedRoute><Categories /></ProtectedRoute>} />

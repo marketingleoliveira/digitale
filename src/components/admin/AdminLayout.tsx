@@ -25,7 +25,7 @@ interface AdminLayoutProps {
   title: string;
 }
 
-import { Mail, Quote } from "lucide-react";
+import { Mail, Quote, Briefcase, FileCheck } from "lucide-react";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
@@ -33,6 +33,8 @@ const menuItems = [
   { icon: FolderOpen, label: "Tecidos", href: "/admin/fabrics" },
   { icon: Palette, label: "Estampas", href: "/admin/prints" },
   { icon: Quote, label: "Depoimentos", href: "/admin/testimonials" },
+  { icon: Briefcase, label: "Vagas", href: "/admin/job-openings" },
+  { icon: FileCheck, label: "Candidaturas", href: "/admin/job-applications" },
   { icon: FileText, label: "Posts", href: "/admin/posts" },
   { icon: FolderOpen, label: "Categorias", href: "/admin/categories" },
   { icon: MessageSquare, label: "Contatos", href: "/admin/contacts" },
