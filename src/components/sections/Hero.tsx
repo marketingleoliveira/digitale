@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +14,7 @@ const fallbackSlides = [
 export function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const { data: dbSlides, isLoading } = useQuery({
     queryKey: ["carousel-slides"],
@@ -30,18 +30,21 @@ export function Hero() {
     },
   });
 
-  // Only use fallback if loading is complete and no slides exist
   const slides = isLoading ? [] : (dbSlides && dbSlides.length > 0 ? dbSlides : fallbackSlides);
 
   const nextSlide = useCallback(() => {
-    if (slides.length === 0) return;
+    if (slides.length === 0 || isTransitioning) return;
+    setIsTransitioning(true);
     setCurrentSlide((prev) => (prev + 1) % slides.length);
-  }, [slides.length]);
+    setTimeout(() => setIsTransitioning(false), 500);
+  }, [slides.length, isTransitioning]);
 
   const prevSlide = useCallback(() => {
-    if (slides.length === 0) return;
+    if (slides.length === 0 || isTransitioning) return;
+    setIsTransitioning(true);
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-  }, [slides.length]);
+    setTimeout(() => setIsTransitioning(false), 500);
+  }, [slides.length, isTransitioning]);
 
   useEffect(() => {
     if (!isAutoPlaying || slides.length <= 1) return;
@@ -55,12 +58,9 @@ export function Hero() {
     }
   }, [slides.length, currentSlide]);
 
-  // Don't render anything while loading
   if (isLoading || slides.length === 0) {
     return null;
   }
-
-  const slide = slides[currentSlide];
 
   return (
     <section
@@ -76,59 +76,28 @@ export function Hero() {
       <div 
         className="relative w-full"
         style={{ 
-          paddingBottom: "26.32%", // 500/1900 = 0.2632
+          paddingBottom: "26.32%",
           maxHeight: "500px"
         }}
       >
-        {/* Carousel Container */}
-        <div className="absolute inset-0" style={{ perspective: "2000px" }}>
-          <AnimatePresence mode="popLayout" initial={false}>
-            <motion.div
+        {/* Carousel Container - Simple fade transition */}
+        <div className="absolute inset-0">
+          {slides.map((slide, index) => (
+            <div
               key={slide.id}
-              initial={{ 
-                rotateY: 45,
-                opacity: 0,
-                x: "10%",
-                boxShadow: "0 0 0 rgba(0,0,0,0)"
-              }}
-              animate={{ 
-                rotateY: 0,
-                opacity: 1,
-                x: "0%",
-                boxShadow: "0 0 0 rgba(0,0,0,0)"
-              }}
-              exit={{ 
-                rotateY: -45,
-                opacity: 0,
-                x: "-10%",
-                boxShadow: "-30px 0 60px rgba(0,0,0,0.4)"
-              }}
-              transition={{ 
-                duration: 1, 
-                ease: [0.25, 0.1, 0.25, 1]
-              }}
-              className="absolute inset-0 flex items-center justify-center"
-              style={{ 
-                backfaceVisibility: "hidden",
-                transformStyle: "preserve-3d"
-              }}
+              className={`absolute inset-0 flex items-center justify-center transition-opacity duration-500 ${
+                index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
+              }`}
             >
               <img
                 src={slide.image_url}
                 alt={slide.alt_text || "Slide"}
                 className="w-full h-auto max-h-full object-contain"
                 style={{ maxWidth: "1900px", maxHeight: "500px" }}
+                loading={index === 0 ? "eager" : "lazy"}
               />
-              {/* Shadow overlay for 3D depth */}
-              <motion.div
-                className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-black/20 pointer-events-none"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0 }}
-                exit={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
-              />
-            </motion.div>
-          </AnimatePresence>
+            </div>
+          ))}
         </div>
 
         {/* Navigation Arrows */}
@@ -136,14 +105,14 @@ export function Hero() {
           <>
             <button
               onClick={prevSlide}
-              className="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 bg-white/90 hover:bg-white rounded-full flex items-center justify-center transition-all z-10 shadow-md"
+              className="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 bg-white/90 hover:bg-white rounded-full flex items-center justify-center transition-all z-20 shadow-md"
               aria-label="Slide anterior"
             >
               <ChevronLeft className="h-5 w-5 md:h-6 md:w-6 text-foreground" />
             </button>
             <button
               onClick={nextSlide}
-              className="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 bg-white/90 hover:bg-white rounded-full flex items-center justify-center transition-all z-10 shadow-md"
+              className="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 bg-white/90 hover:bg-white rounded-full flex items-center justify-center transition-all z-20 shadow-md"
               aria-label="Próximo slide"
             >
               <ChevronRight className="h-5 w-5 md:h-6 md:w-6 text-foreground" />
@@ -153,11 +122,17 @@ export function Hero() {
 
         {/* Dots Navigation */}
         {slides.length > 1 && (
-          <div className="absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+          <div className="absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
             {slides.map((_, index) => (
               <button
                 key={index}
-                onClick={() => setCurrentSlide(index)}
+                onClick={() => {
+                  if (!isTransitioning) {
+                    setIsTransitioning(true);
+                    setCurrentSlide(index);
+                    setTimeout(() => setIsTransitioning(false), 500);
+                  }
+                }}
                 className={`rounded-full transition-all duration-300 ${
                   index === currentSlide
                     ? "bg-accent w-6 md:w-8 h-2"
@@ -171,15 +146,19 @@ export function Hero() {
 
         {/* Progress bar */}
         {slides.length > 1 && isAutoPlaying && (
-          <motion.div
-            className="absolute bottom-0 left-0 h-0.5 bg-accent"
-            initial={{ width: "0%" }}
-            animate={{ width: "100%" }}
-            transition={{ duration: 5, ease: "linear" }}
-            key={currentSlide}
-          />
+          <div className="absolute bottom-0 left-0 h-0.5 bg-accent z-20 progress-bar" key={currentSlide} />
         )}
       </div>
+
+      <style>{`
+        @keyframes progressBar {
+          from { width: 0%; }
+          to { width: 100%; }
+        }
+        .progress-bar {
+          animation: progressBar 5s linear;
+        }
+      `}</style>
     </section>
   );
 }

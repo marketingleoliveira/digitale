@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const clients = [
@@ -15,30 +14,25 @@ const clients = [
 export function Clients() {
   const { t } = useLanguage();
 
-  // Duplicate clients multiple times for seamless infinite scroll
-  const duplicatedClients = [...clients, ...clients, ...clients, ...clients];
+  // Duplicate clients for seamless scroll (reduced from 4x to 2x)
+  const duplicatedClients = [...clients, ...clients];
 
   return (
     <section className="py-16 md:py-20 bg-gradient-to-b from-background to-secondary/20 overflow-hidden">
       {/* Header */}
       <div className="container mx-auto px-6 mb-10 md:mb-12">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center"
-        >
+        <div className="text-center">
           <span className="section-subtitle">{t("clients.label")}</span>
           <h2 className="section-title mt-4">{t("clients.title")}</h2>
           <p className="text-muted-foreground mt-4 max-w-xl mx-auto">
             Grandes marcas escolhem a Digitale pela qualidade, inovação e compromisso com a excelência.
           </p>
-        </motion.div>
+        </div>
       </div>
 
       {/* Full-width Marquee */}
       <div className="relative w-full">
-        {/* Gradient Masks - Full width */}
+        {/* Gradient Masks */}
         <div className="absolute left-0 top-0 bottom-0 w-24 md:w-40 bg-gradient-to-r from-background via-background/80 to-transparent z-10 pointer-events-none" />
         <div className="absolute right-0 top-0 bottom-0 w-24 md:w-40 bg-gradient-to-l from-background via-background/80 to-transparent z-10 pointer-events-none" />
         
@@ -53,7 +47,8 @@ export function Clients() {
                 <img
                   src={client.logo}
                   alt={client.name}
-                  className="max-h-10 md:max-h-12 max-w-full object-contain grayscale group-hover:grayscale-0 opacity-50 group-hover:opacity-100 transition-all duration-500 group-hover:scale-110"
+                  loading="lazy"
+                  className="max-h-10 md:max-h-12 max-w-full object-contain grayscale group-hover:grayscale-0 opacity-50 group-hover:opacity-100 transition-all duration-300 group-hover:scale-110"
                 />
               </div>
             </div>
@@ -63,13 +58,7 @@ export function Clients() {
 
       {/* Trust Badges */}
       <div className="container mx-auto px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.3 }}
-          className="mt-10 md:mt-12 flex flex-wrap items-center justify-center gap-4 md:gap-10"
-        >
+        <div className="mt-10 md:mt-12 flex flex-wrap items-center justify-center gap-4 md:gap-10">
           {[
             "Qualidade Certificada",
             "Entrega em Todo Brasil",
@@ -84,7 +73,7 @@ export function Clients() {
               <span>{badge}</span>
             </div>
           ))}
-        </motion.div>
+        </div>
       </div>
 
       <style>{`
@@ -93,7 +82,7 @@ export function Clients() {
           100% { transform: translateX(-50%); }
         }
         .marquee-track {
-          animation: marquee 40s linear infinite;
+          animation: marquee 30s linear infinite;
           width: fit-content;
         }
         .marquee-track:hover {

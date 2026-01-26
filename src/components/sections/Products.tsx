@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -43,7 +42,7 @@ const defaultImages: Record<string, string> = {
 const getFabricImage = (fabric: { slug?: string; image_url?: string | null }) => {
   if (fabric.image_url) return fabric.image_url;
   if (fabric.slug && defaultImages[fabric.slug]) return defaultImages[fabric.slug];
-  return fabricMilano; // Ultimate fallback
+  return fabricMilano;
 };
 
 const fallbackFabrics = [
@@ -56,11 +55,9 @@ const fallbackFabrics = [
 export function Products() {
   const { t } = useLanguage();
 
-  // Fetch featured fabrics from database (or fallback to latest if none featured)
   const { data: fabrics, isLoading: fabricsLoading } = useQuery({
     queryKey: ["featured-fabrics-home"],
     queryFn: async () => {
-      // First try to get featured fabrics
       const { data: featuredData, error: featuredError } = await supabase
         .from("fabrics")
         .select("id, name, slug, image_url, short_description")
@@ -71,12 +68,10 @@ export function Products() {
       
       if (featuredError) throw featuredError;
       
-      // If we have featured fabrics, return them
       if (featuredData && featuredData.length > 0) {
         return featuredData;
       }
       
-      // Otherwise, fallback to latest fabrics
       const { data, error } = await supabase
         .from("fabrics")
         .select("id, name, slug, image_url, short_description")
@@ -89,7 +84,6 @@ export function Products() {
     },
   });
 
-  // Fetch latest prints from database
   const { data: prints, isLoading: printsLoading } = useQuery({
     queryKey: ["latest-prints-home"],
     queryFn: async () => {
@@ -111,15 +105,10 @@ export function Products() {
     <section className="py-16 md:py-24 bg-secondary/30">
       <div className="container mx-auto px-4 md:px-6">
         {/* Fabrics Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-10 md:mb-12"
-        >
+        <div className="text-center mb-10 md:mb-12">
           <h2 className="section-title">Últimos Lançamentos</h2>
           <span className="inline-block mt-3 text-accent font-semibold text-sm md:text-base tracking-wide uppercase">Tecidos</span>
-        </motion.div>
+        </div>
 
         {/* Fabrics Grid */}
         {fabricsLoading ? (
@@ -135,28 +124,25 @@ export function Products() {
         ) : (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
             {displayFabrics.map((fabric, index) => (
-              <motion.div
+              <div
                 key={fabric.slug || index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
                 className="group"
               >
                 <Link to={`/tecidos/${fabric.slug}`} className="block">
-                  <div className="relative bg-card rounded-xl md:rounded-2xl overflow-hidden shadow-md transition-all duration-500 group-hover:shadow-xl group-hover:-translate-y-2">
+                  <div className="relative bg-card rounded-xl md:rounded-2xl overflow-hidden shadow-md transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-2">
                     {/* Image Container */}
                     <div className="relative h-48 md:h-72 overflow-hidden">
                       <img
                         src={getFabricImage(fabric)}
                         alt={fabric.name}
-                        className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
+                        loading="lazy"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />
                       {/* Gradient Overlay on Hover */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       
                       {/* Logo Badge */}
-                      <div className="absolute top-2 right-2 md:top-3 md:right-3 w-8 h-8 md:w-10 md:h-10 bg-white rounded-lg flex items-center justify-center shadow-lg p-1.5 transition-transform duration-500 group-hover:scale-110">
+                      <div className="absolute top-2 right-2 md:top-3 md:right-3 w-8 h-8 md:w-10 md:h-10 bg-white rounded-lg flex items-center justify-center shadow-lg p-1.5 transition-transform duration-300 group-hover:scale-110">
                         <img 
                           src={logoColor} 
                           alt="Digitale" 
@@ -165,7 +151,7 @@ export function Products() {
                       </div>
 
                       {/* Hover Content */}
-                      <div className="absolute inset-0 hidden md:flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
+                      <div className="absolute inset-0 hidden md:flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <div className="bg-white text-foreground px-5 py-2.5 rounded-full font-semibold shadow-xl flex items-center gap-2 text-sm">
                           {t("products.viewMore")}
                           <ArrowRight className="h-4 w-4" />
@@ -190,22 +176,16 @@ export function Products() {
                     </div>
                   </div>
                 </Link>
-              </motion.div>
+              </div>
             ))}
           </div>
         )}
 
-
         {/* Prints Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-10 md:mb-12 mt-16 md:mt-20"
-        >
+        <div className="text-center mb-10 md:mb-12 mt-16 md:mt-20">
           <h2 className="section-title">Últimos Lançamentos</h2>
           <span className="inline-block mt-3 text-accent font-semibold text-sm md:text-base tracking-wide uppercase">Estampas</span>
-        </motion.div>
+        </div>
 
         {/* Prints Grid */}
         {printsLoading ? (
@@ -216,19 +196,16 @@ export function Products() {
           </div>
         ) : prints && prints.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-5 mb-8">
-            {prints.map((print, index) => (
-              <motion.div
+            {prints.map((print) => (
+              <div
                 key={print.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.05 }}
-                className="group relative aspect-square rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer"
+                className="group relative aspect-square rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer"
               >
                 <img
                   src={print.image_url}
                   alt={print.name || print.code}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  loading="lazy"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                 />
                 
                 {/* Overlay */}
@@ -238,7 +215,7 @@ export function Products() {
                     <span className="text-white/80 text-xs">{print.name}</span>
                   )}
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         ) : (
@@ -246,7 +223,6 @@ export function Products() {
             <p>Nenhuma estampa cadastrada ainda.</p>
           </div>
         )}
-
       </div>
     </section>
   );

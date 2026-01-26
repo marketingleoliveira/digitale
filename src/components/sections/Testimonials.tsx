@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,17 +18,6 @@ export function Testimonials() {
   const [current, setCurrent] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const { t } = useLanguage();
-  const sectionRef = useRef<HTMLElement>(null);
-
-  // Parallax effect - ALL hooks must be called unconditionally at top level
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"]
-  });
-
-  const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
-  const opacityOrbs = useTransform(scrollYProgress, [0, 0.5, 1], [0.03, 0.08, 0.03]);
-  const opacityCenterOrb = useTransform(scrollYProgress, [0, 0.5, 1], [0.01, 0.03, 0.01]);
 
   useEffect(() => {
     fetchTestimonials();
@@ -57,7 +45,6 @@ export function Testimonials() {
     setCurrent((prev) => (prev - 1 + testimonials.length) % testimonials.length);
   }, [testimonials.length]);
 
-  // Auto-play with pause on hover
   useEffect(() => {
     if (!isAutoPlaying || testimonials.length === 0) return;
     const timer = setInterval(next, 6000);
@@ -80,39 +67,21 @@ export function Testimonials() {
   }
 
   return (
-    <section ref={sectionRef} className="py-24 bg-primary relative overflow-hidden">
-      {/* Parallax Background Elements */}
-      <motion.div 
-        className="absolute inset-0 pointer-events-none"
-        style={{ y: backgroundY }}
-      >
-        <motion.div 
-          className="absolute top-0 left-0 w-[600px] h-[600px] bg-accent rounded-full blur-[150px] -translate-x-1/2 -translate-y-1/2"
-          style={{ opacity: opacityOrbs }}
-        />
-        <motion.div 
-          className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-accent rounded-full blur-[150px] translate-x-1/2 translate-y-1/2"
-          style={{ opacity: opacityOrbs }}
-        />
-        <motion.div 
-          className="absolute top-1/2 left-1/2 w-[400px] h-[400px] bg-primary-foreground rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2"
-          style={{ opacity: opacityCenterOrb }}
-        />
-      </motion.div>
+    <section className="py-24 bg-primary relative overflow-hidden">
+      {/* Static Background Elements */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-accent/5 rounded-full blur-[150px] -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-accent/5 rounded-full blur-[150px] translate-x-1/2 translate-y-1/2" />
+      </div>
 
-      {/* Decorative Grid Pattern */}
+      {/* Grid Pattern */}
       <div className="absolute inset-0 opacity-[0.02]" style={{
         backgroundImage: `linear-gradient(hsl(var(--primary-foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary-foreground)) 1px, transparent 1px)`,
         backgroundSize: '60px 60px'
       }} />
       
       <div className="container mx-auto px-6 relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
+        <div className="text-center mb-16">
           <span className="text-accent text-sm uppercase tracking-[0.25em] font-semibold">
             {t("testimonials.label")}
           </span>
@@ -122,7 +91,7 @@ export function Testimonials() {
           <p className="text-primary-foreground/60 mt-4 max-w-2xl mx-auto">
             Milhares de empresas confiam na Digitale para criar produtos de qualidade superior
           </p>
-        </motion.div>
+        </div>
 
         {/* Desktop: 3 Cards View */}
         <div 
@@ -138,31 +107,21 @@ export function Testimonials() {
               const isCenter = testimonials.length < 3 ? true : position === 1;
               
               return (
-                <motion.div
+                <div
                   key={testimonial.id}
-                  initial={false}
-                  animate={{
-                    scale: isCenter ? 1 : 0.9,
-                    opacity: isCenter ? 1 : 0.5,
-                    y: isCenter ? 0 : 20,
-                  }}
-                  transition={{ duration: 0.4, ease: "easeOut" }}
-                  className={`w-[400px] ${isCenter ? 'z-10' : 'z-0'}`}
+                  className={`w-[400px] transition-all duration-300 ${
+                    isCenter ? 'scale-100 opacity-100 z-10' : 'scale-90 opacity-50 z-0'
+                  }`}
                 >
                   <div 
-                    className={`bg-card rounded-2xl p-8 transition-all duration-300 ${
-                      isCenter 
-                        ? 'shadow-2xl shadow-black/20' 
-                        : 'shadow-lg'
+                    className={`bg-card rounded-2xl p-8 transition-shadow duration-300 ${
+                      isCenter ? 'shadow-2xl shadow-black/20' : 'shadow-lg'
                     }`}
                   >
                     {/* Rating Stars */}
                     <div className="flex gap-1 mb-4">
                       {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star 
-                          key={i} 
-                          className="w-5 h-5 fill-accent text-accent" 
-                        />
+                        <Star key={i} className="w-5 h-5 fill-accent text-accent" />
                       ))}
                     </div>
 
@@ -177,6 +136,7 @@ export function Testimonials() {
                         <img
                           src={testimonial.author_photo_url}
                           alt={testimonial.author_name}
+                          loading="lazy"
                           className="w-14 h-14 rounded-full object-cover border-2 border-border shadow-lg"
                         />
                       ) : (
@@ -201,7 +161,7 @@ export function Testimonials() {
                       </div>
                     )}
                   </div>
-                </motion.div>
+                </div>
               );
             })}
           </div>
@@ -225,67 +185,56 @@ export function Testimonials() {
           )}
         </div>
 
-        {/* Mobile: Single Card with Swipe */}
+        {/* Mobile: Single Card */}
         <div 
           className="lg:hidden"
           onMouseEnter={() => setIsAutoPlaying(false)}
           onMouseLeave={() => setIsAutoPlaying(true)}
         >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={current}
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              transition={{ duration: 0.3 }}
-              className="bg-card rounded-2xl p-6 md:p-8 shadow-2xl"
-            >
-              {/* Rating Stars */}
-              <div className="flex gap-1 mb-4">
-                {[...Array(testimonials[current]?.rating || 5)].map((_, i) => (
-                  <Star 
-                    key={i} 
-                    className="w-5 h-5 fill-accent text-accent" 
-                  />
-                ))}
-              </div>
+          <div className="bg-card rounded-2xl p-6 md:p-8 shadow-2xl">
+            {/* Rating Stars */}
+            <div className="flex gap-1 mb-4">
+              {[...Array(testimonials[current]?.rating || 5)].map((_, i) => (
+                <Star key={i} className="w-5 h-5 fill-accent text-accent" />
+              ))}
+            </div>
 
-              {/* Quote */}
-              <blockquote className="text-foreground text-lg md:text-xl leading-relaxed mb-6">
-                "{testimonials[current]?.quote}"
-              </blockquote>
+            {/* Quote */}
+            <blockquote className="text-foreground text-lg md:text-xl leading-relaxed mb-6">
+              "{testimonials[current]?.quote}"
+            </blockquote>
 
-              {/* Author */}
-              <div className="flex items-center gap-4 pt-4 border-t border-border">
-                {testimonials[current]?.author_photo_url ? (
-                  <img
-                    src={testimonials[current].author_photo_url}
-                    alt={testimonials[current].author_name}
-                    className="w-14 h-14 rounded-full object-cover border-2 border-border shadow-lg"
-                  />
-                ) : (
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground text-xl font-bold shadow-lg">
-                    {testimonials[current]?.author_name.charAt(0)}
-                  </div>
-                )}
-                <div className="flex-1">
-                  <p className="font-bold text-foreground">{testimonials[current]?.author_name}</p>
-                  {testimonials[current]?.author_company && (
-                    <p className="text-accent text-sm font-medium">{testimonials[current].author_company}</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Years Badge */}
-              {testimonials[current]?.years_partnership && (
-                <div className="mt-4">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-medium">
-                    {testimonials[current].years_partnership}
-                  </span>
+            {/* Author */}
+            <div className="flex items-center gap-4 pt-4 border-t border-border">
+              {testimonials[current]?.author_photo_url ? (
+                <img
+                  src={testimonials[current].author_photo_url}
+                  alt={testimonials[current].author_name}
+                  loading="lazy"
+                  className="w-14 h-14 rounded-full object-cover border-2 border-border shadow-lg"
+                />
+              ) : (
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground text-xl font-bold shadow-lg">
+                  {testimonials[current]?.author_name.charAt(0)}
                 </div>
               )}
-            </motion.div>
-          </AnimatePresence>
+              <div className="flex-1">
+                <p className="font-bold text-foreground">{testimonials[current]?.author_name}</p>
+                {testimonials[current]?.author_company && (
+                  <p className="text-accent text-sm font-medium">{testimonials[current].author_company}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Years Badge */}
+            {testimonials[current]?.years_partnership && (
+              <div className="mt-4">
+                <span className="inline-flex items-center px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-medium">
+                  {testimonials[current].years_partnership}
+                </span>
+              </div>
+            )}
+          </div>
 
           {/* Mobile Navigation */}
           {testimonials.length > 1 && (
