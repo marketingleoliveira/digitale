@@ -110,8 +110,7 @@ export function Products() {
       <div className="container mx-auto px-4 md:px-6">
         {/* Fabrics Section */}
         <div className="text-center mb-10 md:mb-12">
-          <h2 className="section-title">Últimos Lançamentos</h2>
-          <span className="inline-block mt-3 text-accent font-semibold text-sm md:text-base tracking-wide uppercase">Tecidos</span>
+          <h2 className="section-title">Últimos Tecidos</h2>
         </div>
 
         {/* Fabrics Grid */}
@@ -187,8 +186,7 @@ export function Products() {
 
         {/* Prints Section */}
         <div className="text-center mb-10 md:mb-12 mt-16 md:mt-20">
-          <h2 className="section-title">Últimos Lançamentos</h2>
-          <span className="inline-block mt-3 text-accent font-semibold text-sm md:text-base tracking-wide uppercase">Estampas</span>
+          <h2 className="section-title">Últimas Estampas</h2>
         </div>
 
         {/* Prints Grid */}
