@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, X, ChevronDown, Phone, Clock, Search, Headphones } from "lucide-react";
+import { Menu, X, ChevronDown, Phone, Clock, Headphones } from "lucide-react";
 import logoWhite from "@/assets/logo-white.png";
 import logoColor from "@/assets/logo-color.png";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -11,6 +11,7 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [openMobileDropdown, setOpenMobileDropdown] = useState<string | null>(null);
   const location = useLocation();
   const { t } = useLanguage();
 
@@ -136,11 +137,8 @@ export function Header() {
               ))}
             </nav>
 
-            {/* CTA + SAC + Search */}
+            {/* CTA + SAC */}
             <div className="hidden lg:flex items-center gap-3">
-              <button className="p-2 text-muted-foreground hover:text-accent transition-colors">
-                <Search className="h-5 w-5" />
-              </button>
               <a
                 href="https://sac.digitaletextil.com.br"
                 target="_blank"
@@ -196,29 +194,64 @@ export function Header() {
                 </a>
                 
                 {navigation.map((item) => (
-                  <div key={item.name}>
-                    <Link
-                      to={item.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={`block py-3 font-medium border-b border-border/50 ${
-                        location.pathname === item.href ? "text-accent" : "text-foreground"
-                      }`}
-                    >
-                      {item.name}
-                    </Link>
-                    {item.children && (
-                      <div className="pl-4 pb-2">
-                        {item.children.map((child) => (
-                          <Link
-                            key={child.name}
-                            to={child.href}
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className="block py-2 text-sm text-muted-foreground hover:text-accent"
-                          >
-                            {child.name}
-                          </Link>
-                        ))}
-                      </div>
+                  <div key={item.name} className="border-b border-border/50">
+                    {item.children ? (
+                      <>
+                        <button
+                          onClick={() => setOpenMobileDropdown(openMobileDropdown === item.name ? null : item.name)}
+                          className={`w-full flex items-center justify-between py-3 font-medium ${
+                            location.pathname === item.href ? "text-accent" : "text-foreground"
+                          }`}
+                        >
+                          <span>{item.name}</span>
+                          <ChevronDown 
+                            className={`h-4 w-4 transition-transform duration-200 ${
+                              openMobileDropdown === item.name ? "rotate-180" : ""
+                            }`} 
+                          />
+                        </button>
+                        <AnimatePresence>
+                          {openMobileDropdown === item.name && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.2 }}
+                              className="overflow-hidden"
+                            >
+                              <div className="pl-4 pb-3">
+                                <Link
+                                  to={item.href}
+                                  onClick={() => setIsMobileMenuOpen(false)}
+                                  className="block py-2 text-sm text-muted-foreground hover:text-accent"
+                                >
+                                  Ver todos
+                                </Link>
+                                {item.children.map((child) => (
+                                  <Link
+                                    key={child.name}
+                                    to={child.href}
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className="block py-2 text-sm text-muted-foreground hover:text-accent"
+                                  >
+                                    {child.name}
+                                  </Link>
+                                ))}
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </>
+                    ) : (
+                      <Link
+                        to={item.href}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={`block py-3 font-medium ${
+                          location.pathname === item.href ? "text-accent" : "text-foreground"
+                        }`}
+                      >
+                        {item.name}
+                      </Link>
                     )}
                   </div>
                 ))}
