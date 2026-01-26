@@ -32,12 +32,30 @@ import fabricMilano from "@/assets/fabric-milano.jpg";
 import fabricLyon from "@/assets/fabric-lyon.jpg";
 import fabricAerodry from "@/assets/fabric-aerodry.jpg";
 import fabricVeneza from "@/assets/fabric-veneza.jpg";
+import fabricOceanic from "@/assets/fabric-oceanic.jpg";
+import fabricOceanicEco from "@/assets/fabric-oceanic-eco.jpg";
+import fabricSoftskin from "@/assets/fabric-softskin.jpg";
+import fabricIntense from "@/assets/fabric-intense.jpg";
+import fabricCorsega from "@/assets/fabric-corsega.jpg";
+import fabricVelocity from "@/assets/fabric-velocity.jpg";
+import fabricFlow from "@/assets/fabric-flow.jpg";
+import fabricCaribe from "@/assets/fabric-caribe.jpg";
+import fabricParis from "@/assets/fabric-paris.jpg";
 
 const defaultImages: Record<string, string> = {
   milano: fabricMilano,
   lyon: fabricLyon,
   aerodry: fabricAerodry,
   veneza: fabricVeneza,
+  oceanic: fabricOceanic,
+  "oceanic-eco": fabricOceanicEco,
+  softskin: fabricSoftskin,
+  intense: fabricIntense,
+  corsega: fabricCorsega,
+  velocity: fabricVelocity,
+  flow: fabricFlow,
+  caribe: fabricCaribe,
+  paris: fabricParis,
 };
 
 function FabricsContent() {
