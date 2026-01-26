@@ -136,7 +136,10 @@ export function Footer() {
       <div className="border-t border-white/10">
         <div className="container mx-auto px-4 md:px-6 py-4 md:py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4 text-xs md:text-sm text-white/50">
-            <p className="text-center md:text-left">© {new Date().getFullYear()} Digitale Têxtil. {t("footer.rights")}</p>
+            <div className="text-center md:text-left space-y-1">
+              <p>© {new Date().getFullYear()} Digitale Têxtil. {t("footer.rights")}</p>
+              <p className="text-white/40">CNPJ: 74.447.996/0001-14</p>
+            </div>
             <div className="flex items-center gap-4 md:gap-6">
               <Link 
                 to="/politica-de-privacidade" 
