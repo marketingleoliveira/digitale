@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, DragEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,19 +15,38 @@ interface ImageUploadProps {
 
 export function ImageUpload({ bucket, folder = "", value, onChange, className }: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
 
-    // Validate file type
+  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      processFile(files[0]);
+    }
+  };
+
+  const processFile = async (file: File) => {
     if (!file.type.startsWith("image/")) {
       toast.error("Por favor, selecione uma imagem válida.");
       return;
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error("A imagem deve ter no máximo 5MB.");
       return;
@@ -66,6 +85,12 @@ export function ImageUpload({ bucket, folder = "", value, onChange, className }:
     }
   };
 
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    processFile(file);
+  };
+
   const handleRemove = () => {
     onChange("");
   };
@@ -99,26 +124,32 @@ export function ImageUpload({ bucket, folder = "", value, onChange, className }:
           </Button>
         </div>
       ) : (
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full h-48 flex flex-col gap-2"
+        <div
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
-          disabled={isUploading}
+          className={`w-full h-48 flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
+            isDragging 
+              ? "border-primary bg-primary/5" 
+              : "border-muted-foreground/25 hover:border-primary/50"
+          } ${isUploading ? "pointer-events-none opacity-50" : ""}`}
         >
           {isUploading ? (
             <>
-              <Loader2 className="h-8 w-8 animate-spin" />
-              <span>Enviando...</span>
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Enviando...</span>
             </>
           ) : (
             <>
-              <Upload className="h-8 w-8" />
-              <span>Clique para enviar imagem</span>
+              <Upload className={`h-8 w-8 ${isDragging ? "text-primary" : "text-muted-foreground"}`} />
+              <span className="text-sm text-muted-foreground">
+                {isDragging ? "Solte a imagem aqui" : "Arraste ou clique para enviar"}
+              </span>
               <span className="text-xs text-muted-foreground">PNG, JPG até 5MB</span>
             </>
           )}
-        </Button>
+        </div>
       )}
     </div>
   );
