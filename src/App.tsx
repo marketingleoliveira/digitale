@@ -38,6 +38,7 @@ import PrintCategories from "./pages/admin/PrintCategories";
 import JobOpenings from "./pages/admin/JobOpenings";
 import JobApplications from "./pages/admin/JobApplications";
 import Permissions from "./pages/admin/Permissions";
+import SegmentsAdmin from "./pages/admin/Segments";
 import { NewsletterPopup } from "./components/newsletter/NewsletterPopup";
 
 const queryClient = new QueryClient({
@@ -109,6 +110,7 @@ const App = () => (
               <Route path="/admin/permissions" element={<ProtectedRoute requireAdmin><Permissions /></ProtectedRoute>} />
               <Route path="/admin/prints" element={<ProtectedRoute><PrintsAdmin /></ProtectedRoute>} />
               <Route path="/admin/print-categories" element={<ProtectedRoute><PrintCategories /></ProtectedRoute>} />
+              <Route path="/admin/segments" element={<ProtectedRoute><SegmentsAdmin /></ProtectedRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
