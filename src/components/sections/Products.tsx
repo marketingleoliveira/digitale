@@ -12,6 +12,39 @@ import fabricMilano from "@/assets/fabric-milano.jpg";
 import fabricLyon from "@/assets/fabric-lyon.jpg";
 import fabricAerodry from "@/assets/fabric-aerodry.jpg";
 import fabricVeneza from "@/assets/fabric-veneza.jpg";
+import fabricOceanic from "@/assets/fabric-oceanic.jpg";
+import fabricOceanicEco from "@/assets/fabric-oceanic-eco.jpg";
+import fabricSoftskin from "@/assets/fabric-softskin.jpg";
+import fabricIntense from "@/assets/fabric-intense.jpg";
+import fabricCorsega from "@/assets/fabric-corsega.jpg";
+import fabricVelocity from "@/assets/fabric-velocity.jpg";
+import fabricFlow from "@/assets/fabric-flow.jpg";
+import fabricCaribe from "@/assets/fabric-caribe.jpg";
+import fabricParis from "@/assets/fabric-paris.jpg";
+
+// Default images mapping by slug
+const defaultImages: Record<string, string> = {
+  milano: fabricMilano,
+  lyon: fabricLyon,
+  aerodry: fabricAerodry,
+  veneza: fabricVeneza,
+  oceanic: fabricOceanic,
+  "oceanic-eco": fabricOceanicEco,
+  softskin: fabricSoftskin,
+  intense: fabricIntense,
+  corsega: fabricCorsega,
+  velocity: fabricVelocity,
+  flow: fabricFlow,
+  caribe: fabricCaribe,
+  paris: fabricParis,
+};
+
+// Helper function to get fabric image
+const getFabricImage = (fabric: { slug?: string; image_url?: string | null }) => {
+  if (fabric.image_url) return fabric.image_url;
+  if (fabric.slug && defaultImages[fabric.slug]) return defaultImages[fabric.slug];
+  return fabricMilano; // Ultimate fallback
+};
 
 const fallbackFabrics = [
   { name: "Milano", slug: "milano", image_url: fabricMilano, short_description: "Tecido de alta compressão, ideal para leggings e shorts fitness." },
@@ -98,11 +131,10 @@ export function Products() {
                     {/* Image Container */}
                     <div className="relative h-48 md:h-72 overflow-hidden">
                       <img
-                        src={fabric.image_url}
+                        src={getFabricImage(fabric)}
                         alt={fabric.name}
                         className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
                       />
-                      
                       {/* Gradient Overlay on Hover */}
                       <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                       
