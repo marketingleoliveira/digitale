@@ -40,7 +40,16 @@ import JobApplications from "./pages/admin/JobApplications";
 import Permissions from "./pages/admin/Permissions";
 import { NewsletterPopup } from "./components/newsletter/NewsletterPopup";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 2,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
