@@ -72,16 +72,10 @@ export function Hero() {
             transition={{ duration: 0.6, ease: "easeInOut" }}
             className="absolute inset-0"
           >
-            <motion.img
+            <img
               src={slide.image_url}
               alt={slide.alt_text || "Slide"}
               className="w-full h-full object-cover"
-              initial={{ scale: 1 }}
-              animate={{ scale: 1.02 }}
-              transition={{ 
-                duration: 5,
-                ease: "linear",
-              }}
             />
           </motion.div>
         </AnimatePresence>
