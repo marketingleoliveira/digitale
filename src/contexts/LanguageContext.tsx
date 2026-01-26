@@ -81,6 +81,7 @@ const translations: Record<Language, Record<string, string>> = {
     "blog.clearSearch": "Limpar busca",
     
     // CTA
+    "cta.label": "Atendimento Especializado",
     "cta.title": "Pronto para Revolucionar Seus Produtos?",
     "cta.description": "Entre em contato com nossa equipe e descubra como nossos tecidos podem elevar a qualidade dos seus produtos.",
     "cta.button": "CONTATO",

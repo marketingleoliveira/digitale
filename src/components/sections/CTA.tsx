@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Phone, Mail, ArrowRight, MessageCircle } from "lucide-react";
+import { Phone, Mail, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -7,74 +7,99 @@ export function CTA() {
   const { t } = useLanguage();
 
   return (
-    <section className="py-16 md:py-24 relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 navy-gradient" />
+    <section className="py-20 md:py-28 relative overflow-hidden">
+      {/* Background with gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-primary/90" />
       
-      {/* Pattern Overlay */}
-      <div className="absolute inset-0 opacity-5">
+      {/* Dotted Pattern Overlay */}
+      <div className="absolute inset-0">
         <div 
-          className="absolute inset-0" 
+          className="absolute inset-0 opacity-[0.08]" 
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='1' fill-rule='evenodd'/%3E%3C/svg%3E")`,
+            backgroundImage: `radial-gradient(circle, hsl(var(--background)) 1.5px, transparent 1.5px)`,
+            backgroundSize: '24px 24px',
           }}
         />
       </div>
 
+      {/* Subtle glow effects */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+
       <div className="container mx-auto px-4 md:px-6 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
           >
-            <span className="inline-block px-3 py-1.5 md:px-4 md:py-2 bg-accent/20 text-accent rounded-full text-xs md:text-sm font-semibold mb-4 md:mb-6">
+            {/* Label Badge */}
+            <motion.span 
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="inline-block px-4 py-2 bg-accent text-accent-foreground rounded-full text-xs md:text-sm font-semibold mb-6 md:mb-8 shadow-lg shadow-accent/30"
+            >
               {t("cta.label")}
-            </span>
+            </motion.span>
             
-            <h2 className="text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-4 md:mb-6 font-serif leading-tight px-2">
+            {/* Title */}
+            <h2 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-primary-foreground mb-5 md:mb-6 leading-tight tracking-tight">
               {t("cta.title")}
             </h2>
             
-            <p className="text-white/70 text-base md:text-lg lg:text-xl mb-8 md:mb-10 max-w-2xl mx-auto px-2">
+            {/* Description */}
+            <p className="text-primary-foreground/70 text-base md:text-lg lg:text-xl mb-10 md:mb-12 max-w-2xl mx-auto leading-relaxed">
               {t("cta.description")}
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center mb-8 md:mb-12 px-2">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 md:mb-16">
               <Link
                 to="/contato"
-                className="inline-flex items-center justify-center gap-2 md:gap-3 bg-accent hover:bg-orange-light text-white px-6 md:px-10 py-4 md:py-5 rounded-full font-semibold text-sm md:text-lg transition-all duration-300 hover:shadow-lg hover:shadow-accent/30 hover:-translate-y-1"
+                className="inline-flex items-center justify-center gap-3 bg-accent hover:bg-accent/90 text-accent-foreground px-8 md:px-10 py-4 md:py-5 rounded-full font-semibold text-base md:text-lg transition-all duration-300 hover:shadow-xl hover:shadow-accent/40 hover:-translate-y-1 active:translate-y-0"
               >
-                <MessageCircle className="h-4 w-4 md:h-5 md:w-5" />
+                <MessageCircle className="h-5 w-5" />
                 {t("cta.button")}
               </Link>
               <a
                 href="tel:+551120649662"
-                className="inline-flex items-center justify-center gap-2 md:gap-3 border-2 border-white/30 text-white px-6 md:px-10 py-4 md:py-5 rounded-full font-semibold text-sm md:text-lg hover:bg-white/10 transition-all duration-300"
+                className="inline-flex items-center justify-center gap-3 border-2 border-primary-foreground/30 text-primary-foreground px-8 md:px-10 py-4 md:py-5 rounded-full font-semibold text-base md:text-lg hover:bg-primary-foreground/10 hover:border-primary-foreground/50 transition-all duration-300"
               >
-                <Phone className="h-4 w-4 md:h-5 md:w-5" />
+                <Phone className="h-5 w-5" />
                 {t("nav.contact")}
               </a>
             </div>
 
             {/* Contact Info */}
-            <div className="flex flex-col sm:flex-row justify-center gap-4 md:gap-8 text-white/60 text-sm md:text-base">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="flex flex-col sm:flex-row justify-center items-center gap-6 md:gap-10 text-primary-foreground/60"
+            >
               <a 
                 href="tel:+551120649662" 
-                className="flex items-center justify-center gap-2 md:gap-3 hover:text-accent transition-colors"
+                className="flex items-center gap-3 hover:text-accent transition-colors duration-300 group"
               >
-                <Phone className="h-4 w-4 md:h-5 md:w-5" />
-                <span>+55 11 2064-9662</span>
+                <div className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
+                  <Phone className="h-4 w-4" />
+                </div>
+                <span className="text-sm md:text-base font-medium">+55 11 2064-9662</span>
               </a>
               <a 
                 href="mailto:atendimento@digitaletextil.com.br" 
-                className="flex items-center justify-center gap-2 md:gap-3 hover:text-accent transition-colors"
+                className="flex items-center gap-3 hover:text-accent transition-colors duration-300 group"
               >
-                <Mail className="h-4 w-4 md:h-5 md:w-5" />
-                <span className="text-xs md:text-base">atendimento@digitaletextil.com.br</span>
+                <div className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
+                  <Mail className="h-4 w-4" />
+                </div>
+                <span className="text-sm md:text-base font-medium">atendimento@digitaletextil.com.br</span>
               </a>
-            </div>
+            </motion.div>
           </motion.div>
         </div>
       </div>
