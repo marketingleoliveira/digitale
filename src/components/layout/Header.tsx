@@ -34,7 +34,14 @@ export function Header() {
     },
     { name: t("nav.fabrics"), href: "/tecidos" },
     { name: t("nav.prints"), href: "/estampas" },
-    { name: t("nav.segments"), href: "/segmentos" },
+    { 
+      name: t("nav.segments"), 
+      href: "/segmentos",
+      children: [
+        { name: "Praia", href: "/segmentos/praia" },
+        { name: "Esportivo", href: "/segmentos/esportivo" },
+      ]
+    },
     { name: t("nav.careers"), href: "/trabalhe-conosco" },
   ];
 
