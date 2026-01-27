@@ -131,8 +131,8 @@ function FabricsContent() {
             <p className="text-white/70 text-lg max-w-2xl mx-auto mb-4">
               Conheça nossa linha completa de tecidos de alta performance para moda esportiva e fitness.
             </p>
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-white/80 text-sm">
-              <Eye className="h-4 w-4" />
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-white/80 text-sm animate-pulse cursor-default">
+              <Eye className="h-4 w-4 animate-bounce" />
               <span>Clique nos tecidos para ver detalhes completos</span>
             </div>
           </div>
