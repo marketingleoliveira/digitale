@@ -317,31 +317,33 @@ const SegmentDetail = () => {
 
                 {/* Tab Content */}
                 <AnimatePresence mode="wait">
-                  <motion.div
-                    key={activeTab}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                    className="bg-background rounded-3xl p-8 border border-border"
-                  >
-                    <h3 className="text-2xl font-bold text-foreground mb-4">
-                      {segment.subcategories[activeTab].name}
-                    </h3>
-                    <p className="text-muted-foreground text-lg mb-6">
-                      {segment.subcategories[activeTab].description}
-                    </p>
-                    <div className="flex flex-wrap gap-3">
-                      {segment.subcategories[activeTab].features.map((feature) => (
-                        <span
-                          key={feature}
-                          className="px-4 py-2 bg-accent/10 border border-accent/30 rounded-full text-sm text-accent font-medium"
-                        >
-                          {feature}
-                        </span>
-                      ))}
-                    </div>
-                  </motion.div>
+                  {segment.subcategories[activeTab] && (
+                    <motion.div
+                      key={activeTab}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                      className="bg-background rounded-3xl p-8 border border-border"
+                    >
+                      <h3 className="text-2xl font-bold text-foreground mb-4">
+                        {segment.subcategories[activeTab].name}
+                      </h3>
+                      <p className="text-muted-foreground text-lg mb-6">
+                        {segment.subcategories[activeTab].description}
+                      </p>
+                      <div className="flex flex-wrap gap-3">
+                        {segment.subcategories[activeTab].features?.map((feature) => (
+                          <span
+                            key={feature}
+                            className="px-4 py-2 bg-accent/10 border border-accent/30 rounded-full text-sm text-accent font-medium"
+                          >
+                            {feature}
+                          </span>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
                 </AnimatePresence>
               </motion.div>
             </div>
