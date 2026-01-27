@@ -128,9 +128,13 @@ function FabricsContent() {
             <h1 className="text-4xl md:text-5xl font-bold mt-4 mb-6">
               Nossos Tecidos
             </h1>
-            <p className="text-white/70 text-lg max-w-2xl mx-auto">
+            <p className="text-white/70 text-lg max-w-2xl mx-auto mb-4">
               Conheça nossa linha completa de tecidos de alta performance para moda esportiva e fitness.
             </p>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-white/80 text-sm">
+              <Eye className="h-4 w-4" />
+              <span>Clique nos tecidos para ver detalhes completos</span>
+            </div>
           </div>
         </section>
 
