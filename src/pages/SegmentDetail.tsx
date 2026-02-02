@@ -193,45 +193,10 @@ const SegmentDetail = () => {
           </div>
         </section>
 
-        {/* Gallery Section */}
-        {galleryImages.length > 0 && (
-          <section className="py-16 md:py-20 bg-muted/30">
-            <div className="container mx-auto px-6">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                viewport={{ once: true }}
-              >
-                <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-8">
-                  Galeria
-                </h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {galleryImages.map((image, index) => (
-                    <motion.div
-                      key={index}
-                      whileHover={{ scale: 1.02 }}
-                      className="relative aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer group"
-                      onClick={() => setSelectedImage(image)}
-                    >
-                      <img
-                        src={image}
-                        alt={`${segment.name} - Imagem ${index + 1}`}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
-            </div>
-          </section>
-        )}
-
         {/* About Section */}
         <section className="py-16 md:py-20">
           <div className="container mx-auto px-6">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="grid lg:grid-cols-2 gap-12 items-start">
               <motion.div
                 initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -283,6 +248,41 @@ const SegmentDetail = () => {
             </div>
           </div>
         </section>
+
+        {/* Gallery Section */}
+        {galleryImages.length > 0 && (
+          <section className="py-16 md:py-20 bg-muted/30">
+            <div className="container mx-auto px-6">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                viewport={{ once: true }}
+              >
+                <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-8">
+                  Galeria
+                </h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {galleryImages.map((image, index) => (
+                    <motion.div
+                      key={index}
+                      whileHover={{ scale: 1.02 }}
+                      className="relative aspect-[4/3] rounded-2xl overflow-hidden cursor-pointer group"
+                      onClick={() => setSelectedImage(image)}
+                    >
+                      <img
+                        src={image}
+                        alt={`${segment.name} - Imagem ${index + 1}`}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            </div>
+          </section>
+        )}
 
         {/* Applications Section */}
         {segment.subcategories.length > 0 && (

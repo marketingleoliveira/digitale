@@ -1,22 +1,18 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, X, Clock, Headphones, ChevronDown, Waves, Dumbbell, ArrowRight } from "lucide-react";
+import { Menu, X, Clock, Headphones, ChevronDown } from "lucide-react";
 import logoColor from "@/assets/logo-color.png";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 
-// Import segment images
-import segmentPraiaImg from "@/assets/segment-praia.jpg";
-import segmentEsportivoImg from "@/assets/segment-esportivo.jpg";
 
 interface NavItem {
   name: string;
   href: string;
-  children?: { name: string; href: string; image?: string; icon?: React.ReactNode; description?: string }[];
-  isMegaMenu?: boolean;
+  children?: { name: string; href: string }[];
 }
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -41,22 +37,9 @@ export function Header() {
     { 
       name: t("nav.segments"), 
       href: "/segmentos",
-      isMegaMenu: true,
       children: [
-        { 
-          name: "Praia", 
-          href: "/segmentos/praia", 
-          image: segmentPraiaImg,
-          icon: <Waves className="h-5 w-5" />,
-          description: "Tecidos com proteção UV, secagem rápida e cores vibrantes para moda praia."
-        },
-        { 
-          name: "Esportivo", 
-          href: "/segmentos/esportivo", 
-          image: segmentEsportivoImg,
-          icon: <Dumbbell className="h-5 w-5" />,
-          description: "Malhas de alta performance com compressão e conforto térmico."
-        },
+        { name: "Praia", href: "/segmentos/praia" },
+        { name: "Esportivo", href: "/segmentos/esportivo" },
       ]
     },
     { name: t("nav.careers"), href: "/trabalhe-conosco" },
@@ -139,62 +122,6 @@ export function Header() {
                     </button>
                     <AnimatePresence>
                       {openSubmenu === item.name && (
-                        item.isMegaMenu ? (
-                          // Mega Menu for Segments
-                          <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 10 }}
-                            transition={{ duration: 0.2 }}
-                            className="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-white rounded-2xl shadow-2xl border border-border p-6 z-50 w-[520px]"
-                          >
-                            <div className="grid grid-cols-2 gap-4">
-                              {item.children.map((child) => (
-                                <Link
-                                  key={child.name}
-                                  to={child.href}
-                                  className="group relative overflow-hidden rounded-xl border border-border/50 hover:border-accent/50 transition-all duration-300 hover:shadow-lg"
-                                >
-                                  {/* Image */}
-                                  <div className="relative h-32 overflow-hidden">
-                                    <img
-                                      src={child.image}
-                                      alt={child.name}
-                                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                                    
-                                    {/* Icon Badge */}
-                                    <div className="absolute top-3 left-3 p-2 bg-accent rounded-lg text-accent-foreground">
-                                      {child.icon}
-                                    </div>
-                                  </div>
-                                  
-                                  {/* Content */}
-                                  <div className="p-4">
-                                    <h3 className="font-semibold text-foreground group-hover:text-accent transition-colors flex items-center gap-2">
-                                      {child.name}
-                                      <ArrowRight className="h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                                    </h3>
-                                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                                      {child.description}
-                                    </p>
-                                  </div>
-                                </Link>
-                              ))}
-                            </div>
-                            
-                            {/* View All Link */}
-                            <Link
-                              to="/segmentos"
-                              className="mt-4 flex items-center justify-center gap-2 py-2.5 text-sm font-medium text-accent hover:bg-accent/5 rounded-lg transition-colors"
-                            >
-                              Ver todos os segmentos
-                              <ArrowRight className="h-4 w-4" />
-                            </Link>
-                          </motion.div>
-                        ) : (
-                          // Regular Dropdown
                           <motion.div
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -216,7 +143,6 @@ export function Header() {
                               </Link>
                             ))}
                           </motion.div>
-                        )
                       )}
                     </AnimatePresence>
                   </div>
