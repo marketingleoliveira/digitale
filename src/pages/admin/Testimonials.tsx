@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { 
   Plus, 
   Trash2, 
@@ -11,7 +12,8 @@ import {
   Upload,
   X,
   Save,
-  RefreshCw
+  RefreshCw,
+  Loader2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminLayout } from "@/components/admin/AdminLayout";
@@ -46,6 +48,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { useInvalidateCache } from "@/hooks/useInvalidateCache";
 
 interface Testimonial {
   id: string;
@@ -57,14 +60,13 @@ interface Testimonial {
   years_partnership: string | null;
   is_active: boolean;
   display_order: number;
-  created_at: string;
 }
 
-const emptyTestimonial: Omit<Testimonial, 'id' | 'created_at'> = {
+const emptyTestimonial: Omit<Testimonial, "id"> = {
   quote: "",
   author_name: "",
   author_company: "",
-  author_photo_url: null,
+  author_photo_url: "",
   rating: 5,
   years_partnership: "",
   is_active: true,
@@ -72,116 +74,126 @@ const emptyTestimonial: Omit<Testimonial, 'id' | 'created_at'> = {
 };
 
 const Testimonials = () => {
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { invalidateTestimonials } = useInvalidateCache();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTestimonial, setEditingTestimonial] = useState<Partial<Testimonial> | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    fetchTestimonials();
-  }, []);
+  // Query for testimonials
+  const { data: testimonials = [], isLoading } = useQuery({
+    queryKey: ["admin-testimonials"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("testimonials")
+        .select("*")
+        .order("display_order", { ascending: true });
 
-  const fetchTestimonials = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from("testimonials")
-      .select("*")
-      .order("display_order", { ascending: true });
+      if (error) throw error;
+      return data as Testimonial[];
+    },
+  });
 
-    if (error) {
-      toast.error("Erro ao carregar depoimentos");
-      console.error(error);
-    } else {
-      setTestimonials(data || []);
-    }
-    setLoading(false);
-  };
-
-  const handleSave = async () => {
-    if (!editingTestimonial?.quote || !editingTestimonial?.author_name) {
-      toast.error("Preencha os campos obrigatórios");
-      return;
-    }
-
-    setSaving(true);
-
-    try {
-      if (editingTestimonial.id) {
+  // Save mutation (create/update)
+  const saveMutation = useMutation({
+    mutationFn: async (testimonial: Partial<Testimonial>) => {
+      if (testimonial.id) {
         // Update existing
         const { error } = await supabase
           .from("testimonials")
           .update({
-            quote: editingTestimonial.quote,
-            author_name: editingTestimonial.author_name,
-            author_company: editingTestimonial.author_company || null,
-            author_photo_url: editingTestimonial.author_photo_url,
-            rating: editingTestimonial.rating,
-            years_partnership: editingTestimonial.years_partnership || null,
-            is_active: editingTestimonial.is_active,
+            quote: testimonial.quote,
+            author_name: testimonial.author_name,
+            author_company: testimonial.author_company || null,
+            author_photo_url: testimonial.author_photo_url,
+            rating: testimonial.rating,
+            years_partnership: testimonial.years_partnership || null,
+            is_active: testimonial.is_active,
           })
-          .eq("id", editingTestimonial.id);
+          .eq("id", testimonial.id);
 
         if (error) throw error;
-        toast.success("Depoimento atualizado!");
       } else {
         // Create new
         const maxOrder = Math.max(...testimonials.map(t => t.display_order), 0);
         const { error } = await supabase
           .from("testimonials")
           .insert({
-            quote: editingTestimonial.quote,
-            author_name: editingTestimonial.author_name,
-            author_company: editingTestimonial.author_company || null,
-            author_photo_url: editingTestimonial.author_photo_url,
-            rating: editingTestimonial.rating || 5,
-            years_partnership: editingTestimonial.years_partnership || null,
-            is_active: editingTestimonial.is_active ?? true,
+            quote: testimonial.quote,
+            author_name: testimonial.author_name,
+            author_company: testimonial.author_company || null,
+            author_photo_url: testimonial.author_photo_url,
+            rating: testimonial.rating || 5,
+            years_partnership: testimonial.years_partnership || null,
+            is_active: testimonial.is_active ?? true,
             display_order: maxOrder + 1,
           });
 
         if (error) throw error;
-        toast.success("Depoimento criado!");
       }
-
+    },
+    onSuccess: () => {
+      invalidateTestimonials();
+      toast.success(editingTestimonial?.id ? "Depoimento atualizado!" : "Depoimento criado!");
       setDialogOpen(false);
       setEditingTestimonial(null);
-      fetchTestimonials();
-    } catch (error) {
-      console.error(error);
-      toast.error("Erro ao salvar depoimento");
-    } finally {
-      setSaving(false);
-    }
-  };
+    },
+    onError: (error) => {
+      toast.error("Erro ao salvar depoimento: " + error.message);
+    },
+  });
 
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase
-      .from("testimonials")
-      .delete()
-      .eq("id", id);
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("testimonials")
+        .delete()
+        .eq("id", id);
 
-    if (error) {
-      toast.error("Erro ao excluir depoimento");
-    } else {
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      invalidateTestimonials();
       toast.success("Depoimento excluído!");
-      fetchTestimonials();
+    },
+    onError: () => {
+      toast.error("Erro ao excluir depoimento");
+    },
+  });
+
+  // Toggle active mutation
+  const toggleActiveMutation = useMutation({
+    mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
+      const { error } = await supabase
+        .from("testimonials")
+        .update({ is_active: !isActive })
+        .eq("id", id);
+
+      if (error) throw error;
+    },
+    onSuccess: (_, { isActive }) => {
+      invalidateTestimonials();
+      toast.success(isActive ? "Depoimento ocultado" : "Depoimento ativado");
+    },
+    onError: () => {
+      toast.error("Erro ao atualizar status");
+    },
+  });
+
+  const handleSave = () => {
+    if (!editingTestimonial?.quote || !editingTestimonial?.author_name) {
+      toast.error("Preencha os campos obrigatórios");
+      return;
     }
+    saveMutation.mutate(editingTestimonial);
   };
 
-  const handleToggleActive = async (id: string, currentState: boolean) => {
-    const { error } = await supabase
-      .from("testimonials")
-      .update({ is_active: !currentState })
-      .eq("id", id);
+  const handleDelete = (id: string) => {
+    deleteMutation.mutate(id);
+  };
 
-    if (error) {
-      toast.error("Erro ao atualizar status");
-    } else {
-      toast.success(currentState ? "Depoimento ocultado" : "Depoimento ativado");
-      fetchTestimonials();
-    }
+  const handleToggleActive = (id: string, currentState: boolean) => {
+    toggleActiveMutation.mutate({ id, isActive: currentState });
   };
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -209,11 +221,7 @@ const Testimonials = () => {
         .from("testimonials")
         .getPublicUrl(fileName);
 
-      setEditingTestimonial(prev => ({
-        ...prev,
-        author_photo_url: publicUrl,
-      }));
-
+      setEditingTestimonial(prev => prev ? { ...prev, author_photo_url: publicUrl } : null);
       toast.success("Foto enviada!");
     } catch (error) {
       console.error(error);
@@ -221,34 +229,6 @@ const Testimonials = () => {
     } finally {
       setUploading(false);
     }
-  };
-
-  const handleMoveUp = async (index: number) => {
-    if (index === 0) return;
-
-    const currentItem = testimonials[index];
-    const prevItem = testimonials[index - 1];
-
-    await Promise.all([
-      supabase.from("testimonials").update({ display_order: prevItem.display_order }).eq("id", currentItem.id),
-      supabase.from("testimonials").update({ display_order: currentItem.display_order }).eq("id", prevItem.id),
-    ]);
-
-    fetchTestimonials();
-  };
-
-  const handleMoveDown = async (index: number) => {
-    if (index === testimonials.length - 1) return;
-
-    const currentItem = testimonials[index];
-    const nextItem = testimonials[index + 1];
-
-    await Promise.all([
-      supabase.from("testimonials").update({ display_order: nextItem.display_order }).eq("id", currentItem.id),
-      supabase.from("testimonials").update({ display_order: currentItem.display_order }).eq("id", nextItem.id),
-    ]);
-
-    fetchTestimonials();
   };
 
   const openCreateDialog = () => {
@@ -263,287 +243,264 @@ const Testimonials = () => {
 
   return (
     <AdminLayout title="Depoimentos">
-      {/* Header Actions */}
-      <div className="flex justify-between items-center mb-6">
-        <p className="text-muted-foreground">
-          Gerencie os depoimentos exibidos na página inicial
-        </p>
-        <div className="flex gap-3">
-          <Button variant="outline" onClick={fetchTestimonials} disabled={loading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
-            Atualizar
-          </Button>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <p className="text-muted-foreground">
+              Gerencie os depoimentos exibidos na página inicial
+            </p>
+          </div>
           <Button onClick={openCreateDialog}>
             <Plus className="h-4 w-4 mr-2" />
             Novo Depoimento
           </Button>
         </div>
-      </div>
 
-      {/* Testimonials List */}
-      <div className="bg-card rounded-2xl border border-border overflow-hidden">
-        {loading ? (
-          <div className="p-10 text-center">
-            <RefreshCw className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : testimonials.length === 0 ? (
-          <div className="p-10 text-center text-muted-foreground">
-            Nenhum depoimento cadastrado
+          <div className="text-center py-12 text-muted-foreground">
+            Nenhum depoimento cadastrado. Clique em "Novo Depoimento" para adicionar.
           </div>
         ) : (
-          <div className="divide-y divide-border">
+          <div className="grid gap-4">
             {testimonials.map((testimonial, index) => (
               <motion.div
                 key={testimonial.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="p-4 flex items-start gap-4 hover:bg-muted/50 transition-colors"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                className={`bg-card border rounded-xl p-5 ${!testimonial.is_active ? "opacity-60" : ""}`}
               >
-                {/* Drag Handle & Order */}
-                <div className="flex flex-col items-center gap-1 pt-2">
-                  <button
-                    onClick={() => handleMoveUp(index)}
-                    disabled={index === 0}
-                    className="p-1 hover:bg-muted rounded disabled:opacity-30"
-                  >
-                    <GripVertical className="h-4 w-4 text-muted-foreground rotate-90" />
-                  </button>
-                  <span className="text-xs text-muted-foreground font-medium">
-                    {index + 1}
-                  </span>
-                  <button
-                    onClick={() => handleMoveDown(index)}
-                    disabled={index === testimonials.length - 1}
-                    className="p-1 hover:bg-muted rounded disabled:opacity-30"
-                  >
-                    <GripVertical className="h-4 w-4 text-muted-foreground rotate-90" />
-                  </button>
-                </div>
-
-                {/* Photo */}
-                <div className="flex-shrink-0">
-                  {testimonial.author_photo_url ? (
-                    <img
-                      src={testimonial.author_photo_url}
-                      alt={testimonial.author_name}
-                      className="w-16 h-16 rounded-full object-cover border-2 border-border"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xl font-bold">
-                      {testimonial.author_name.charAt(0)}
-                    </div>
-                  )}
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <p className="font-semibold text-foreground">{testimonial.author_name}</p>
-                    {testimonial.author_company && (
-                      <span className="text-sm text-muted-foreground">
-                        • {testimonial.author_company}
-                      </span>
-                    )}
-                    <Badge variant={testimonial.is_active ? "default" : "secondary"}>
-                      {testimonial.is_active ? "Ativo" : "Oculto"}
-                    </Badge>
+                <div className="flex items-start gap-4">
+                  <div className="cursor-move text-muted-foreground">
+                    <GripVertical className="h-5 w-5" />
                   </div>
-                  <div className="flex gap-0.5 mb-2">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-accent text-accent" />
-                    ))}
-                  </div>
-                  <p className="text-sm text-foreground line-clamp-2">
-                    "{testimonial.quote}"
-                  </p>
-                  {testimonial.years_partnership && (
-                    <span className="inline-block mt-2 px-2 py-0.5 text-xs rounded-full bg-accent/10 text-accent">
-                      {testimonial.years_partnership}
-                    </span>
-                  )}
-                </div>
 
-                {/* Actions */}
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleToggleActive(testimonial.id, testimonial.is_active)}
-                    title={testimonial.is_active ? "Ocultar" : "Ativar"}
-                  >
-                    {testimonial.is_active ? (
-                      <Eye className="h-4 w-4" />
+                  {/* Photo */}
+                  <div className="flex-shrink-0">
+                    {testimonial.author_photo_url ? (
+                      <img
+                        src={testimonial.author_photo_url}
+                        alt={testimonial.author_name}
+                        className="w-14 h-14 rounded-full object-cover border-2 border-border"
+                      />
                     ) : (
-                      <EyeOff className="h-4 w-4" />
+                      <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xl font-bold">
+                        {testimonial.author_name.charAt(0)}
+                      </div>
                     )}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => openEditDialog(testimonial)}
-                  >
-                    <Edit2 className="h-4 w-4" />
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Excluir depoimento?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Esta ação não pode ser desfeita. O depoimento de {testimonial.author_name} será removido permanentemente.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={() => handleDelete(testimonial.id)}
-                          className="bg-destructive text-destructive-foreground"
-                        >
-                          Excluir
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold text-foreground">{testimonial.author_name}</h3>
+                      {testimonial.author_company && (
+                        <span className="text-muted-foreground text-sm">• {testimonial.author_company}</span>
+                      )}
+                      {testimonial.years_partnership && (
+                        <Badge variant="secondary" className="text-xs">
+                          {testimonial.years_partnership}
+                        </Badge>
+                      )}
+                    </div>
+
+                    <div className="flex gap-0.5 mb-2">
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 fill-accent text-accent" />
+                      ))}
+                    </div>
+
+                    <p className="text-muted-foreground text-sm line-clamp-2">
+                      "{testimonial.quote}"
+                    </p>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => handleToggleActive(testimonial.id, testimonial.is_active)}
+                    >
+                      {testimonial.is_active ? (
+                        <Eye className="h-4 w-4" />
+                      ) : (
+                        <EyeOff className="h-4 w-4" />
+                      )}
+                    </Button>
+
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => openEditDialog(testimonial)}
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </Button>
+
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Excluir depoimento?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Esta ação não pode ser desfeita. O depoimento será removido permanentemente.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDelete(testimonial.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Excluir
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 </div>
               </motion.div>
             ))}
           </div>
         )}
-      </div>
 
-      {/* Create/Edit Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>
-              {editingTestimonial?.id ? "Editar Depoimento" : "Novo Depoimento"}
-            </DialogTitle>
-          </DialogHeader>
+        {/* Edit/Create Dialog */}
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>
+                {editingTestimonial?.id ? "Editar Depoimento" : "Novo Depoimento"}
+              </DialogTitle>
+            </DialogHeader>
 
-          <div className="space-y-4 py-4">
-            {/* Photo Upload */}
-            <div className="flex items-center gap-4">
-              {editingTestimonial?.author_photo_url ? (
-                <div className="relative">
-                  <img
-                    src={editingTestimonial.author_photo_url}
-                    alt="Preview"
-                    className="w-20 h-20 rounded-full object-cover border-2 border-border"
-                  />
-                  <button
-                    onClick={() => setEditingTestimonial(prev => ({ ...prev, author_photo_url: null }))}
-                    className="absolute -top-1 -right-1 w-6 h-6 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
+            <div className="space-y-4">
+              {/* Photo Upload */}
+              <div className="flex items-center gap-4">
+                {editingTestimonial?.author_photo_url ? (
+                  <div className="relative">
+                    <img
+                      src={editingTestimonial.author_photo_url}
+                      alt="Preview"
+                      className="w-16 h-16 rounded-full object-cover border-2 border-border"
+                    />
+                    <button
+                      onClick={() => setEditingTestimonial(prev => prev ? { ...prev, author_photo_url: "" } : null)}
+                      className="absolute -top-1 -right-1 w-5 h-5 bg-destructive rounded-full flex items-center justify-center"
+                    >
+                      <X className="w-3 h-3 text-destructive-foreground" />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="cursor-pointer">
+                    <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center border-2 border-dashed border-border hover:border-accent transition-colors">
+                      {uploading ? (
+                        <RefreshCw className="w-5 h-5 animate-spin text-muted-foreground" />
+                      ) : (
+                        <Upload className="w-5 h-5 text-muted-foreground" />
+                      )}
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePhotoUpload}
+                      className="hidden"
+                      disabled={uploading}
+                    />
+                  </label>
+                )}
+                <div>
+                  <p className="text-sm font-medium">Foto (opcional)</p>
+                  <p className="text-xs text-muted-foreground">Clique para enviar</p>
                 </div>
-              ) : (
-                <label className="w-20 h-20 rounded-full border-2 border-dashed border-border flex items-center justify-center cursor-pointer hover:border-accent transition-colors">
-                  {uploading ? (
-                    <RefreshCw className="h-5 w-5 animate-spin text-muted-foreground" />
-                  ) : (
-                    <Upload className="h-5 w-5 text-muted-foreground" />
-                  )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handlePhotoUpload}
-                    disabled={uploading}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="author_name">Nome *</Label>
+                  <Input
+                    id="author_name"
+                    value={editingTestimonial?.author_name || ""}
+                    onChange={(e) => setEditingTestimonial(prev => prev ? { ...prev, author_name: e.target.value } : null)}
+                    placeholder="Nome do autor"
                   />
-                </label>
-              )}
-              <div>
-                <p className="font-medium text-sm">Foto do Cliente</p>
-                <p className="text-xs text-muted-foreground">Opcional. JPG ou PNG.</p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="author_company">Empresa</Label>
+                  <Input
+                    id="author_company"
+                    value={editingTestimonial?.author_company || ""}
+                    onChange={(e) => setEditingTestimonial(prev => prev ? { ...prev, author_company: e.target.value } : null)}
+                    placeholder="Nome da empresa"
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Author Name */}
-            <div className="space-y-2">
-              <Label htmlFor="author_name">Nome do Cliente *</Label>
-              <Input
-                id="author_name"
-                value={editingTestimonial?.author_name || ""}
-                onChange={(e) => setEditingTestimonial(prev => ({ ...prev, author_name: e.target.value }))}
-                placeholder="Nome completo"
-              />
-            </div>
-
-            {/* Author Company */}
-            <div className="space-y-2">
-              <Label htmlFor="author_company">Empresa</Label>
-              <Input
-                id="author_company"
-                value={editingTestimonial?.author_company || ""}
-                onChange={(e) => setEditingTestimonial(prev => ({ ...prev, author_company: e.target.value }))}
-                placeholder="Nome da empresa"
-              />
-            </div>
-
-            {/* Quote */}
-            <div className="space-y-2">
-              <Label htmlFor="quote">Depoimento *</Label>
-              <Textarea
-                id="quote"
-                value={editingTestimonial?.quote || ""}
-                onChange={(e) => setEditingTestimonial(prev => ({ ...prev, quote: e.target.value }))}
-                placeholder="O que o cliente disse sobre a Digitale..."
-                rows={4}
-              />
-            </div>
-
-            {/* Rating & Years */}
-            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Avaliação</Label>
-                <Select
-                  value={String(editingTestimonial?.rating || 5)}
-                  onValueChange={(v) => setEditingTestimonial(prev => ({ ...prev, rating: parseInt(v) }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[5, 4, 3, 2, 1].map((r) => (
-                      <SelectItem key={r} value={String(r)}>
-                        {r} estrela{r !== 1 && "s"}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="years">Tempo de Parceria</Label>
-                <Input
-                  id="years"
-                  value={editingTestimonial?.years_partnership || ""}
-                  onChange={(e) => setEditingTestimonial(prev => ({ ...prev, years_partnership: e.target.value }))}
-                  placeholder="Ex: 5 anos de parceria"
+                <Label htmlFor="quote">Depoimento *</Label>
+                <Textarea
+                  id="quote"
+                  value={editingTestimonial?.quote || ""}
+                  onChange={(e) => setEditingTestimonial(prev => prev ? { ...prev, quote: e.target.value } : null)}
+                  placeholder="O que o cliente disse..."
+                  rows={4}
                 />
               </div>
-            </div>
-          </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSave} disabled={saving}>
-              {saving ? (
-                <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-              ) : (
-                <Save className="h-4 w-4 mr-2" />
-              )}
-              Salvar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="rating">Avaliação</Label>
+                  <Select
+                    value={String(editingTestimonial?.rating || 5)}
+                    onValueChange={(value) => setEditingTestimonial(prev => prev ? { ...prev, rating: parseInt(value) } : null)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[5, 4, 3, 2, 1].map((r) => (
+                        <SelectItem key={r} value={String(r)}>
+                          {r} estrela{r > 1 ? "s" : ""}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="years_partnership">Tempo de parceria</Label>
+                  <Input
+                    id="years_partnership"
+                    value={editingTestimonial?.years_partnership || ""}
+                    onChange={(e) => setEditingTestimonial(prev => prev ? { ...prev, years_partnership: e.target.value } : null)}
+                    placeholder="Ex: 5 anos de parceria"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button onClick={handleSave} disabled={saveMutation.isPending}>
+                {saveMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4 mr-2" />
+                )}
+                Salvar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
     </AdminLayout>
   );
 };

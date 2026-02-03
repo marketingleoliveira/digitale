@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Plus, Trash2, GripVertical, Upload, Image as ImageIcon } from "lucide-react";
+import { useInvalidateCache } from "@/hooks/useInvalidateCache";
 
 interface CarouselSlide {
   id: string;
@@ -20,7 +21,7 @@ interface CarouselSlide {
 }
 
 export default function Carousel() {
-  const queryClient = useQueryClient();
+  const { invalidateCarousel } = useInvalidateCache();
   const [uploading, setUploading] = useState(false);
 
   const { data: slides, isLoading } = useQuery({
@@ -46,8 +47,7 @@ export default function Carousel() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-carousel-slides"] });
-      queryClient.invalidateQueries({ queryKey: ["carousel-slides"] });
+      invalidateCarousel();
     },
     onError: () => {
       toast.error("Erro ao atualizar slide");
@@ -64,8 +64,7 @@ export default function Carousel() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-carousel-slides"] });
-      queryClient.invalidateQueries({ queryKey: ["carousel-slides"] });
+      invalidateCarousel();
       toast.success("Slide removido");
     },
     onError: () => {
@@ -120,8 +119,7 @@ export default function Carousel() {
 
       if (insertError) throw insertError;
 
-      queryClient.invalidateQueries({ queryKey: ["admin-carousel-slides"] });
-      queryClient.invalidateQueries({ queryKey: ["carousel-slides"] });
+      invalidateCarousel();
       toast.success("Imagem adicionada ao carrossel");
     } catch (error) {
       console.error("Upload error:", error);
