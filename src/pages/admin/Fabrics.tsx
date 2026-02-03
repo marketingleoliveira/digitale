@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ import { toast } from "sonner";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import { GalleryUpload } from "@/components/admin/GalleryUpload";
 import { ColorVariantsEditor, ColorVariant } from "@/components/admin/ColorVariantsEditor";
+import { useInvalidateCache } from "@/hooks/useInvalidateCache";
 
 interface GalleryImage {
   url: string;
@@ -52,7 +53,7 @@ interface Fabric {
 }
 
 export default function AdminFabrics() {
-  const queryClient = useQueryClient();
+  const { invalidateFabrics } = useInvalidateCache();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingFabric, setEditingFabric] = useState<Fabric | null>(null);
   const [formData, setFormData] = useState({
@@ -112,7 +113,7 @@ export default function AdminFabrics() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-fabrics"] });
+      invalidateFabrics();
       toast.success(editingFabric ? "Tecido atualizado!" : "Tecido criado!");
       handleCloseDialog();
     },
@@ -127,7 +128,7 @@ export default function AdminFabrics() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-fabrics"] });
+      invalidateFabrics();
       toast.success("Tecido excluído!");
     },
     onError: (error) => {
@@ -144,8 +145,7 @@ export default function AdminFabrics() {
       if (error) throw error;
     },
     onSuccess: (_, { is_featured }) => {
-      queryClient.invalidateQueries({ queryKey: ["admin-fabrics"] });
-      queryClient.invalidateQueries({ queryKey: ["featured-fabrics-home"] });
+      invalidateFabrics();
       toast.success(is_featured ? "Tecido destacado na home!" : "Tecido removido dos destaques");
     },
     onError: (error) => {

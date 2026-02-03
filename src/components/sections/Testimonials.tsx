@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Testimonial {
@@ -14,26 +15,25 @@ interface Testimonial {
 }
 
 export function Testimonials() {
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [current, setCurrent] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const { t } = useLanguage();
 
-  useEffect(() => {
-    fetchTestimonials();
-  }, []);
+  const { data: testimonials = [] } = useQuery({
+    queryKey: ["testimonials"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("testimonials")
+        .select("*")
+        .eq("is_active", true)
+        .order("display_order", { ascending: true });
 
-  const fetchTestimonials = async () => {
-    const { data } = await supabase
-      .from("testimonials")
-      .select("*")
-      .eq("is_active", true)
-      .order("display_order", { ascending: true });
-
-    if (data && data.length > 0) {
-      setTestimonials(data);
-    }
-  };
+      if (error) throw error;
+      return data as Testimonial[];
+    },
+    staleTime: 1000 * 60 * 2,
+    refetchOnWindowFocus: true,
+  });
 
   const next = useCallback(() => {
     if (testimonials.length === 0) return;
@@ -50,6 +50,13 @@ export function Testimonials() {
     const timer = setInterval(next, 6000);
     return () => clearInterval(timer);
   }, [isAutoPlaying, next, testimonials.length]);
+
+  // Reset current index when testimonials change
+  useEffect(() => {
+    if (testimonials.length > 0 && current >= testimonials.length) {
+      setCurrent(0);
+    }
+  }, [testimonials.length, current]);
 
   const getVisibleTestimonials = () => {
     if (testimonials.length === 0) return [];

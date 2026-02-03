@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,7 @@ import { ImageUpload } from "@/components/admin/ImageUpload";
 import { Plus, Pencil, Trash2, GripVertical, Loader2, FolderOpen } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { useInvalidateCache } from "@/hooks/useInvalidateCache";
 
 interface PrintCategory {
   id: string;
@@ -51,12 +53,9 @@ interface Print {
 }
 
 const PrintsAdmin = () => {
-  const [prints, setPrints] = useState<Print[]>([]);
-  const [categories, setCategories] = useState<PrintCategory[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { invalidatePrints } = useInvalidateCache();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPrint, setEditingPrint] = useState<Print | null>(null);
-  const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     code: "",
     name: "",
@@ -65,36 +64,100 @@ const PrintsAdmin = () => {
     is_active: true,
   });
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    setLoading(true);
-    
-    const [printsResult, categoriesResult] = await Promise.all([
-      supabase
+  // Query for prints
+  const { data: prints = [], isLoading: printsLoading } = useQuery({
+    queryKey: ["admin-prints"],
+    queryFn: async () => {
+      const { data, error } = await supabase
         .from("prints")
         .select("*")
-        .order("display_order", { ascending: true }),
-      supabase
+        .order("display_order", { ascending: true });
+      
+      if (error) throw error;
+      return data as Print[];
+    },
+  });
+
+  // Query for categories
+  const { data: categories = [] } = useQuery({
+    queryKey: ["print-categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase
         .from("print_categories")
         .select("id, name, slug, parent_id")
-        .order("display_order", { ascending: true })
-    ]);
+        .order("display_order", { ascending: true });
+      
+      if (error) throw error;
+      return data as PrintCategory[];
+    },
+  });
 
-    if (printsResult.error) {
-      toast.error("Erro ao carregar estampas");
-    } else {
-      setPrints(printsResult.data || []);
-    }
+  // Create/Update mutation
+  const saveMutation = useMutation({
+    mutationFn: async (data: typeof form & { id?: string }) => {
+      const printData = {
+        code: data.code,
+        name: data.name || null,
+        image_url: data.image_url,
+        category_id: data.category_id || null,
+        is_active: data.is_active,
+      };
 
-    if (!categoriesResult.error) {
-      setCategories(categoriesResult.data || []);
-    }
+      if (data.id) {
+        const { error } = await supabase
+          .from("prints")
+          .update(printData)
+          .eq("id", data.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("prints")
+          .insert([{ ...printData, display_order: prints.length }]);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      invalidatePrints();
+      toast.success(editingPrint ? "Estampa atualizada!" : "Estampa criada!");
+      setDialogOpen(false);
+      resetForm();
+    },
+    onError: (error) => {
+      toast.error("Erro ao salvar estampa", { description: error.message });
+    },
+  });
 
-    setLoading(false);
-  };
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("prints").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      invalidatePrints();
+      toast.success("Estampa excluída!");
+    },
+    onError: () => {
+      toast.error("Erro ao excluir estampa");
+    },
+  });
+
+  // Toggle active mutation
+  const toggleActiveMutation = useMutation({
+    mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
+      const { error } = await supabase
+        .from("prints")
+        .update({ is_active: !isActive })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      invalidatePrints();
+    },
+    onError: () => {
+      toast.error("Erro ao atualizar status");
+    },
+  });
 
   const resetForm = () => {
     setForm({
@@ -119,74 +182,26 @@ const PrintsAdmin = () => {
     setDialogOpen(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.code || !form.image_url) {
       toast.error("Preencha o código e a imagem");
       return;
     }
 
-    setSaving(true);
-
-    const printData = {
-      code: form.code,
-      name: form.name || null,
-      image_url: form.image_url,
-      category_id: form.category_id || null,
-      is_active: form.is_active,
-    };
-
-    let error;
-
-    if (editingPrint) {
-      const result = await supabase
-        .from("prints")
-        .update(printData)
-        .eq("id", editingPrint.id);
-      error = result.error;
-    } else {
-      const result = await supabase
-        .from("prints")
-        .insert([{ ...printData, display_order: prints.length }]);
-      error = result.error;
-    }
-
-    if (error) {
-      toast.error("Erro ao salvar estampa", { description: error.message });
-    } else {
-      toast.success(editingPrint ? "Estampa atualizada!" : "Estampa criada!");
-      setDialogOpen(false);
-      resetForm();
-      fetchData();
-    }
-
-    setSaving(false);
+    saveMutation.mutate({
+      ...form,
+      id: editingPrint?.id,
+    });
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     if (!confirm("Tem certeza que deseja excluir esta estampa?")) return;
-
-    const { error } = await supabase.from("prints").delete().eq("id", id);
-
-    if (error) {
-      toast.error("Erro ao excluir estampa");
-    } else {
-      toast.success("Estampa excluída!");
-      fetchData();
-    }
+    deleteMutation.mutate(id);
   };
 
-  const handleToggleActive = async (id: string, isActive: boolean) => {
-    const { error } = await supabase
-      .from("prints")
-      .update({ is_active: !isActive })
-      .eq("id", id);
-
-    if (error) {
-      toast.error("Erro ao atualizar status");
-    } else {
-      fetchData();
-    }
+  const handleToggleActive = (id: string, isActive: boolean) => {
+    toggleActiveMutation.mutate({ id, isActive });
   };
 
   // Build hierarchical category options
@@ -325,8 +340,8 @@ const PrintsAdmin = () => {
                   >
                     Cancelar
                   </Button>
-                  <Button type="submit" disabled={saving}>
-                    {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  <Button type="submit" disabled={saveMutation.isPending}>
+                    {saveMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                     {editingPrint ? "Salvar" : "Criar"}
                   </Button>
                 </div>
@@ -336,7 +351,7 @@ const PrintsAdmin = () => {
         </div>
 
         <div className="bg-card rounded-xl border border-border overflow-hidden">
-          {loading ? (
+          {printsLoading ? (
             <div className="p-8 text-center text-muted-foreground">
               <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
               Carregando...

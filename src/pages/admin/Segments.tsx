@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Waves, Dumbbell } from "lucide-react";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import { GalleryUpload } from "@/components/admin/GalleryUpload";
+import { useInvalidateCache } from "@/hooks/useInvalidateCache";
 
 interface Subcategory {
   name: string;
@@ -59,7 +60,7 @@ const iconOptions = [
 ];
 
 const SegmentsAdmin = () => {
-  const queryClient = useQueryClient();
+  const { invalidateSegments } = useInvalidateCache();
   const [editingSegment, setEditingSegment] = useState<Segment | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -117,7 +118,7 @@ const SegmentsAdmin = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-segments"] });
+      invalidateSegments();
       toast.success("Segmento atualizado!");
       setIsDialogOpen(false);
       setEditingSegment(null);
@@ -137,7 +138,7 @@ const SegmentsAdmin = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-segments"] });
+      invalidateSegments();
       toast.success("Status atualizado!");
     },
   });
