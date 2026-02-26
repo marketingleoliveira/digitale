@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { LogIn, Eye, EyeOff } from "lucide-react";
@@ -11,15 +11,22 @@ import logoColor from "@/assets/logo-color.png";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { signIn } = useAuth();
+  const { signIn, user, isAdmin, isEditor, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Redirect when user is authenticated AND has roles
+  useEffect(() => {
+    if (!loading && user && (isAdmin || isEditor)) {
+      navigate("/admin", { replace: true });
+    }
+  }, [loading, user, isAdmin, isEditor, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setSubmitting(true);
 
     const { error } = await signIn(email, password);
 
@@ -27,13 +34,10 @@ const Login = () => {
       toast.error("Erro ao fazer login", {
         description: "Verifique suas credenciais e tente novamente."
       });
-      setLoading(false);
+      setSubmitting(false);
     } else {
       toast.success("Login realizado com sucesso!");
-      // Aguarda um momento para as roles serem carregadas antes de redirecionar
-      setTimeout(() => {
-        navigate("/admin");
-      }, 500);
+      // useEffect above will handle redirect once roles are loaded
     }
   };
 
@@ -89,9 +93,9 @@ const Login = () => {
               </div>
             </div>
 
-            <Button type="submit" size="lg" className="w-full" disabled={loading}>
+            <Button type="submit" size="lg" className="w-full" disabled={submitting}>
               <LogIn className="mr-2 h-4 w-4" />
-              {loading ? "Entrando..." : "Entrar"}
+              {submitting ? "Entrando..." : "Entrar"}
             </Button>
           </form>
 
