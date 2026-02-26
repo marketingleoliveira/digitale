@@ -11,36 +11,12 @@ interface AuthContextType {
   isAdmin: boolean;
   isEditor: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
-  clearCache: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Intervalo de refresh do token (10 minutos)
 const TOKEN_REFRESH_INTERVAL = 10 * 60 * 1000;
-
-// Limpa o cache de autenticação do localStorage
-const clearAuthCache = () => {
-  // Remove todos os itens de autenticação do Supabase
-  const keysToRemove: string[] = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key && (key.startsWith('sb-') || key.includes('supabase'))) {
-      keysToRemove.push(key);
-    }
-  }
-  keysToRemove.forEach(key => localStorage.removeItem(key));
-  
-  // Também limpa sessionStorage
-  for (let i = 0; i < sessionStorage.length; i++) {
-    const key = sessionStorage.key(i);
-    if (key && (key.startsWith('sb-') || key.includes('supabase'))) {
-      sessionStorage.removeItem(key);
-    }
-  }
-};
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -50,20 +26,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditor, setIsEditor] = useState(false);
   
-  // Refs para controlar estados
-  const isInitializedRef = useRef(false);
-  const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const refreshIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const currentUserIdRef = useRef<string | null>(null);
 
-  // Função para buscar roles - sem dependências externas problemáticas
-  const fetchRoles = async (userId: string): Promise<{ admin: boolean; editor: boolean }> => {
+  const fetchRoles = useCallback(async (userId: string): Promise<{ admin: boolean; editor: boolean }> => {
     try {
       const { data: roles, error } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", userId);
-
-      console.log("fetchRoles - userId:", userId, "roles:", roles, "error:", error);
 
       if (error) {
         console.error("Error fetching roles:", error);
@@ -71,25 +42,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const userRoles = roles?.map((r) => String(r.role)) || [];
-      console.log("fetchRoles - userRoles array:", userRoles);
-      
-      // Admin includes: admin, desenvolvedor
       const admin = userRoles.some(role => role === "admin" || role === "desenvolvedor");
-      // Editor includes: editor, redator, vendedor, or any admin role
       const editor = userRoles.some(role => 
         role === "editor" || role === "redator" || role === "vendedor"
       ) || admin;
-      
-      console.log("fetchRoles - computed: admin=", admin, "editor=", editor);
       
       return { admin, editor };
     } catch (error) {
       console.error("Error fetching roles:", error);
       return { admin: false, editor: false };
     }
-  };
+  }, []);
 
-  // Para o intervalo de refresh
   const stopRefreshInterval = useCallback(() => {
     if (refreshIntervalRef.current) {
       clearInterval(refreshIntervalRef.current);
@@ -97,284 +61,139 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Inicia o intervalo de refresh automático
   const startRefreshInterval = useCallback(() => {
     stopRefreshInterval();
-    
     refreshIntervalRef.current = setInterval(async () => {
       try {
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
-        if (currentSession) {
-          await supabase.auth.refreshSession();
-        }
-      } catch (error) {
-        console.error("Error in refresh interval:", error);
+        const { data: { session: s } } = await supabase.auth.getSession();
+        if (s) await supabase.auth.refreshSession();
+      } catch (e) {
+        console.error("Token refresh error:", e);
       }
     }, TOKEN_REFRESH_INTERVAL);
   }, [stopRefreshInterval]);
 
-  // Função para limpar cache e fazer logout
-  const clearCache = useCallback(() => {
-    stopRefreshInterval();
-    clearAuthCache();
-    setUser(null);
-    setSession(null);
-    setIsAdmin(false);
-    setIsEditor(false);
-    isInitializedRef.current = false;
-    currentUserIdRef.current = null;
-    toast.info("Cache limpo com sucesso");
-  }, [stopRefreshInterval]);
+  const handleSession = useCallback(async (newSession: Session | null) => {
+    setSession(newSession);
+    setUser(newSession?.user ?? null);
+    currentUserIdRef.current = newSession?.user?.id ?? null;
+
+    if (newSession?.user) {
+      const { admin, editor } = await fetchRoles(newSession.user.id);
+      setIsAdmin(admin);
+      setIsEditor(editor);
+      startRefreshInterval();
+    } else {
+      setIsAdmin(false);
+      setIsEditor(false);
+      stopRefreshInterval();
+    }
+  }, [fetchRoles, startRefreshInterval, stopRefreshInterval]);
 
   useEffect(() => {
     let isMounted = true;
-    let localRefreshInterval: NodeJS.Timeout | null = null;
-    let initTimeout: NodeJS.Timeout | null = null;
 
-    const stopLocalRefresh = () => {
-      if (localRefreshInterval) {
-        clearInterval(localRefreshInterval);
-        localRefreshInterval = null;
-      }
-    };
-
-    const startLocalRefresh = () => {
-      stopLocalRefresh();
-      localRefreshInterval = setInterval(async () => {
-        try {
-          const { data: { session: currentSession } } = await supabase.auth.getSession();
-          if (currentSession) {
-            await supabase.auth.refreshSession();
-          }
-        } catch (error) {
-          console.error("Error in refresh interval:", error);
-        }
-      }, TOKEN_REFRESH_INTERVAL);
-    };
-
-    // Carregamento INICIAL com retry
-    const initializeAuth = async (retryCount = 0) => {
-      // Evita re-inicialização
-      if (isInitializedRef.current) {
-        setLoading(false);
-        return;
-      }
-      
-      // Timeout de segurança - evita loading infinito
-      if (initTimeout) clearTimeout(initTimeout);
-      initTimeout = setTimeout(() => {
-        if (isMounted && !isInitializedRef.current) {
-          console.warn("Auth initialization timed out, forcing completion");
-          setSession(null);
-          setUser(null);
-          setIsAdmin(false);
-          setIsEditor(false);
-          isInitializedRef.current = true;
-          setLoading(false);
-        }
-      }, 10000); // 10 segundos de timeout
-      
-      try {
-        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
-        
+    // 1. Set up auth listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, newSession) => {
         if (!isMounted) return;
-        
-        if (error) {
-          console.error("Error getting session:", error);
-          
-          // Tenta novamente até 2 vezes
-          if (retryCount < 2) {
-            console.log(`Retrying auth initialization (attempt ${retryCount + 1})...`);
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            return initializeAuth(retryCount + 1);
-          }
-          
+        console.log("Auth event:", event);
+
+        if (event === "SIGNED_OUT") {
           setSession(null);
           setUser(null);
           setIsAdmin(false);
           setIsEditor(false);
-          isInitializedRef.current = true;
-          if (initTimeout) clearTimeout(initTimeout);
+          currentUserIdRef.current = null;
+          stopRefreshInterval();
           setLoading(false);
           return;
         }
 
-        setSession(initialSession);
-        setUser(initialSession?.user ?? null);
-        currentUserIdRef.current = initialSession?.user?.id ?? null;
-
-        if (initialSession?.user) {
-          const { admin, editor } = await fetchRoles(initialSession.user.id);
-          if (isMounted) {
-            setIsAdmin(admin);
-            setIsEditor(editor);
-            startLocalRefresh();
+        if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION") {
+          if (newSession?.user) {
+            // Use setTimeout to avoid Supabase deadlock on rapid events
+            setTimeout(async () => {
+              if (!isMounted) return;
+              await handleSession(newSession);
+              setLoading(false);
+            }, 0);
+          } else {
+            setSession(null);
+            setUser(null);
+            setIsAdmin(false);
+            setIsEditor(false);
+            currentUserIdRef.current = null;
+            setLoading(false);
           }
-        } else {
-          setIsAdmin(false);
-          setIsEditor(false);
-        }
-        
-        isInitializedRef.current = true;
-        if (initTimeout) clearTimeout(initTimeout);
-      } catch (error) {
-        console.error("Error initializing auth:", error);
-        
-        // Tenta novamente até 2 vezes
-        if (retryCount < 2) {
-          console.log(`Retrying auth initialization after error (attempt ${retryCount + 1})...`);
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          if (isMounted) {
-            return initializeAuth(retryCount + 1);
-          }
-        }
-        
-        if (isMounted) {
-          setSession(null);
-          setUser(null);
-          setIsAdmin(false);
-          setIsEditor(false);
-          isInitializedRef.current = true;
-          if (initTimeout) clearTimeout(initTimeout);
-        }
-      } finally {
-        if (isMounted && isInitializedRef.current) {
-          setLoading(false);
-        }
-      }
-    };
-
-    // Listener para mudanças de auth
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
-        if (!isMounted) return;
-
-        // Só processa após inicialização
-        if (!isInitializedRef.current) return;
-
-        console.log("Auth state changed:", event);
-
-        // Atualiza estado
-        setSession(newSession);
-        setUser(newSession?.user ?? null);
-        currentUserIdRef.current = newSession?.user?.id ?? null;
-
-        if (newSession?.user) {
-          const { admin, editor } = await fetchRoles(newSession.user.id);
-          if (isMounted) {
-            setIsAdmin(admin);
-            setIsEditor(editor);
-            startLocalRefresh();
-          }
-        } else {
-          setIsAdmin(false);
-          setIsEditor(false);
-          stopLocalRefresh();
         }
       }
     );
 
-    // Handler para visibilidade
+    // 2. Then get initial session
+    supabase.auth.getSession().then(async ({ data: { session: initialSession } }) => {
+      if (!isMounted) return;
+      // If no INITIAL_SESSION event fired yet, handle it manually
+      if (initialSession?.user) {
+        await handleSession(initialSession);
+      }
+      setLoading(false);
+    }).catch(() => {
+      if (isMounted) setLoading(false);
+    });
+
+    // Safety timeout
+    const safetyTimeout = setTimeout(() => {
+      if (isMounted) setLoading(false);
+    }, 8000);
+
+    // Visibility change handler
     const handleVisibilityChange = async () => {
       if (document.visibilityState !== "visible" || !isMounted) return;
-      
-      // Só faz algo se já inicializou e tem usuário
-      if (!isInitializedRef.current) return;
-      
-      const userId = currentUserIdRef.current;
-      
+      if (!currentUserIdRef.current) return;
+
       try {
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
-        
+        setReconnecting(true);
+        const { data: { session: refreshed } } = await supabase.auth.refreshSession();
         if (!isMounted) return;
-        
-        if (currentSession?.user) {
-          // Usuário ainda tem sessão
-          if (userId) {
-            setReconnecting(true);
-          }
-          
-          // Refresh silencioso
-          const { data: { session: refreshedSession } } = await supabase.auth.refreshSession();
-          
-          if (!isMounted) return;
-          
-          if (refreshedSession) {
-            setSession(refreshedSession);
-            setUser(refreshedSession.user);
-            currentUserIdRef.current = refreshedSession.user.id;
-            
-            const { admin, editor } = await fetchRoles(refreshedSession.user.id);
-            if (isMounted) {
-              setIsAdmin(admin);
-              setIsEditor(editor);
-              if (userId) {
-                toast.success("Sessão ativa", { id: "reconnecting", duration: 1500 });
-              }
-            }
-          }
-          
-          setReconnecting(false);
-        } else if (userId) {
-          // Tinha usuário mas sessão expirou
-          toast.error("Sessão expirada", { 
-            description: "Por favor, faça login novamente.",
-            duration: 4000 
-          });
-          setUser(null);
+
+        if (refreshed) {
+          await handleSession(refreshed);
+        } else {
+          // Session expired
           setSession(null);
+          setUser(null);
           setIsAdmin(false);
           setIsEditor(false);
           currentUserIdRef.current = null;
-          stopLocalRefresh();
+          stopRefreshInterval();
+          toast.error("Sessão expirada", {
+            description: "Por favor, faça login novamente.",
+            duration: 4000
+          });
         }
       } catch (error) {
-        console.error("Error checking session on visibility change:", error);
-        setReconnecting(false);
+        console.error("Visibility change error:", error);
+      } finally {
+        if (isMounted) setReconnecting(false);
       }
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    initializeAuth();
 
     return () => {
       isMounted = false;
       subscription.unsubscribe();
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      stopLocalRefresh();
-      if (initTimeout) clearTimeout(initTimeout);
+      stopRefreshInterval();
+      clearTimeout(safetyTimeout);
     };
-  }, []);
+  }, [handleSession, stopRefreshInterval]);
 
   const signIn = useCallback(async (email: string, password: string) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (!error && data.user) {
-        // Busca as roles imediatamente após o login
-        const { admin, editor } = await fetchRoles(data.user.id);
-        setIsAdmin(admin);
-        setIsEditor(editor);
-        setUser(data.user);
-        setSession(data.session);
-        currentUserIdRef.current = data.user.id;
-        startRefreshInterval();
-      }
-      return { error: error as Error | null };
-    } catch (error) {
-      return { error: error as Error };
-    }
-  }, [startRefreshInterval]);
-
-  const signUp = useCallback(async (email: string, password: string, fullName: string) => {
-    try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: window.location.origin,
-          data: { full_name: fullName }
-        }
-      });
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      // onAuthStateChange will handle the rest
       return { error: error as Error | null };
     } catch (error) {
       return { error: error as Error };
@@ -384,28 +203,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = useCallback(async () => {
     stopRefreshInterval();
     await supabase.auth.signOut();
-    clearAuthCache();
-    setUser(null);
-    setSession(null);
-    setIsAdmin(false);
-    setIsEditor(false);
-    currentUserIdRef.current = null;
-    isInitializedRef.current = false;
+    // onAuthStateChange SIGNED_OUT will handle state cleanup
     toast.info("Você saiu da sua conta");
   }, [stopRefreshInterval]);
 
   return (
     <AuthContext.Provider value={{ 
-      user, 
-      session, 
-      loading, 
-      reconnecting, 
-      isAdmin, 
-      isEditor, 
-      signIn, 
-      signUp, 
-      signOut,
-      clearCache 
+      user, session, loading, reconnecting, 
+      isAdmin, isEditor, signIn, signOut
     }}>
       {children}
     </AuthContext.Provider>

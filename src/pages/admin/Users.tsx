@@ -5,37 +5,17 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
@@ -46,13 +26,9 @@ interface UserWithRole {
   user_id: string;
   role: string;
   created_at: string;
-  profile?: {
-    full_name: string | null;
-    user_id: string;
-  } | null;
+  profile?: { full_name: string | null; user_id: string } | null;
 }
 
-// New role definitions
 const ROLES = [
   { value: "desenvolvedor", label: "Desenvolvedor", description: "Acesso total ao sistema" },
   { value: "redator", label: "Redator", description: "Gerencia conteúdo e blog" },
@@ -65,14 +41,13 @@ const Users = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState("");
   const [newUserRole, setNewUserRole] = useState<string>("redator");
   const [newUserPassword, setNewUserPassword] = useState("");
   const [newUserName, setNewUserName] = useState("");
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  useEffect(() => { fetchUsers(); }, []);
 
   const fetchUsers = async () => {
     const { data: rolesData, error } = await supabase
@@ -86,7 +61,6 @@ const Users = () => {
       return;
     }
 
-    // Fetch profiles separately
     const userIds = rolesData?.map(r => r.user_id) || [];
     const { data: profilesData } = await supabase
       .from("profiles")
@@ -104,30 +78,29 @@ const Users = () => {
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
+    setCreating(true);
 
-    // Create user through auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: newUserEmail,
-      password: newUserPassword,
-      options: {
-        emailRedirectTo: window.location.origin,
-        data: { full_name: newUserName }
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.error("Sessão expirada, faça login novamente");
+        setCreating(false);
+        return;
       }
-    });
 
-    if (authError) {
-      toast.error("Erro ao criar usuário", { description: authError.message });
-      return;
-    }
+      const response = await supabase.functions.invoke("create-user", {
+        body: {
+          email: newUserEmail,
+          password: newUserPassword,
+          fullName: newUserName,
+          role: newUserRole,
+        },
+      });
 
-    if (authData.user) {
-      // Assign role
-      const { error: roleError } = await supabase.from("user_roles").insert([
-        { user_id: authData.user.id, role: newUserRole as any }
-      ]);
-
-      if (roleError) {
-        toast.error("Erro ao atribuir cargo", { description: roleError.message });
+      if (response.error) {
+        toast.error("Erro ao criar usuário", { description: response.error.message });
+      } else if (response.data?.error) {
+        toast.error("Erro ao criar usuário", { description: response.data.error });
       } else {
         toast.success("Usuário criado com sucesso!");
         setDialogOpen(false);
@@ -137,6 +110,10 @@ const Users = () => {
         setNewUserRole("redator");
         fetchUsers();
       }
+    } catch (err: any) {
+      toast.error("Erro ao criar usuário", { description: err.message });
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -155,9 +132,7 @@ const Users = () => {
   };
 
   const handleDeleteUser = async (userId: string) => {
-    // Only delete the role, not the auth user
     const { error } = await supabase.from("user_roles").delete().eq("user_id", userId);
-
     if (error) {
       toast.error("Erro ao remover acesso");
     } else {
@@ -184,15 +159,10 @@ const Users = () => {
   const getRoleLabel = (role: string) => {
     const roleConfig = ROLES.find(r => r.value === role);
     if (roleConfig) return roleConfig.label;
-    
-    // Fallback for legacy roles
     switch (role) {
-      case "admin":
-        return "Administrador";
-      case "editor":
-        return "Editor";
-      default:
-        return "Usuário";
+      case "admin": return "Administrador";
+      case "editor": return "Editor";
+      default: return "Usuário";
     }
   };
 
@@ -207,64 +177,31 @@ const Users = () => {
         <div className="flex flex-col sm:flex-row gap-4 justify-between mb-6">
           <div className="relative w-full sm:w-72">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar usuários..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-10"
-            />
+            <Input placeholder="Buscar usuários..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
           </div>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
-                <UserPlus className="h-4 w-4 mr-2" />
-                Novo Usuário
-              </Button>
+              <Button><UserPlus className="h-4 w-4 mr-2" />Novo Usuário</Button>
             </DialogTrigger>
             <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Criar Novo Usuário</DialogTitle>
-              </DialogHeader>
+              <DialogHeader><DialogTitle>Criar Novo Usuário</DialogTitle></DialogHeader>
               <form onSubmit={handleCreateUser} className="space-y-4 mt-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Nome</Label>
-                  <Input
-                    id="name"
-                    value={newUserName}
-                    onChange={(e) => setNewUserName(e.target.value)}
-                    placeholder="Nome completo"
-                    required
-                  />
+                  <Input id="name" value={newUserName} onChange={(e) => setNewUserName(e.target.value)} placeholder="Nome completo" required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={newUserEmail}
-                    onChange={(e) => setNewUserEmail(e.target.value)}
-                    placeholder="email@exemplo.com"
-                    required
-                  />
+                  <Input id="email" type="email" value={newUserEmail} onChange={(e) => setNewUserEmail(e.target.value)} placeholder="email@exemplo.com" required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password">Senha</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={newUserPassword}
-                    onChange={(e) => setNewUserPassword(e.target.value)}
-                    placeholder="Mínimo 6 caracteres"
-                    minLength={6}
-                    required
-                  />
+                  <Input id="password" type="password" value={newUserPassword} onChange={(e) => setNewUserPassword(e.target.value)} placeholder="Mínimo 6 caracteres" minLength={6} required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="role">Cargo</Label>
                   <Select value={newUserRole} onValueChange={setNewUserRole}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {ROLES.map(role => (
                         <SelectItem key={role.value} value={role.value}>
@@ -278,12 +215,10 @@ const Users = () => {
                   </Select>
                 </div>
                 <div className="flex justify-end gap-2 pt-4">
-                  <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                    Cancelar
-                  </Button>
-                  <Button type="submit">
+                  <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+                  <Button type="submit" disabled={creating}>
                     <UserPlus className="h-4 w-4 mr-2" />
-                    Criar Usuário
+                    {creating ? "Criando..." : "Criar Usuário"}
                   </Button>
                 </div>
               </form>
@@ -306,55 +241,38 @@ const Users = () => {
             <TableBody>
               {filteredUsers.map((u) => (
                 <TableRow key={u.id}>
-                  <TableCell className="font-medium">
-                    {u.profile?.full_name || "Sem nome"}
-                  </TableCell>
+                  <TableCell className="font-medium">{u.profile?.full_name || "Sem nome"}</TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRoleBadge(u.role)}`}>
                       {getRoleLabel(u.role)}
                     </span>
                   </TableCell>
-                  <TableCell>
-                    {new Date(u.created_at).toLocaleDateString("pt-BR")}
-                  </TableCell>
+                  <TableCell>{new Date(u.created_at).toLocaleDateString("pt-BR")}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
-                      <Select
-                        value={u.role}
-                        onValueChange={(value) => handleUpdateRole(u.user_id, value)}
-                        disabled={u.user_id === currentUser?.id}
-                      >
+                      <Select value={u.role} onValueChange={(value) => handleUpdateRole(u.user_id, value)} disabled={u.user_id === currentUser?.id}>
                         <SelectTrigger className="w-32 h-8">
-                          <Shield className="h-3 w-3 mr-1" />
-                          <SelectValue />
+                          <Shield className="h-3 w-3 mr-1" /><SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                           {ROLES.map(role => (
-                            <SelectItem key={role.value} value={role.value}>
-                              {role.label}
-                            </SelectItem>
+                            <SelectItem key={role.value} value={role.value}>{role.label}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                       {u.user_id !== currentUser?.id && (
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="text-destructive">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            <Button variant="ghost" size="icon" className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
                               <AlertDialogTitle>Remover acesso?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                O usuário perderá acesso ao painel administrativo.
-                              </AlertDialogDescription>
+                              <AlertDialogDescription>O usuário perderá acesso ao painel administrativo.</AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDeleteUser(u.user_id)}>
-                                Remover
-                              </AlertDialogAction>
+                              <AlertDialogAction onClick={() => handleDeleteUser(u.user_id)}>Remover</AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>
