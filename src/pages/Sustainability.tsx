@@ -65,16 +65,6 @@ const Sustainability = () => {
       description: t("sustainability.product.pet.desc"),
       image: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=600&q=80",
     },
-    {
-      name: "Algodão Orgânico",
-      description: t("sustainability.product.cotton.desc"),
-      image: "https://images.unsplash.com/photo-1464490997959-0c525f9c3b51?w=600&q=80",
-    },
-    {
-      name: "Fibras Biodegradáveis",
-      description: t("sustainability.product.biodegradable.desc"),
-      image: "https://images.unsplash.com/photo-1605000797499-95a51c5269ae?w=600&q=80",
-    },
   ];
 
   return (
