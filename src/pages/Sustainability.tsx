@@ -220,7 +220,7 @@ const Sustainability = () => {
               </p>
             </motion.div>
 
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-1 max-w-md mx-auto gap-8">
               {ecoProducts.map((product, index) => (
                 <motion.div
                   key={product.name}
