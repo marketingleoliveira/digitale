@@ -110,6 +110,10 @@ const translations: Record<Language, Record<string, string>> = {
     "about.value.sustainability.desc": "Compromisso com práticas ambientalmente responsáveis.",
     "about.value.partnership": "Parceria",
     "about.value.partnership.desc": "Construímos relacionamentos duradouros com nossos clientes.",
+    "about.value.service": "Atendimento de Qualidade",
+    "about.value.service.desc": "Excelência no atendimento ao cliente, com suporte dedicado e personalizado.",
+    "about.value.delivery": "Pronta Entrega",
+    "about.value.delivery.desc": "Agilidade na entrega com estoque disponível para atender suas demandas.",
     "about.image.alt": "Atleta usando tecidos Digitale",
     "about.years": "Anos de mercado",
     
@@ -422,6 +426,10 @@ const translations: Record<Language, Record<string, string>> = {
     "about.value.sustainability.desc": "Compromiso con prácticas ambientalmente responsables.",
     "about.value.partnership": "Alianza",
     "about.value.partnership.desc": "Construimos relaciones duraderas con nuestros clientes.",
+    "about.value.service": "Atención de Calidad",
+    "about.value.service.desc": "Excelencia en atención al cliente, con soporte dedicado y personalizado.",
+    "about.value.delivery": "Entrega Inmediata",
+    "about.value.delivery.desc": "Agilidad en la entrega con stock disponible para atender sus demandas.",
     "about.image.alt": "Atleta usando tejidos Digitale",
     "about.years": "Años de mercado",
     
@@ -734,6 +742,10 @@ const translations: Record<Language, Record<string, string>> = {
     "about.value.sustainability.desc": "Commitment to environmentally responsible practices.",
     "about.value.partnership": "Partnership",
     "about.value.partnership.desc": "We build lasting relationships with our customers.",
+    "about.value.service": "Quality Service",
+    "about.value.service.desc": "Excellence in customer service with dedicated and personalized support.",
+    "about.value.delivery": "Ready to Ship",
+    "about.value.delivery.desc": "Fast delivery with available stock to meet your demands.",
     "about.image.alt": "Athlete wearing Digitale fabrics",
     "about.years": "Years in the market",
     
