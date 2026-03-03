@@ -1,32 +1,21 @@
 import { motion } from "framer-motion";
-import { CheckCircle } from "lucide-react";
+import { Award, Lightbulb, Leaf, Handshake, HeadphonesIcon, PackageCheck } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Stats } from "@/components/sections/Stats";
 import { Clients } from "@/components/sections/Clients";
 import { useLanguage } from "@/contexts/LanguageContext";
-import teamPhoto from "@/assets/team-photo.webp";
 
 const About = () => {
   const { t } = useLanguage();
 
   const values = [
-    {
-      titleKey: "about.value.quality",
-      descKey: "about.value.quality.desc",
-    },
-    {
-      titleKey: "about.value.innovation",
-      descKey: "about.value.innovation.desc",
-    },
-    {
-      titleKey: "about.value.sustainability",
-      descKey: "about.value.sustainability.desc",
-    },
-    {
-      titleKey: "about.value.partnership",
-      descKey: "about.value.partnership.desc",
-    },
+    { titleKey: "about.value.quality", descKey: "about.value.quality.desc", icon: Award },
+    { titleKey: "about.value.innovation", descKey: "about.value.innovation.desc", icon: Lightbulb },
+    { titleKey: "about.value.sustainability", descKey: "about.value.sustainability.desc", icon: Leaf },
+    { titleKey: "about.value.partnership", descKey: "about.value.partnership.desc", icon: Handshake },
+    { titleKey: "about.value.service", descKey: "about.value.service.desc", icon: HeadphonesIcon },
+    { titleKey: "about.value.delivery", descKey: "about.value.delivery.desc", icon: PackageCheck },
   ];
 
   return (
@@ -55,59 +44,38 @@ const About = () => {
       {/* Story */}
       <section className="py-24">
         <div className="container mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-            >
-              <h2 className="section-title mb-6">{t("about.history.title")}</h2>
-              <p className="text-muted-foreground text-lg leading-relaxed mb-6">
-                {t("about.history.p1")}
-              </p>
-              <p className="text-muted-foreground text-lg leading-relaxed mb-8">
-                {t("about.history.p2")}
-              </p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="max-w-3xl mx-auto"
+          >
+            <h2 className="section-title mb-6 text-center">{t("about.history.title")}</h2>
+            <p className="text-muted-foreground text-lg leading-relaxed mb-6">
+              {t("about.history.p1")}
+            </p>
+            <p className="text-muted-foreground text-lg leading-relaxed mb-10">
+              {t("about.history.p2")}
+            </p>
 
-              <div className="space-y-4">
-                {values.map((value, index) => (
-                  <motion.div
-                    key={value.titleKey}
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.1 }}
-                    className="flex gap-4"
-                  >
-                    <CheckCircle className="h-6 w-6 text-accent flex-shrink-0" />
-                    <div>
-                      <h4 className="font-semibold text-foreground">{t(value.titleKey)}</h4>
-                      <p className="text-sm text-muted-foreground">{t(value.descKey)}</p>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="relative"
-            >
-              <div className="aspect-[4/5] rounded-3xl overflow-hidden">
-                <img
-                  src={teamPhoto}
-                  alt={t("about.image.alt")}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="absolute -bottom-6 -left-6 bg-primary text-primary-foreground p-6 rounded-2xl shadow-xl">
-                <p className="font-display text-4xl font-bold">60+</p>
-                <p className="text-sm text-primary-foreground/80">{t("about.years")}</p>
-              </div>
-            </motion.div>
-          </div>
+            <h3 className="text-xl font-semibold text-foreground mb-6 text-center">Pilares da Empresa</h3>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {values.map((value, index) => (
+                <motion.div
+                  key={value.titleKey}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.1 }}
+                  className="bg-muted/50 rounded-2xl p-6 border border-border hover:border-accent/50 transition-colors"
+                >
+                  <value.icon className="h-7 w-7 text-accent mb-3" />
+                  <h4 className="font-semibold text-foreground mb-1">{t(value.titleKey)}</h4>
+                  <p className="text-sm text-muted-foreground">{t(value.descKey)}</p>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
         </div>
       </section>
 
