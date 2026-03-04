@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-react";
+import { isVideoUrl } from "@/lib/media-utils";
 
 interface GalleryImage {
   url: string;
@@ -40,14 +41,11 @@ export function FabricGallery({ images, mainImage, fabricName }: FabricGalleryPr
           className="aspect-square rounded-3xl overflow-hidden shadow-2xl cursor-zoom-in"
           onClick={() => setIsLightboxOpen(true)}
         >
-          <img
-            src={mainImage}
-            alt={fabricName}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors flex items-center justify-center">
-            <ZoomIn className="h-8 w-8 text-white opacity-0 hover:opacity-100 transition-opacity" />
-          </div>
+          {isVideoUrl(mainImage) ? (
+            <video src={mainImage} className="w-full h-full object-cover" muted loop autoPlay playsInline />
+          ) : (
+            <img src={mainImage} alt={fabricName} className="w-full h-full object-cover" />
+          )}
         </div>
 
         {/* Lightbox */}
@@ -73,11 +71,11 @@ export function FabricGallery({ images, mainImage, fabricName }: FabricGalleryPr
           className="aspect-square rounded-3xl overflow-hidden shadow-2xl cursor-zoom-in"
           onClick={() => setIsLightboxOpen(true)}
         >
-          <img
-            src={currentImage.url}
-            alt={currentImage.alt || fabricName}
-            className="w-full h-full object-cover"
-          />
+          {isVideoUrl(currentImage.url) ? (
+            <video src={currentImage.url} className="w-full h-full object-cover" muted loop autoPlay playsInline />
+          ) : (
+            <img src={currentImage.url} alt={currentImage.alt || fabricName} className="w-full h-full object-cover" />
+          )}
         </motion.div>
 
         {/* Navigation Arrows */}
@@ -114,11 +112,11 @@ export function FabricGallery({ images, mainImage, fabricName }: FabricGalleryPr
               }
             `}
           >
-            <img
-              src={image.url}
-              alt={image.alt || `${fabricName} ${index + 1}`}
-              className="w-full h-full object-cover"
-            />
+            {isVideoUrl(image.url) ? (
+              <video src={image.url} className="w-full h-full object-cover" muted playsInline />
+            ) : (
+              <img src={image.url} alt={image.alt || `${fabricName} ${index + 1}`} className="w-full h-full object-cover" />
+            )}
           </button>
         ))}
       </div>
@@ -188,16 +186,27 @@ function Lightbox({
           <X className="h-6 w-6 text-white" />
         </button>
 
-        {/* Image */}
-        <motion.img
-          key={currentIndex}
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          src={current?.url}
-          alt={current?.alt || ""}
-          className="max-w-[90vw] max-h-[90vh] object-contain"
-          onClick={(e) => e.stopPropagation()}
-        />
+        {/* Media */}
+        {isVideoUrl(current?.url || '') ? (
+          <video
+            key={currentIndex}
+            src={current?.url}
+            className="max-w-[90vw] max-h-[90vh] object-contain"
+            controls
+            autoPlay
+            onClick={(e) => e.stopPropagation()}
+          />
+        ) : (
+          <motion.img
+            key={currentIndex}
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            src={current?.url}
+            alt={current?.alt || ""}
+            className="max-w-[90vw] max-h-[90vh] object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        )}
 
         {/* Navigation for multiple images */}
         {allImages.length > 1 && (
