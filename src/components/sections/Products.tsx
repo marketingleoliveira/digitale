@@ -111,7 +111,7 @@ export function Products() {
       <div className="container mx-auto px-4 md:px-6">
         {/* Fabrics Section */}
         <div className="text-center mb-10 md:mb-12">
-          <h2 className="section-title">Linha Confort</h2>
+          <h2 className="section-title">Tecidos Confort</h2>
         </div>
 
         {/* Fabrics Grid */}
@@ -136,19 +136,19 @@ export function Products() {
                   <div className="relative bg-card rounded-xl md:rounded-2xl overflow-hidden shadow-md transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-2">
                     {/* Image Container */}
                     <div className="relative h-48 md:h-72 overflow-hidden">
-                      {isVideoUrl(getFabricImage(fabric)) ? (
-                        <video
-                          src={getFabricImage(fabric)}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                          muted loop autoPlay playsInline
-                        />
-                      ) : (
-                        <img
-                          src={getFabricImage(fabric)}
-                          alt={fabric.name}
-                          loading="lazy"
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                      )}
+                      {isVideoUrl(getFabricImage(fabric)) ?
+                  <video
+                    src={getFabricImage(fabric)}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    muted loop autoPlay playsInline /> :
+
+
+                  <img
+                    src={getFabricImage(fabric)}
+                    alt={fabric.name}
+                    loading="lazy"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                  }
 
                       {/* Gradient Overlay on Hover */}
                       <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -195,7 +195,7 @@ export function Products() {
 
         {/* Prints Section */}
         <div className="text-center mb-10 md:mb-12 mt-16 md:mt-20">
-          <h2 className="section-title">Lançamentos</h2>
+          <h2 className="section-title">Novas Estampas</h2>
         </div>
 
         {/* Prints Grid */}
@@ -212,19 +212,19 @@ export function Products() {
             key={print.id}
             className="group relative aspect-square rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer">
 
-                {isVideoUrl(print.image_url) ? (
-                  <video
-                    src={print.image_url}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                    muted loop autoPlay playsInline
-                  />
-                ) : (
-                  <img
-                    src={print.image_url}
-                    alt={print.name || print.code}
-                    loading="lazy"
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
-                )}
+                {isVideoUrl(print.image_url) ?
+            <video
+              src={print.image_url}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+              muted loop autoPlay playsInline /> :
+
+
+            <img
+              src={print.image_url}
+              alt={print.name || print.code}
+              loading="lazy"
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
+            }
 
                 
                 {/* Overlay */}
