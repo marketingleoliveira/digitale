@@ -57,7 +57,6 @@ export function Stats() {
   const stats = [
     { value: 60, suffix: "+", label: t("stats.years"), iconIndex: 0 },
     { value: 1000, suffix: "+", label: t("stats.clients"), iconIndex: 1 },
-    { value: 10, suffix: "M+", label: t("stats.fabrics"), iconIndex: 2 },
     { value: 5, suffix: "+", label: t("stats.production"), iconIndex: 3 },
   ];
 
@@ -82,7 +81,7 @@ export function Stats() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
           {stats.map((stat, index) => {
             const { Icon, color } = icons[stat.iconIndex];
             return (
