@@ -40,7 +40,7 @@ const translations: Record<Language, Record<string, string>> = {
     
     // Testimonials
     "testimonials.label": "Depoimentos",
-    "testimonials.title": "O Que Nossos Clientes Dizem",
+    "testimonials.title": "O Que Dizem Nossos Clientes",
     
     // Stats
     "stats.years": "Anos de Experiência",

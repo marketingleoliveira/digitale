@@ -58,7 +58,7 @@ export function Stats() {
     { value: 60, suffix: "+", label: t("stats.years"), iconIndex: 0 },
     { value: 1000, suffix: "+", label: t("stats.clients"), iconIndex: 1 },
     { value: 10, suffix: "M+", label: t("stats.fabrics"), iconIndex: 2 },
-    { value: 15, suffix: "+", label: t("stats.production"), iconIndex: 3 },
+    { value: 5, suffix: "+", label: t("stats.production"), iconIndex: 3 },
   ];
 
   return (
