@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, GripVertical, Image, Palette, Images, Star } from "lucide-react";
 import { toast } from "sonner";
+import { isVideoUrl } from "@/lib/media-utils";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import { GalleryUpload } from "@/components/admin/GalleryUpload";
 import { ColorVariantsEditor, ColorVariant } from "@/components/admin/ColorVariantsEditor";
@@ -448,11 +449,19 @@ export default function AdminFabrics() {
                     </TableCell>
                     <TableCell>
                       {fabric.image_url ? (
-                        <img
-                          src={fabric.image_url}
-                          alt={fabric.name}
-                          className="w-12 h-12 object-cover rounded"
-                        />
+                        isVideoUrl(fabric.image_url) ? (
+                          <video
+                            src={fabric.image_url}
+                            className="w-12 h-12 object-cover rounded"
+                            muted playsInline autoPlay loop
+                          />
+                        ) : (
+                          <img
+                            src={fabric.image_url}
+                            alt={fabric.name}
+                            className="w-12 h-12 object-cover rounded"
+                          />
+                        )
                       ) : (
                         <div className="w-12 h-12 bg-muted rounded flex items-center justify-center">
                           <Image className="h-5 w-5 text-muted-foreground" />
