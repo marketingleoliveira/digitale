@@ -39,6 +39,8 @@ import JobOpenings from "./pages/admin/JobOpenings";
 import JobApplications from "./pages/admin/JobApplications";
 import Permissions from "./pages/admin/Permissions";
 import SegmentsAdmin from "./pages/admin/Segments";
+import RadarDigitale from "./pages/RadarDigitale";
+import RadarAdmin from "./pages/admin/RadarAdmin";
 import { NewsletterPopup } from "./components/newsletter/NewsletterPopup";
 
 const queryClient = new QueryClient({
@@ -93,6 +95,7 @@ const App = () => (
               <Route path="/sustentabilidade" element={<Sustainability />} />
               <Route path="/sostenibilidad" element={<Navigate to="/sustentabilidade" replace />} />
               <Route path="/sustainability" element={<Navigate to="/sustentabilidade" replace />} />
+              <Route path="/radar-digitale" element={<RadarDigitale />} />
               <Route path="/politica-de-privacidade" element={<Privacy />} />
               <Route path="/privacidade" element={<Navigate to="/politica-de-privacidade" replace />} />
               <Route path="/privacy" element={<Navigate to="/politica-de-privacidade" replace />} />
@@ -117,6 +120,7 @@ const App = () => (
               <Route path="/admin/prints" element={<ProtectedRoute><PrintsAdmin /></ProtectedRoute>} />
               <Route path="/admin/print-categories" element={<ProtectedRoute><PrintCategories /></ProtectedRoute>} />
               <Route path="/admin/segments" element={<ProtectedRoute><SegmentsAdmin /></ProtectedRoute>} />
+              <Route path="/admin/radar" element={<ProtectedRoute><RadarAdmin /></ProtectedRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>

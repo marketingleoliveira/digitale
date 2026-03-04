@@ -43,6 +43,7 @@ export function Header() {
       ]
     },
     { name: t("nav.careers"), href: "/trabalhe-conosco" },
+    { name: "RADAR DIGITALE", href: "/radar-digitale" },
   ];
 
   useEffect(() => {
