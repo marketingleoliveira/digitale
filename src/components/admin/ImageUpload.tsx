@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Upload, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { isVideoUrl, isValidMediaFile, getMaxFileSize, getMaxFileSizeLabel, getAcceptedMediaTypes } from "@/lib/media-utils";
 
 interface ImageUploadProps {
   bucket: string;
@@ -42,13 +43,14 @@ export function ImageUpload({ bucket, folder = "", value, onChange, className }:
   };
 
   const processFile = async (file: File) => {
-    if (!file.type.startsWith("image/")) {
-      toast.error("Por favor, selecione uma imagem válida.");
+    if (!isValidMediaFile(file)) {
+      toast.error("Por favor, selecione uma imagem ou vídeo MP4 válido.");
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("A imagem deve ter no máximo 5MB.");
+    const maxSize = getMaxFileSize(file);
+    if (file.size > maxSize) {
+      toast.error(`O arquivo deve ter no máximo ${getMaxFileSizeLabel(file)}.`);
       return;
     }
 
@@ -73,7 +75,7 @@ export function ImageUpload({ bucket, folder = "", value, onChange, className }:
         .getPublicUrl(filePath);
 
       onChange(publicUrl);
-      toast.success("Imagem enviada com sucesso!");
+      toast.success("Arquivo enviado com sucesso!");
     } catch (error: any) {
       console.error("Upload error:", error);
       toast.error("Erro ao enviar imagem: " + error.message);
@@ -100,7 +102,7 @@ export function ImageUpload({ bucket, folder = "", value, onChange, className }:
       <Input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept={getAcceptedMediaTypes()}
         onChange={handleUpload}
         className="hidden"
         id="image-upload"
@@ -108,11 +110,22 @@ export function ImageUpload({ bucket, folder = "", value, onChange, className }:
       
       {value ? (
         <div className="relative">
-          <img
-            src={value}
-            alt="Preview"
-            className="w-full h-48 object-cover rounded-lg border"
-          />
+          {isVideoUrl(value) ? (
+            <video
+              src={value}
+              className="w-full h-48 object-cover rounded-lg border"
+              muted
+              loop
+              autoPlay
+              playsInline
+            />
+          ) : (
+            <img
+              src={value}
+              alt="Preview"
+              className="w-full h-48 object-cover rounded-lg border"
+            />
+          )}
           <Button
             type="button"
             variant="destructive"
@@ -144,9 +157,9 @@ export function ImageUpload({ bucket, folder = "", value, onChange, className }:
             <>
               <Upload className={`h-8 w-8 ${isDragging ? "text-primary" : "text-muted-foreground"}`} />
               <span className="text-sm text-muted-foreground">
-                {isDragging ? "Solte a imagem aqui" : "Arraste ou clique para enviar"}
+                {isDragging ? "Solte o arquivo aqui" : "Arraste ou clique para enviar"}
               </span>
-              <span className="text-xs text-muted-foreground">PNG, JPG até 5MB</span>
+              <span className="text-xs text-muted-foreground">PNG, JPG até 5MB | MP4 até 50MB</span>
             </>
           )}
         </div>
