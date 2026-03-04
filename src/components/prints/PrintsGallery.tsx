@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { isVideoUrl } from "@/lib/media-utils";
 
 interface Print {
   id: string;
@@ -51,11 +52,22 @@ export function PrintsGallery() {
           viewport={{ once: true }}
           className="group relative aspect-square rounded-lg overflow-hidden cursor-pointer shadow-md hover:shadow-xl transition-shadow"
         >
-          <img
-            src={print.image_url}
-            alt={print.name || `Estampa ${print.code}`}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-          />
+          {isVideoUrl(print.image_url) ? (
+            <video
+              src={print.image_url}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              muted
+              loop
+              autoPlay
+              playsInline
+            />
+          ) : (
+            <img
+              src={print.image_url}
+              alt={print.name || `Estampa ${print.code}`}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            />
+          )}
           {/* Overlay with code on hover */}
           <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
             <div className="text-center text-white">

@@ -34,6 +34,7 @@ import { Plus, Pencil, Trash2, GripVertical, Loader2, FolderOpen } from "lucide-
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { useInvalidateCache } from "@/hooks/useInvalidateCache";
+import { isVideoUrl } from "@/lib/media-utils";
 
 interface PrintCategory {
   id: string;
@@ -380,11 +381,19 @@ const PrintsAdmin = () => {
                       <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
                     </TableCell>
                     <TableCell>
-                      <img
-                        src={print.image_url}
-                        alt={print.code}
-                        className="w-16 h-16 object-cover rounded-lg"
-                      />
+                      {isVideoUrl(print.image_url) ? (
+                        <video
+                          src={print.image_url}
+                          className="w-16 h-16 object-cover rounded-lg"
+                          muted playsInline autoPlay loop
+                        />
+                      ) : (
+                        <img
+                          src={print.image_url}
+                          alt={print.code}
+                          className="w-16 h-16 object-cover rounded-lg"
+                        />
+                      )}
                     </TableCell>
                     <TableCell className="font-medium">{print.code}</TableCell>
                     <TableCell>{print.name || "-"}</TableCell>

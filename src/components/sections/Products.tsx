@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import logoColor from "@/assets/logo-color.png";
 import { Skeleton } from "@/components/ui/skeleton";
+import { isVideoUrl } from "@/lib/media-utils";
 
 // Fallback images
 import fabricMilano from "@/assets/fabric-milano.jpg";
@@ -135,11 +136,19 @@ export function Products() {
                   <div className="relative bg-card rounded-xl md:rounded-2xl overflow-hidden shadow-md transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-2">
                     {/* Image Container */}
                     <div className="relative h-48 md:h-72 overflow-hidden">
-                      <img
-                    src={getFabricImage(fabric)}
-                    alt={fabric.name}
-                    loading="lazy"
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                      {isVideoUrl(getFabricImage(fabric)) ? (
+                        <video
+                          src={getFabricImage(fabric)}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          muted loop autoPlay playsInline
+                        />
+                      ) : (
+                        <img
+                          src={getFabricImage(fabric)}
+                          alt={fabric.name}
+                          loading="lazy"
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                      )}
 
                       {/* Gradient Overlay on Hover */}
                       <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -203,11 +212,19 @@ export function Products() {
             key={print.id}
             className="group relative aspect-square rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer">
 
-                <img
-              src={print.image_url}
-              alt={print.name || print.code}
-              loading="lazy"
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
+                {isVideoUrl(print.image_url) ? (
+                  <video
+                    src={print.image_url}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    muted loop autoPlay playsInline
+                  />
+                ) : (
+                  <img
+                    src={print.image_url}
+                    alt={print.name || print.code}
+                    loading="lazy"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
+                )}
 
                 
                 {/* Overlay */}

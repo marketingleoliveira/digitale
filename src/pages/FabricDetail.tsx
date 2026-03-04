@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { motion } from "framer-motion";
 import { ArrowLeft, Check, Phone, Mail, ArrowRight, Heart } from "lucide-react";
+import { isVideoUrl } from "@/lib/media-utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ColorGallery } from "@/components/fabric/ColorGallery";
@@ -270,11 +271,19 @@ export default function FabricDetail() {
                     className="group block bg-card rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
                   >
                     <div className="aspect-video overflow-hidden">
-                      <img
-                        src={otherFabric.image_url || defaultImages[otherFabric.slug] || fabricMilano}
-                        alt={otherFabric.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
+                      {isVideoUrl(otherFabric.image_url || defaultImages[otherFabric.slug] || fabricMilano) ? (
+                        <video
+                          src={otherFabric.image_url || defaultImages[otherFabric.slug] || fabricMilano}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          muted loop autoPlay playsInline
+                        />
+                      ) : (
+                        <img
+                          src={otherFabric.image_url || defaultImages[otherFabric.slug] || fabricMilano}
+                          alt={otherFabric.name}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                      )}
                     </div>
                     <div className="p-6">
                       <h3 className="text-xl font-bold text-foreground group-hover:text-accent transition-colors">

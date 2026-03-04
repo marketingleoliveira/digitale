@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Upload, X, Loader2, Plus, Image } from "lucide-react";
 import { toast } from "sonner";
+import { isVideoUrl, isValidMediaFile, getMaxFileSize, getMaxFileSizeLabel, getAcceptedMediaTypes } from "@/lib/media-utils";
 
 interface GalleryImage {
   url: string;
@@ -64,13 +65,14 @@ export function GalleryUpload({
 
     try {
       for (const file of filesToUpload) {
-        if (!file.type.startsWith("image/")) {
-          toast.error(`${file.name} não é uma imagem válida.`);
+        if (!isValidMediaFile(file)) {
+          toast.error(`${file.name} não é um arquivo válido (imagem ou vídeo).`);
           continue;
         }
 
-        if (file.size > 5 * 1024 * 1024) {
-          toast.error(`${file.name} é muito grande (máx 5MB).`);
+        const maxSize = getMaxFileSize(file);
+        if (file.size > maxSize) {
+          toast.error(`${file.name} é muito grande (máx ${getMaxFileSizeLabel(file)}).`);
           continue;
         }
 
@@ -95,7 +97,7 @@ export function GalleryUpload({
       }
 
       onChange([...value, ...uploadedImages]);
-      toast.success(`${uploadedImages.length} imagem(ns) enviada(s)!`);
+      toast.success(`${uploadedImages.length} arquivo(s) enviado(s)!`);
     } catch (error: any) {
       console.error("Upload error:", error);
       toast.error("Erro ao enviar imagem: " + error.message);
@@ -134,7 +136,7 @@ export function GalleryUpload({
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept={getAcceptedMediaTypes()}
         multiple
         onChange={handleUpload}
         className="hidden"
@@ -146,11 +148,22 @@ export function GalleryUpload({
       }`}>
         {value.map((image, index) => (
           <div key={index} className="relative group">
-            <img
-              src={image.url}
-              alt={image.alt || `Imagem ${index + 1}`}
-              className="w-full aspect-square object-cover rounded-lg border"
-            />
+            {isVideoUrl(image.url) ? (
+              <video
+                src={image.url}
+                className="w-full aspect-square object-cover rounded-lg border"
+                muted
+                loop
+                autoPlay
+                playsInline
+              />
+            ) : (
+              <img
+                src={image.url}
+                alt={image.alt || `Imagem ${index + 1}`}
+                className="w-full aspect-square object-cover rounded-lg border"
+              />
+            )}
             <button
               type="button"
               onClick={() => handleRemove(index)}
@@ -196,10 +209,10 @@ export function GalleryUpload({
         >
           <Image className={`h-10 w-10 mx-auto mb-3 ${isDragging ? "text-primary" : "text-muted-foreground"}`} />
           <p className="text-sm text-muted-foreground">
-            {isDragging ? "Solte as imagens aqui" : "Arraste ou clique para adicionar imagens"}
+            {isDragging ? "Solte os arquivos aqui" : "Arraste ou clique para adicionar imagens ou vídeos"}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            Máximo de {maxImages} imagens, 5MB cada
+            Máximo de {maxImages} arquivos | Imagens até 5MB | Vídeos até 50MB
           </p>
         </div>
       )}
