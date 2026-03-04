@@ -42,6 +42,7 @@ const menuItems = [
   { icon: FolderOpen, label: "Categorias", href: "/admin/categories" },
   { icon: MessageSquare, label: "Contatos", href: "/admin/contacts" },
   { icon: Mail, label: "Newsletter", href: "/admin/newsletter", adminOnly: true },
+  { icon: FileText, label: "Radar Digitale", href: "/admin/radar" },
   { icon: Users, label: "Usuários", href: "/admin/users", adminOnly: true },
   { icon: ShieldCheck, label: "Permissões", href: "/admin/permissions", adminOnly: true },
   { icon: Settings, label: "Configurações", href: "/admin/settings", adminOnly: true },
