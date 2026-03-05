@@ -7,6 +7,7 @@ import { Footer } from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import radarHeader from "@/assets/radar-header.png";
 
 interface RadarCategory {
   id: string;
