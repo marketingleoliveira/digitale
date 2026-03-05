@@ -42,7 +42,7 @@ export function FabricGallery({ images, mainImage, fabricName }: FabricGalleryPr
           onClick={() => setIsLightboxOpen(true)}
         >
           {isVideoUrl(mainImage) ? (
-            <video src={mainImage} className="w-full h-full object-cover" muted loop autoPlay playsInline />
+            <video src={mainImage} className="w-full h-full object-cover" muted playsInline controls />
           ) : (
             <img src={mainImage} alt={fabricName} className="w-full h-full object-cover" />
           )}
@@ -72,7 +72,7 @@ export function FabricGallery({ images, mainImage, fabricName }: FabricGalleryPr
           onClick={() => setIsLightboxOpen(true)}
         >
           {isVideoUrl(currentImage.url) ? (
-            <video src={currentImage.url} className="w-full h-full object-cover" muted loop autoPlay playsInline />
+            <video src={currentImage.url} className="w-full h-full object-cover" muted playsInline controls />
           ) : (
             <img src={currentImage.url} alt={currentImage.alt || fabricName} className="w-full h-full object-cover" />
           )}

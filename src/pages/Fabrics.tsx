@@ -3,8 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { ChevronDown, Heart, Eye } from "lucide-react";
+import { ChevronDown, Heart, Eye, Play } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { isVideoUrl } from "@/lib/media-utils";
 import { Button } from "@/components/ui/button";
 import { FavoriteButton } from "@/components/fabric/FavoriteButton";
 import { FavoritesDrawer } from "@/components/fabric/FavoritesDrawer";
@@ -193,13 +194,30 @@ function FabricsContent() {
                               className="w-full h-auto flex flex-col items-stretch p-0 overflow-hidden border-2 hover:border-accent transition-all"
                               onClick={() => handleFabricClick(fabric)}>
                               
-                                  {/* Image preview */}
+                                  {/* Image/Video preview */}
                                   <div className="aspect-[4/3] overflow-hidden relative">
+                                    {isVideoUrl(fabric.image_url || defaultImages[fabric.slug] || '') ? (
+                                      <>
+                                        <video
+                                          src={fabric.image_url || defaultImages[fabric.slug] || fabricMilano}
+                                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                          muted
+                                          playsInline
+                                          preload="metadata"
+                                        />
+                                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                          <div className="w-10 h-10 rounded-full bg-black/50 flex items-center justify-center">
+                                            <Play className="h-5 w-5 text-white fill-white" />
+                                          </div>
+                                        </div>
+                                      </>
+                                    ) : (
                                     <img
                                   src={fabric.image_url || defaultImages[fabric.slug] || fabricMilano}
                                   alt={fabric.name}
                                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                   loading="lazy" />
+                                    )}
                                 
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                                     <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
