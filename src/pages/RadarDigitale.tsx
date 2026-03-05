@@ -117,7 +117,7 @@ const RadarDigitale = () => {
                       >
                         Todas as edições
                       </button>
-                      {categories.map((cat) => (
+                      {categoriesWithEditions.map((cat) => (
                         <button
                           key={cat.id}
                           onClick={() => { setSelectedCategory(cat.id); setSelectedEdition(null); }}
