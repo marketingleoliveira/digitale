@@ -73,24 +73,13 @@ const RadarDigitale = () => {
       <Header />
       <main>
         {/* Hero */}
-        <section className="bg-primary text-primary-foreground py-12 md:py-16">
-          <div className="container mx-auto px-4 md:px-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center max-w-3xl mx-auto"
-            >
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <Newspaper className="h-6 w-6 text-accent" />
-                <span className="text-accent font-medium tracking-wider text-sm uppercase">Newsletter</span>
-              </div>
-              <h1 className="font-display text-3xl md:text-5xl font-bold mb-4">
-                <span className="text-accent">radar</span>digitale
-              </h1>
-              <p className="text-primary-foreground/70 text-lg">
-                Fique por dentro das tendências, novidades e inovações do mercado têxtil.
-              </p>
-            </motion.div>
+        <section className="bg-white py-8 md:py-12">
+          <div className="container mx-auto px-4 md:px-6 flex justify-center">
+            <img
+              src={radarHeader}
+              alt="Radar Digitale - Boletim Informativo"
+              className="max-w-full h-auto max-h-[200px] md:max-h-[280px] object-contain"
+            />
           </div>
         </section>
 
