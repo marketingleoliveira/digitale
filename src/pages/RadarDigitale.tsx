@@ -54,6 +54,11 @@ const RadarDigitale = () => {
     },
   });
 
+  // Only show categories that have at least one edition
+  const categoriesWithEditions = categories.filter((cat) =>
+    editions.some((e) => e.category_id === cat.id)
+  );
+
   const filteredEditions = selectedCategory
     ? editions.filter((e) => e.category_id === selectedCategory)
     : editions;
