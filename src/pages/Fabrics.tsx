@@ -205,11 +205,6 @@ function FabricsContent() {
                                           playsInline
                                           preload="metadata"
                                         />
-                                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                          <div className="w-10 h-10 rounded-full bg-black/50 flex items-center justify-center">
-                                            <Play className="h-5 w-5 text-white fill-white" />
-                                          </div>
-                                        </div>
                                       </>
                                     ) : (
                                     <img
