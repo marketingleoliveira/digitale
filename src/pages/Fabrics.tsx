@@ -43,7 +43,7 @@ const techBadgesByCategory: Record<string, { name: string; image: string }[]> = 
     { name: "4 Way Stretch", image: badge4WayStretch },
     { name: "Zero Transparência", image: badgeZeroTransparencia },
   ],
-  "microfibra": [
+  "supermicrofibra": [
     { name: "Aloe Vera", image: badgeAloeVera },
     { name: "Proteção UV 50+", image: badgeUV50 },
     { name: "Creora", image: badgeCreora },
@@ -183,8 +183,8 @@ function FabricsContent() {
                       onOpenChange={() => toggleCategory(category.id)}>
                       
                         <CollapsibleTrigger asChild>
-                          <button className="w-full flex items-center justify-between p-5 bg-card rounded-xl border border-border hover:border-accent/30 transition-all group">
-                            <div className="flex items-center gap-4">
+                          <button className="w-full flex flex-col md:flex-row items-center justify-between p-5 bg-card rounded-xl border border-border hover:border-accent/30 transition-all group gap-4">
+                            <div className="flex items-center gap-4 flex-shrink-0">
                               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent to-accent/70 flex items-center justify-center text-white font-bold text-lg">
                                 {category.name.charAt(0)}
                               </div>
@@ -199,7 +199,29 @@ function FabricsContent() {
                               }
                               </div>
                             </div>
-                            <div className="flex items-center gap-3">
+                            
+                            {/* Tech Badges - centered */}
+                            {(() => {
+                              const slug = category.slug?.toLowerCase() || category.name.toLowerCase();
+                              const badges = techBadgesByCategory[slug];
+                              if (!badges) return <div className="flex-1" />;
+                              return (
+                                <div className="flex-1 flex justify-center">
+                                  <div className="flex flex-wrap justify-center gap-3">
+                                    {badges.map((badge) => (
+                                      <div key={badge.name} className="flex flex-col items-center gap-1" title={badge.name}>
+                                        <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center p-1">
+                                          <img src={badge.image} alt={badge.name} className="w-full h-full object-contain" />
+                                        </div>
+                                        <span className="text-[9px] text-muted-foreground font-medium text-center leading-tight max-w-[60px]">{badge.name}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              );
+                            })()}
+
+                            <div className="flex items-center gap-3 flex-shrink-0">
                               <span className="text-sm text-muted-foreground bg-secondary px-3 py-1 rounded-full">
                                 {categoryFabrics.length} tecido{categoryFabrics.length !== 1 ? 's' : ''}
                               </span>
@@ -209,27 +231,6 @@ function FabricsContent() {
                         </CollapsibleTrigger>
                         
                         <CollapsibleContent>
-                          {/* Tech Badges */}
-                          {(() => {
-                            const slug = category.slug?.toLowerCase() || category.name.toLowerCase();
-                            const badges = techBadgesByCategory[slug];
-                            if (!badges) return null;
-                            return (
-                              <div className="mt-4 mb-2 p-4 bg-secondary/30 rounded-xl">
-                                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Tecnologias</h3>
-                                <div className="flex flex-wrap gap-4">
-                                  {badges.map((badge) => (
-                                    <div key={badge.name} className="flex flex-col items-center gap-1.5">
-                                      <div className="w-14 h-14 rounded-full bg-white shadow-sm flex items-center justify-center p-1.5">
-                                        <img src={badge.image} alt={badge.name} className="w-full h-full object-contain" />
-                                      </div>
-                                      <span className="text-[10px] text-muted-foreground font-medium text-center leading-tight max-w-[70px]">{badge.name}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            );
-                          })()}
                           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-4">
                             {categoryFabrics.map((fabric) =>
                           <div
