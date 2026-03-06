@@ -20,6 +20,16 @@ import esportivoGallery1 from "@/assets/segment-esportivo-gallery-1.jpg";
 import esportivoGallery2 from "@/assets/segment-esportivo-gallery-2.jpg";
 import esportivoGallery3 from "@/assets/segment-esportivo-gallery-3.jpg";
 
+// Tech badge images
+import badgeAloeVera from "@/assets/tech-badges/aloe-vera.webp";
+import badgeAntibacteriano from "@/assets/tech-badges/antibacteriano.webp";
+import badgeDigitaleEco from "@/assets/tech-badges/digitale-eco.webp";
+import badge4WayStretch from "@/assets/tech-badges/4-way-stretch.webp";
+import badgeSuperMicroFibra from "@/assets/tech-badges/super-micro-fibra.webp";
+import badgeUV50 from "@/assets/tech-badges/uv50.webp";
+import badgeZeroTransparencia from "@/assets/tech-badges/zero-transparencia.webp";
+import badgeCreora from "@/assets/tech-badges/creora.png";
+
 interface Subcategory {
   name: string;
   description: string;
