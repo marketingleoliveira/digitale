@@ -20,6 +20,16 @@ import esportivoGallery1 from "@/assets/segment-esportivo-gallery-1.jpg";
 import esportivoGallery2 from "@/assets/segment-esportivo-gallery-2.jpg";
 import esportivoGallery3 from "@/assets/segment-esportivo-gallery-3.jpg";
 
+// Tech badge images
+import badgeAloeVera from "@/assets/tech-badges/aloe-vera.webp";
+import badgeAntibacteriano from "@/assets/tech-badges/antibacteriano.webp";
+import badgeDigitaleEco from "@/assets/tech-badges/digitale-eco.webp";
+import badge4WayStretch from "@/assets/tech-badges/4-way-stretch.webp";
+import badgeSuperMicroFibra from "@/assets/tech-badges/super-micro-fibra.webp";
+import badgeUV50 from "@/assets/tech-badges/uv50.webp";
+import badgeZeroTransparencia from "@/assets/tech-badges/zero-transparencia.webp";
+import badgeCreora from "@/assets/tech-badges/creora.png";
+
 interface Subcategory {
   name: string;
   description: string;
@@ -69,6 +79,27 @@ const fallbackGalleries: Record<string, string[]> = {
 const iconComponents: Record<string, React.ComponentType<{ className?: string }>> = {
   waves: Waves,
   dumbbell: Dumbbell,
+};
+
+const techBadgeImages: Record<string, string> = {
+  "aloe vera": badgeAloeVera,
+  "proteção uv 50+": badgeUV50,
+  "uv 50+": badgeUV50,
+  "uv50": badgeUV50,
+  "antibacteriana": badgeAntibacteriano,
+  "antibacteriano": badgeAntibacteriano,
+  "digitale eco": badgeDigitaleEco,
+  "4 way stretch": badge4WayStretch,
+  "super micro fibra": badgeSuperMicroFibra,
+  "microfibra": badgeSuperMicroFibra,
+  "zero transparência": badgeZeroTransparencia,
+  "zero transparencia": badgeZeroTransparencia,
+  "creora": badgeCreora,
+};
+
+const getTechBadge = (title: string): string | null => {
+  const normalized = title.trim().toLowerCase();
+  return techBadgeImages[normalized] || null;
 };
 
 const SegmentDetail = () => {
@@ -230,19 +261,31 @@ const SegmentDetail = () => {
                   viewport={{ once: true }}
                   className="space-y-6"
                 >
-                  {segment.benefits.map((benefit, index) => (
-                    <div 
-                      key={index}
-                      className="p-6 bg-muted/50 rounded-2xl border border-border/50"
-                    >
-                      <h3 className="text-xl font-semibold text-foreground mb-2">
-                        {benefit.title}
-                      </h3>
-                      <p className="text-muted-foreground">
-                        {benefit.description}
-                      </p>
-                    </div>
-                  ))}
+                  {segment.benefits.map((benefit, index) => {
+                    const badge = getTechBadge(benefit.title);
+                    return (
+                      <div 
+                        key={index}
+                        className="p-6 bg-muted/50 rounded-2xl border border-border/50 flex items-start gap-4"
+                      >
+                        {badge && (
+                          <img 
+                            src={badge} 
+                            alt={benefit.title} 
+                            className="w-16 h-16 rounded-full object-contain flex-shrink-0"
+                          />
+                        )}
+                        <div>
+                          <h3 className="text-xl font-semibold text-foreground mb-2">
+                            {benefit.title}
+                          </h3>
+                          <p className="text-muted-foreground">
+                            {benefit.description}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </motion.div>
               )}
             </div>
