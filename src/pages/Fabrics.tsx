@@ -339,6 +339,27 @@ function FabricsContent() {
         defaultImages={defaultImages}
         fallbackImage={fabricMilano} />
       
+      {/* Tech Badge Popup */}
+      <Dialog open={!!selectedTech} onOpenChange={(open) => !open && setSelectedTech(null)}>
+        <DialogContent className="max-w-sm">
+          {selectedTech && (
+            <>
+              <DialogHeader>
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-24 h-24 rounded-full bg-secondary/50 flex items-center justify-center p-3">
+                    <img src={selectedTech.image} alt={selectedTech.name} className="w-full h-full object-contain" />
+                  </div>
+                  <DialogTitle className="text-xl font-bold text-center">{selectedTech.name}</DialogTitle>
+                </div>
+              </DialogHeader>
+              <p className="text-muted-foreground text-sm text-center leading-relaxed mt-2">
+                {techDescriptions[selectedTech.name] || "Tecnologia de alta performance para tecidos esportivos."}
+              </p>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+      
       
       <FavoritesDrawer defaultImages={defaultImages} />
     </div>);
