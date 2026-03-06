@@ -85,6 +85,7 @@ function FabricsContent() {
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const [selectedFabric, setSelectedFabric] = useState<any>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [selectedTech, setSelectedTech] = useState<{ name: string; image: string } | null>(null);
 
   // Fetch categories
   const { data: categories, isLoading: categoriesLoading } = useQuery({
