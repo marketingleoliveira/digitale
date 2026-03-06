@@ -97,10 +97,10 @@ const translations: Record<Language, Record<string, string>> = {
     
     // About Page
     "about.label": "Sobre Nós",
-    "about.title": "Mais de 60 Anos de Excelência Têxtil",
-    "about.description": "Somos uma empresa do Grupo VMF/Schick Bin, com mais de seis décadas de experiência no segmento têxtil, sempre à frente das inovações do mercado.",
+    "about.title": "Mais de 30 Anos de Excelência Têxtil",
+    "about.description": "Somos uma empresa do Grupo VMF/Schick Bin, com mais de três décadas de experiência no segmento têxtil, sempre à frente das inovações do mercado.",
     "about.history.title": "Nossa História",
-    "about.history.p1": "A Digitale Têxtil nasceu da paixão por transformar tecidos em experiências. Ao longo de mais de 60 anos, nos tornamos referência em tecidos de alta tecnologia, sempre investindo em inovação e sustentabilidade.",
+    "about.history.p1": "A Digitale Têxtil nasceu da paixão por transformar tecidos em experiências. Ao longo de mais de 30 anos, nos tornamos referência em tecidos de alta tecnologia, sempre investindo em inovação e sustentabilidade.",
     "about.history.p2": "Hoje, atendemos mais de 1.000 clientes em 15 países, oferecendo tecidos com tecnologias exclusivas como Aloe Vera, proteção UV 50+, antibacteriano e muito mais.",
     "about.value.quality": "Qualidade",
     "about.value.quality.desc": "Entregamos tecidos com os mais altos padrões de qualidade do mercado.",
@@ -413,10 +413,10 @@ const translations: Record<Language, Record<string, string>> = {
     
     // About Page
     "about.label": "Nosotros",
-    "about.title": "Más de 60 Años de Excelencia Textil",
-    "about.description": "Somos una empresa del Grupo VMF/Schick Bin, con más de seis décadas de experiencia en el segmento textil, siempre a la vanguardia de las innovaciones del mercado.",
+    "about.title": "Más de 30 Años de Excelencia Textil",
+    "about.description": "Somos una empresa del Grupo VMF/Schick Bin, con más de tres décadas de experiencia en el segmento textil, siempre a la vanguardia de las innovaciones del mercado.",
     "about.history.title": "Nuestra Historia",
-    "about.history.p1": "Digitale Têxtil nació de la pasión por transformar tejidos en experiencias. A lo largo de más de 60 años, nos hemos convertido en referencia en tejidos de alta tecnología, siempre invirtiendo en innovación y sostenibilidad.",
+    "about.history.p1": "Digitale Têxtil nació de la pasión por transformar tejidos en experiencias. A lo largo de más de 30 años, nos hemos convertido en referencia en tejidos de alta tecnología, siempre invirtiendo en innovación y sostenibilidad.",
     "about.history.p2": "Hoy, atendemos a más de 1.000 clientes en 15 países, ofreciendo tejidos con tecnologías exclusivas como Aloe Vera, protección UV 50+, antibacteriano y mucho más.",
     "about.value.quality": "Calidad",
     "about.value.quality.desc": "Entregamos tejidos con los más altos estándares de calidad del mercado.",
@@ -729,10 +729,10 @@ const translations: Record<Language, Record<string, string>> = {
     
     // About Page
     "about.label": "About Us",
-    "about.title": "Over 60 Years of Textile Excellence",
-    "about.description": "We are a company of the VMF/Schick Bin Group, with over six decades of experience in the textile segment, always at the forefront of market innovations.",
+    "about.title": "Over 30 Years of Textile Excellence",
+    "about.description": "We are a company of the VMF/Schick Bin Group, with over three decades of experience in the textile segment, always at the forefront of market innovations.",
     "about.history.title": "Our History",
-    "about.history.p1": "Digitale Têxtil was born from the passion for transforming fabrics into experiences. Over more than 60 years, we have become a reference in high-tech fabrics, always investing in innovation and sustainability.",
+    "about.history.p1": "Digitale Têxtil was born from the passion for transforming fabrics into experiences. Over more than 30 years, we have become a reference in high-tech fabrics, always investing in innovation and sustainability.",
     "about.history.p2": "Today, we serve more than 1,000 clients in 15 countries, offering fabrics with exclusive technologies such as Aloe Vera, UV 50+ protection, antibacterial and much more.",
     "about.value.quality": "Quality",
     "about.value.quality.desc": "We deliver fabrics with the highest quality standards in the market.",
