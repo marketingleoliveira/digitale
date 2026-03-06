@@ -81,6 +81,27 @@ const iconComponents: Record<string, React.ComponentType<{ className?: string }>
   dumbbell: Dumbbell,
 };
 
+const techBadgeImages: Record<string, string> = {
+  "aloe vera": badgeAloeVera,
+  "proteção uv 50+": badgeUV50,
+  "uv 50+": badgeUV50,
+  "uv50": badgeUV50,
+  "antibacteriana": badgeAntibacteriano,
+  "antibacteriano": badgeAntibacteriano,
+  "digitale eco": badgeDigitaleEco,
+  "4 way stretch": badge4WayStretch,
+  "super micro fibra": badgeSuperMicroFibra,
+  "microfibra": badgeSuperMicroFibra,
+  "zero transparência": badgeZeroTransparencia,
+  "zero transparencia": badgeZeroTransparencia,
+  "creora": badgeCreora,
+};
+
+const getTechBadge = (title: string): string | null => {
+  const normalized = title.trim().toLowerCase();
+  return techBadgeImages[normalized] || null;
+};
+
 const SegmentDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const { t } = useLanguage();
