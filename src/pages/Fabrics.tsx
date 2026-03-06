@@ -220,14 +220,16 @@ function FabricsContent() {
                               if (!badges) return <div className="flex-1" />;
                               return (
                                 <div className="flex-1 flex justify-center">
-                                  <div className="flex flex-wrap justify-center gap-3">
+                                <div className="flex flex-wrap justify-center gap-4">
                                     {badges.map((badge) => (
-                                      <div key={badge.name} className="flex flex-col items-center gap-1" title={badge.name}>
-                                        <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center p-1">
-                                          <img src={badge.image} alt={badge.name} className="w-full h-full object-contain" />
-                                        </div>
-                                        <span className="text-[9px] text-muted-foreground font-medium text-center leading-tight max-w-[60px]">{badge.name}</span>
-                                      </div>
+                                      <button
+                                        key={badge.name}
+                                        onClick={(e) => { e.stopPropagation(); setSelectedTech(badge); }}
+                                        className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-white shadow-sm flex items-center justify-center p-1.5 hover:shadow-md hover:scale-110 transition-all cursor-pointer"
+                                        title={badge.name}
+                                      >
+                                        <img src={badge.image} alt={badge.name} className="w-full h-full object-contain" />
+                                      </button>
                                     ))}
                                   </div>
                                 </div>
