@@ -37,7 +37,7 @@ function AnimatedNumber({ value, suffix }: { value: number; suffix: string }) {
   return (
     <div ref={ref} className="flex items-baseline justify-center gap-1">
       <span className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground tabular-nums">
-        {displayValue}
+        {displayValue.toLocaleString("pt-BR")}
       </span>
       <span className="text-3xl md:text-4xl lg:text-5xl font-bold text-accent">{suffix}</span>
     </div>
@@ -55,9 +55,9 @@ export function Stats() {
   const { t } = useLanguage();
 
   const stats = [
-    { value: 60, suffix: "+", label: t("stats.years"), iconIndex: 0 },
+    { value: 30, suffix: "+", label: t("stats.years"), iconIndex: 0 },
     { value: 1000, suffix: "+", label: t("stats.clients"), iconIndex: 1 },
-    { value: 5, suffix: "+", label: t("stats.production"), iconIndex: 3 },
+    { value: 100, suffix: "+", label: t("stats.production"), iconIndex: 3 },
   ];
 
   return (
