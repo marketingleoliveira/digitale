@@ -209,7 +209,28 @@ function FabricsContent() {
                         </CollapsibleTrigger>
                         
                         <CollapsibleContent>
-                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-6">
+                          {/* Tech Badges */}
+                          {(() => {
+                            const slug = category.slug?.toLowerCase() || category.name.toLowerCase();
+                            const badges = techBadgesByCategory[slug];
+                            if (!badges) return null;
+                            return (
+                              <div className="mt-4 mb-2 p-4 bg-secondary/30 rounded-xl">
+                                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Tecnologias</h3>
+                                <div className="flex flex-wrap gap-4">
+                                  {badges.map((badge) => (
+                                    <div key={badge.name} className="flex flex-col items-center gap-1.5">
+                                      <div className="w-14 h-14 rounded-full bg-white shadow-sm flex items-center justify-center p-1.5">
+                                        <img src={badge.image} alt={badge.name} className="w-full h-full object-contain" />
+                                      </div>
+                                      <span className="text-[10px] text-muted-foreground font-medium text-center leading-tight max-w-[70px]">{badge.name}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })()}
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-4">
                             {categoryFabrics.map((fabric) =>
                           <div
                             key={fabric.id}
