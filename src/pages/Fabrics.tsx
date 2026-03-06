@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ChevronDown, Heart, Eye, Play } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { isVideoUrl } from "@/lib/media-utils";
 import { Button } from "@/components/ui/button";
 import { FavoriteButton } from "@/components/fabric/FavoriteButton";
@@ -33,6 +34,17 @@ import badge4WayStretch from "@/assets/tech-badges/4-way-stretch.webp";
 import badgeZeroTransparencia from "@/assets/tech-badges/zero-transparencia.webp";
 import badgeCreora from "@/assets/tech-badges/creora.png";
 import badgeSuperMicroFibra from "@/assets/tech-badges/super-micro-fibra.webp";
+
+const techDescriptions: Record<string, string> = {
+  "Aloe Vera": "Tecnologia que incorpora microcápsulas de Aloe Vera na fibra do tecido, proporcionando hidratação e suavidade ao contato com a pele, além de propriedades calmantes e anti-irritação.",
+  "Proteção UV 50+": "Proteção ultravioleta fator 50+, bloqueando mais de 98% dos raios UVA e UVB. Certificação permanente que não diminui com as lavagens, garantindo segurança durante atividades ao ar livre.",
+  "Antibacteriana": "Tratamento antibacteriano permanente que inibe a proliferação de bactérias causadoras de mau odor, mantendo o tecido fresco e higiênico por mais tempo.",
+  "Super Black": "Tecnologia exclusiva de tingimento que garante um preto ultra intenso e duradouro, com alta resistência à perda de cor mesmo após múltiplas lavagens.",
+  "4 Way Stretch": "Elasticidade multidirecional (4 vias) que permite total liberdade de movimento em qualquer direção, oferecendo conforto superior e perfeito caimento ao corpo.",
+  "Zero Transparência": "Tecido com construção especial que elimina a transparência mesmo em cores claras, garantindo segurança e confiança durante qualquer atividade física.",
+  "Creora": "Fio de elastano premium da marca Creora®, reconhecido mundialmente por sua elasticidade superior, excelente recuperação e durabilidade, proporcionando ajuste perfeito ao corpo.",
+  "Super Microfibra": "Tecido produzido com fios de microfibra ultrafinos, resultando em toque extremamente macio, leveza e alta capacidade de absorção e secagem rápida.",
+};
 
 const techBadgesByCategory: Record<string, { name: string; image: string }[]> = {
   "poliamida": [
@@ -73,6 +85,7 @@ function FabricsContent() {
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const [selectedFabric, setSelectedFabric] = useState<any>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [selectedTech, setSelectedTech] = useState<{ name: string; image: string } | null>(null);
 
   // Fetch categories
   const { data: categories, isLoading: categoriesLoading } = useQuery({
@@ -207,14 +220,16 @@ function FabricsContent() {
                               if (!badges) return <div className="flex-1" />;
                               return (
                                 <div className="flex-1 flex justify-center">
-                                  <div className="flex flex-wrap justify-center gap-3">
+                                <div className="flex flex-wrap justify-center gap-4">
                                     {badges.map((badge) => (
-                                      <div key={badge.name} className="flex flex-col items-center gap-1" title={badge.name}>
-                                        <div className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center p-1">
-                                          <img src={badge.image} alt={badge.name} className="w-full h-full object-contain" />
-                                        </div>
-                                        <span className="text-[9px] text-muted-foreground font-medium text-center leading-tight max-w-[60px]">{badge.name}</span>
-                                      </div>
+                                      <button
+                                        key={badge.name}
+                                        onClick={(e) => { e.stopPropagation(); setSelectedTech(badge); }}
+                                        className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-white shadow-sm flex items-center justify-center p-1.5 hover:shadow-md hover:scale-110 transition-all cursor-pointer"
+                                        title={badge.name}
+                                      >
+                                        <img src={badge.image} alt={badge.name} className="w-full h-full object-contain" />
+                                      </button>
                                     ))}
                                   </div>
                                 </div>
@@ -323,6 +338,27 @@ function FabricsContent() {
         onOpenChange={setModalOpen}
         defaultImages={defaultImages}
         fallbackImage={fabricMilano} />
+      
+      {/* Tech Badge Popup */}
+      <Dialog open={!!selectedTech} onOpenChange={(open) => !open && setSelectedTech(null)}>
+        <DialogContent className="max-w-sm">
+          {selectedTech && (
+            <>
+              <DialogHeader>
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-24 h-24 rounded-full bg-secondary/50 flex items-center justify-center p-3">
+                    <img src={selectedTech.image} alt={selectedTech.name} className="w-full h-full object-contain" />
+                  </div>
+                  <DialogTitle className="text-xl font-bold text-center">{selectedTech.name}</DialogTitle>
+                </div>
+              </DialogHeader>
+              <p className="text-muted-foreground text-sm text-center leading-relaxed mt-2">
+                {techDescriptions[selectedTech.name] || "Tecnologia de alta performance para tecidos esportivos."}
+              </p>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
       
       
       <FavoritesDrawer defaultImages={defaultImages} />
