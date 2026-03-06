@@ -22,9 +22,9 @@ export function Footer() {
     // Assuming Brazilian format: 55 + DDD + number
     if (number.startsWith("55") && number.length >= 12) {
       const ddd = number.slice(2, 4);
-      const part1 = number.slice(4, 8);
-      const part2 = number.slice(8);
-      return `+55 ${ddd} ${part1}-${part2}`;
+      const part1 = number.slice(4, 9);
+      const part2 = number.slice(9);
+      return `${ddd} ${part1}-${part2}`;
     }
     return number;
   };
