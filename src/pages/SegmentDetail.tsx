@@ -261,19 +261,31 @@ const SegmentDetail = () => {
                   viewport={{ once: true }}
                   className="space-y-6"
                 >
-                  {segment.benefits.map((benefit, index) => (
-                    <div 
-                      key={index}
-                      className="p-6 bg-muted/50 rounded-2xl border border-border/50"
-                    >
-                      <h3 className="text-xl font-semibold text-foreground mb-2">
-                        {benefit.title}
-                      </h3>
-                      <p className="text-muted-foreground">
-                        {benefit.description}
-                      </p>
-                    </div>
-                  ))}
+                  {segment.benefits.map((benefit, index) => {
+                    const badge = getTechBadge(benefit.title);
+                    return (
+                      <div 
+                        key={index}
+                        className="p-6 bg-muted/50 rounded-2xl border border-border/50 flex items-start gap-4"
+                      >
+                        {badge && (
+                          <img 
+                            src={badge} 
+                            alt={benefit.title} 
+                            className="w-16 h-16 rounded-full object-contain flex-shrink-0"
+                          />
+                        )}
+                        <div>
+                          <h3 className="text-xl font-semibold text-foreground mb-2">
+                            {benefit.title}
+                          </h3>
+                          <p className="text-muted-foreground">
+                            {benefit.description}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </motion.div>
               )}
             </div>
