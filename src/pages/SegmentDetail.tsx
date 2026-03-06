@@ -29,6 +29,8 @@ import badgeSuperMicroFibra from "@/assets/tech-badges/super-micro-fibra.webp";
 import badgeUV50 from "@/assets/tech-badges/uv50.webp";
 import badgeZeroTransparencia from "@/assets/tech-badges/zero-transparencia.webp";
 import badgeCreora from "@/assets/tech-badges/creora.png";
+import badgeSuperBlack from "@/assets/tech-badges/super-black.webp";
+import badgeSuperBrilho from "@/assets/tech-badges/super-brilho.png";
 
 interface Subcategory {
   name: string;
@@ -95,6 +97,8 @@ const techBadgeImages: Record<string, string> = {
   "zero transparência": badgeZeroTransparencia,
   "zero transparencia": badgeZeroTransparencia,
   "creora": badgeCreora,
+  "super black": badgeSuperBlack,
+  "super brilho": badgeSuperBrilho,
 };
 
 const getTechBadge = (title: string): string | null => {
