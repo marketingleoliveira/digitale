@@ -25,6 +25,32 @@ import fabricCorsega from "@/assets/fabric-corsega.jpg";
 import fabricVelocity from "@/assets/fabric-velocity.jpg";
 import fabricFlow from "@/assets/fabric-flow.jpg";
 import fabricCaribe from "@/assets/fabric-caribe.jpg";
+import badgeAloeVera from "@/assets/tech-badges/aloe-vera.webp";
+import badgeUV50 from "@/assets/tech-badges/uv50.webp";
+import badgeAntibacteriano from "@/assets/tech-badges/antibacteriano.webp";
+import badgeSuperBlack from "@/assets/tech-badges/super-black.webp";
+import badge4WayStretch from "@/assets/tech-badges/4-way-stretch.webp";
+import badgeZeroTransparencia from "@/assets/tech-badges/zero-transparencia.webp";
+import badgeCreora from "@/assets/tech-badges/creora.png";
+import badgeSuperMicroFibra from "@/assets/tech-badges/super-micro-fibra.webp";
+
+const techBadgesByCategory: Record<string, { name: string; image: string }[]> = {
+  "poliamida": [
+    { name: "Aloe Vera", image: badgeAloeVera },
+    { name: "Proteção UV 50+", image: badgeUV50 },
+    { name: "Antibacteriana", image: badgeAntibacteriano },
+    { name: "Super Black", image: badgeSuperBlack },
+    { name: "4 Way Stretch", image: badge4WayStretch },
+    { name: "Zero Transparência", image: badgeZeroTransparencia },
+  ],
+  "microfibra": [
+    { name: "Aloe Vera", image: badgeAloeVera },
+    { name: "Proteção UV 50+", image: badgeUV50 },
+    { name: "Creora", image: badgeCreora },
+    { name: "Super Microfibra", image: badgeSuperMicroFibra },
+    { name: "Antibacteriana", image: badgeAntibacteriano },
+  ],
+};
 
 const defaultImages: Record<string, string> = {
   milano: fabricMilano,
