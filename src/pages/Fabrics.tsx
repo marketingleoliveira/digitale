@@ -25,6 +25,32 @@ import fabricCorsega from "@/assets/fabric-corsega.jpg";
 import fabricVelocity from "@/assets/fabric-velocity.jpg";
 import fabricFlow from "@/assets/fabric-flow.jpg";
 import fabricCaribe from "@/assets/fabric-caribe.jpg";
+import badgeAloeVera from "@/assets/tech-badges/aloe-vera.webp";
+import badgeUV50 from "@/assets/tech-badges/uv50.webp";
+import badgeAntibacteriano from "@/assets/tech-badges/antibacteriano.webp";
+import badgeSuperBlack from "@/assets/tech-badges/super-black.webp";
+import badge4WayStretch from "@/assets/tech-badges/4-way-stretch.webp";
+import badgeZeroTransparencia from "@/assets/tech-badges/zero-transparencia.webp";
+import badgeCreora from "@/assets/tech-badges/creora.png";
+import badgeSuperMicroFibra from "@/assets/tech-badges/super-micro-fibra.webp";
+
+const techBadgesByCategory: Record<string, { name: string; image: string }[]> = {
+  "poliamida": [
+    { name: "Aloe Vera", image: badgeAloeVera },
+    { name: "Proteção UV 50+", image: badgeUV50 },
+    { name: "Antibacteriana", image: badgeAntibacteriano },
+    { name: "Super Black", image: badgeSuperBlack },
+    { name: "4 Way Stretch", image: badge4WayStretch },
+    { name: "Zero Transparência", image: badgeZeroTransparencia },
+  ],
+  "microfibra": [
+    { name: "Aloe Vera", image: badgeAloeVera },
+    { name: "Proteção UV 50+", image: badgeUV50 },
+    { name: "Creora", image: badgeCreora },
+    { name: "Super Microfibra", image: badgeSuperMicroFibra },
+    { name: "Antibacteriana", image: badgeAntibacteriano },
+  ],
+};
 
 const defaultImages: Record<string, string> = {
   milano: fabricMilano,
@@ -183,7 +209,28 @@ function FabricsContent() {
                         </CollapsibleTrigger>
                         
                         <CollapsibleContent>
-                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-6">
+                          {/* Tech Badges */}
+                          {(() => {
+                            const slug = category.slug?.toLowerCase() || category.name.toLowerCase();
+                            const badges = techBadgesByCategory[slug];
+                            if (!badges) return null;
+                            return (
+                              <div className="mt-4 mb-2 p-4 bg-secondary/30 rounded-xl">
+                                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Tecnologias</h3>
+                                <div className="flex flex-wrap gap-4">
+                                  {badges.map((badge) => (
+                                    <div key={badge.name} className="flex flex-col items-center gap-1.5">
+                                      <div className="w-14 h-14 rounded-full bg-white shadow-sm flex items-center justify-center p-1.5">
+                                        <img src={badge.image} alt={badge.name} className="w-full h-full object-contain" />
+                                      </div>
+                                      <span className="text-[10px] text-muted-foreground font-medium text-center leading-tight max-w-[70px]">{badge.name}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })()}
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mt-4">
                             {categoryFabrics.map((fabric) =>
                           <div
                             key={fabric.id}
