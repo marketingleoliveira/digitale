@@ -87,7 +87,7 @@ const translations: Record<Language, Record<string, string>> = {
     "cta.button": "CONTATO",
     
     // Footer
-    "footer.description": "Há mais de 25 anos desenvolvendo tecidos inovadores e sustentáveis para o mercado esportivo brasileiro.",
+    "footer.description": "Há mais de 30 anos desenvolvendo tecidos inovadores e sustentáveis para o mercado esportivo brasileiro.",
     "footer.navigation": "Navegação",
     "footer.contact": "Contato",
     "footer.followUs": "Siga-nos",
@@ -403,7 +403,7 @@ const translations: Record<Language, Record<string, string>> = {
     "cta.button": "Solicitar Presupuesto",
     
     // Footer
-    "footer.description": "Hace más de 25 años desarrollando tejidos innovadores y sostenibles para el mercado deportivo brasileño.",
+    "footer.description": "Hace más de 30 años desarrollando tejidos innovadores y sostenibles para el mercado deportivo brasileño.",
     "footer.navigation": "Navegación",
     "footer.contact": "Contacto",
     "footer.followUs": "Síguenos",
@@ -719,7 +719,7 @@ const translations: Record<Language, Record<string, string>> = {
     "cta.button": "CONTACT",
     
     // Footer
-    "footer.description": "For over 25 years developing innovative and sustainable fabrics for the Brazilian sports market.",
+    "footer.description": "For over 30 years developing innovative and sustainable fabrics for the Brazilian sports market.",
     "footer.navigation": "Navigation",
     "footer.contact": "Contact",
     "footer.followUs": "Follow Us",
