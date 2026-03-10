@@ -34,20 +34,26 @@ const PrintsCatalog = () => {
   const [openCategories, setOpenCategories] = useState<string[]>([]);
 
   // Fetch categories
-  const { data: categories, isLoading: categoriesLoading } = useQuery({
+  // Fetch all categories (parents + subcategories)
+  const { data: allCategories, isLoading: categoriesLoading } = useQuery({
     queryKey: ["print-categories-catalog"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("print_categories")
         .select("*")
         .eq("is_active", true)
-        .is("parent_id", null)
         .order("display_order", { ascending: true });
 
       if (error) throw error;
       return data as PrintCategory[];
     },
   });
+
+  // Separate parent categories and subcategories
+  const categories = allCategories?.filter((c) => !c.parent_id) || [];
+  const getSubcategories = (parentId: string) => {
+    return allCategories?.filter((c) => c.parent_id === parentId) || [];
+  };
 
   // Fetch all prints
   const { data: prints, isLoading: printsLoading } = useQuery({
