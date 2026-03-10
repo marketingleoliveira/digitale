@@ -19,6 +19,7 @@ interface PrintCategory {
   slug: string;
   description: string | null;
   image_url: string | null;
+  parent_id: string | null;
 }
 
 interface Print {
@@ -33,20 +34,26 @@ const PrintsCatalog = () => {
   const [openCategories, setOpenCategories] = useState<string[]>([]);
 
   // Fetch categories
-  const { data: categories, isLoading: categoriesLoading } = useQuery({
+  // Fetch all categories (parents + subcategories)
+  const { data: allCategories, isLoading: categoriesLoading } = useQuery({
     queryKey: ["print-categories-catalog"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("print_categories")
         .select("*")
         .eq("is_active", true)
-        .is("parent_id", null)
         .order("display_order", { ascending: true });
 
       if (error) throw error;
       return data as PrintCategory[];
     },
   });
+
+  // Separate parent categories and subcategories
+  const categories = allCategories?.filter((c) => !c.parent_id) || [];
+  const getSubcategories = (parentId: string) => {
+    return allCategories?.filter((c) => c.parent_id === parentId) || [];
+  };
 
   // Fetch all prints
   const { data: prints, isLoading: printsLoading } = useQuery({
@@ -120,9 +127,11 @@ const PrintsCatalog = () => {
           ) : (
             <div className="space-y-6">
               {/* Categories with prints */}
-              {categories?.map((category, index) => {
+               {categories?.map((category, index) => {
                 const categoryPrints = getPrintsByCategory(category.id);
-                if (categoryPrints.length === 0) return null;
+                const subcategories = getSubcategories(category.id);
+                const totalPrints = categoryPrints.length + subcategories.reduce((acc, sub) => acc + getPrintsByCategory(sub.id).length, 0);
+                if (totalPrints === 0) return null;
 
                 const isOpen = openCategories.includes(category.id);
 
@@ -152,7 +161,7 @@ const PrintsCatalog = () => {
                                 {category.name}
                               </h2>
                               <p className="text-sm text-muted-foreground">
-                                {categoryPrints.length} estampa{categoryPrints.length !== 1 ? "s" : ""}
+                                {totalPrints} estampa{totalPrints !== 1 ? "s" : ""}
                               </p>
                             </div>
                           </div>
@@ -164,31 +173,87 @@ const PrintsCatalog = () => {
                         </Button>
                       </CollapsibleTrigger>
                       <CollapsibleContent>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 pb-6">
-                          {categoryPrints.map((print) => (
-                            <motion.div
-                              key={print.id}
-                              initial={{ opacity: 0, scale: 0.9 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              className="group relative aspect-square rounded-lg overflow-hidden cursor-pointer shadow-md hover:shadow-xl transition-shadow"
-                            >
-                              <img
-                                src={print.image_url}
-                                alt={print.name || `Estampa ${print.code}`}
-                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                              />
-                              <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                <div className="text-center text-white">
-                                  <p className="text-xs font-medium mb-1">Cód:</p>
-                                  <p className="text-sm font-bold">{print.code}</p>
-                                  {print.name && (
-                                    <p className="text-xs mt-1 text-white/80">{print.name}</p>
-                                  )}
+                        {/* Direct prints in parent category */}
+                        {categoryPrints.length > 0 && (
+                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 pb-6">
+                            {categoryPrints.map((print) => (
+                              <motion.div
+                                key={print.id}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="group relative aspect-square rounded-lg overflow-hidden cursor-pointer shadow-md hover:shadow-xl transition-shadow"
+                              >
+                                <img
+                                  src={print.image_url}
+                                  alt={print.name || `Estampa ${print.code}`}
+                                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                />
+                                <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                  <div className="text-center text-white">
+                                    <p className="text-xs font-medium mb-1">Cód:</p>
+                                    <p className="text-sm font-bold">{print.code}</p>
+                                    {print.name && (
+                                      <p className="text-xs mt-1 text-white/80">{print.name}</p>
+                                    )}
+                                  </div>
+                                </div>
+                              </motion.div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Subcategories */}
+                        {subcategories.map((sub) => {
+                          const subPrints = getPrintsByCategory(sub.id);
+                          if (subPrints.length === 0) return null;
+
+                          return (
+                            <div key={sub.id} className="mb-6 ml-4 border-l-2 border-accent/30 pl-4">
+                              <div className="flex items-center gap-3 mb-3">
+                                {sub.image_url && (
+                                  <img
+                                    src={sub.image_url}
+                                    alt={sub.name}
+                                    className="w-8 h-8 rounded-md object-cover"
+                                  />
+                                )}
+                                <div>
+                                  <h3 className="text-base font-semibold text-foreground">
+                                    {sub.name}
+                                  </h3>
+                                  <p className="text-xs text-muted-foreground">
+                                    {subPrints.length} estampa{subPrints.length !== 1 ? "s" : ""}
+                                  </p>
                                 </div>
                               </div>
-                            </motion.div>
-                          ))}
-                        </div>
+                              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                                {subPrints.map((print) => (
+                                  <motion.div
+                                    key={print.id}
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    className="group relative aspect-square rounded-lg overflow-hidden cursor-pointer shadow-md hover:shadow-xl transition-shadow"
+                                  >
+                                    <img
+                                      src={print.image_url}
+                                      alt={print.name || `Estampa ${print.code}`}
+                                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                    />
+                                    <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                      <div className="text-center text-white">
+                                        <p className="text-xs font-medium mb-1">Cód:</p>
+                                        <p className="text-sm font-bold">{print.code}</p>
+                                        {print.name && (
+                                          <p className="text-xs mt-1 text-white/80">{print.name}</p>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </motion.div>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </CollapsibleContent>
                     </Collapsible>
                   </motion.div>
