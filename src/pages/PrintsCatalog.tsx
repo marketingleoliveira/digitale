@@ -32,6 +32,7 @@ interface Print {
 
 const PrintsCatalog = () => {
   const [openCategories, setOpenCategories] = useState<string[]>([]);
+  const [activeSubcategory, setActiveSubcategory] = useState<Record<string, string | null>>({});
 
   // Fetch categories
   // Fetch all categories (parents + subcategories)
