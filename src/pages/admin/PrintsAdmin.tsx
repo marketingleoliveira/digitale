@@ -29,8 +29,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ImageUpload } from "@/components/admin/ImageUpload";
-import { Plus, Pencil, Trash2, GripVertical, Loader2, FolderOpen } from "lucide-react";
+import { Plus, Pencil, Trash2, GripVertical, Loader2, FolderOpen, MoveRight } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { useInvalidateCache } from "@/hooks/useInvalidateCache";
@@ -57,6 +58,9 @@ const PrintsAdmin = () => {
   const { invalidatePrints } = useInvalidateCache();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPrint, setEditingPrint] = useState<Print | null>(null);
+  const [selectedPrints, setSelectedPrints] = useState<Set<string>>(new Set());
+  const [bulkMoveDialogOpen, setBulkMoveDialogOpen] = useState(false);
+  const [bulkCategoryId, setBulkCategoryId] = useState("");
   const [form, setForm] = useState({
     code: "",
     name: "",
@@ -160,6 +164,27 @@ const PrintsAdmin = () => {
     },
   });
 
+  // Bulk move mutation
+  const bulkMoveMutation = useMutation({
+    mutationFn: async ({ ids, categoryId }: { ids: string[]; categoryId: string | null }) => {
+      const { error } = await supabase
+        .from("prints")
+        .update({ category_id: categoryId })
+        .in("id", ids);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      invalidatePrints();
+      toast.success(`${selectedPrints.size} estampa(s) movida(s) com sucesso!`);
+      setSelectedPrints(new Set());
+      setBulkMoveDialogOpen(false);
+      setBulkCategoryId("");
+    },
+    onError: (error) => {
+      toast.error("Erro ao mover estampas", { description: error.message });
+    },
+  });
+
   const resetForm = () => {
     setForm({
       code: "",
@@ -205,6 +230,31 @@ const PrintsAdmin = () => {
     toggleActiveMutation.mutate({ id, isActive });
   };
 
+  const handleSelectPrint = (id: string, checked: boolean) => {
+    setSelectedPrints(prev => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedPrints(new Set(prints.map(p => p.id)));
+    } else {
+      setSelectedPrints(new Set());
+    }
+  };
+
+  const handleBulkMove = () => {
+    if (selectedPrints.size === 0) return;
+    bulkMoveMutation.mutate({
+      ids: Array.from(selectedPrints),
+      categoryId: bulkCategoryId === "none" ? null : bulkCategoryId || null,
+    });
+  };
+
   // Build hierarchical category options
   const getCategoryOptions = () => {
     const parentCategories = categories.filter(c => !c.parent_id);
@@ -235,6 +285,7 @@ const PrintsAdmin = () => {
   };
 
   const categoryOptions = getCategoryOptions();
+  const allSelected = prints.length > 0 && selectedPrints.size === prints.length;
 
   return (
     <AdminLayout title="Estampas">
@@ -249,106 +300,154 @@ const PrintsAdmin = () => {
               Gerenciar Categorias
             </Link>
           </div>
-          <Dialog open={dialogOpen} onOpenChange={(open) => {
-            setDialogOpen(open);
-            if (!open) resetForm();
-          }}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Nova Estampa
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingPrint ? "Editar Estampa" : "Nova Estampa"}
-                </DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="code">Código *</Label>
-                  <Input
-                    id="code"
-                    value={form.code}
-                    onChange={(e) => setForm({ ...form, code: e.target.value })}
-                    placeholder="Ex: 20116"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="name">Nome (opcional)</Label>
-                  <Input
-                    id="name"
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    placeholder="Ex: Tropical Vibes"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="category_id">Categoria</Label>
-                  <Select
-                    value={form.category_id}
-                    onValueChange={(value) => setForm({ ...form, category_id: value === "none" ? "" : value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione uma categoria" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Sem categoria</SelectItem>
-                      {categoryOptions.map((cat) => (
-                        <SelectItem key={cat.id} value={cat.id}>
-                          {cat.isSubcategory && <span className="text-muted-foreground">↳ </span>}
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {categories.length === 0 && (
-                    <p className="text-xs text-muted-foreground">
-                      <Link to="/admin/print-categories" className="text-accent hover:underline">
-                        Crie categorias primeiro
-                      </Link>
+          <div className="flex items-center gap-2">
+            {selectedPrints.size > 0 && (
+              <Dialog open={bulkMoveDialogOpen} onOpenChange={setBulkMoveDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <MoveRight className="h-4 w-4 mr-2" />
+                    Mover {selectedPrints.size} selecionada(s)
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-sm">
+                  <DialogHeader>
+                    <DialogTitle>Mover Estampas para Categoria</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      {selectedPrints.size} estampa(s) selecionada(s) serão movidas para a categoria escolhida.
                     </p>
-                  )}
-                </div>
+                    <div className="space-y-2">
+                      <Label>Categoria de destino</Label>
+                      <Select value={bulkCategoryId} onValueChange={setBulkCategoryId}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione a categoria" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Sem categoria</SelectItem>
+                          {categoryOptions.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.id}>
+                              {cat.isSubcategory && <span className="text-muted-foreground">↳ </span>}
+                              {cat.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex justify-end gap-2 pt-2">
+                      <Button variant="outline" onClick={() => setBulkMoveDialogOpen(false)}>
+                        Cancelar
+                      </Button>
+                      <Button onClick={handleBulkMove} disabled={bulkMoveMutation.isPending}>
+                        {bulkMoveMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                        Mover
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
+            <Dialog open={dialogOpen} onOpenChange={(open) => {
+              setDialogOpen(open);
+              if (!open) resetForm();
+            }}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nova Estampa
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingPrint ? "Editar Estampa" : "Nova Estampa"}
+                  </DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="code">Código *</Label>
+                    <Input
+                      id="code"
+                      value={form.code}
+                      onChange={(e) => setForm({ ...form, code: e.target.value })}
+                      placeholder="Ex: 20116"
+                      required
+                    />
+                  </div>
 
-                <div className="space-y-2">
-                  <Label>Imagem *</Label>
-                  <ImageUpload
-                    bucket="prints"
-                    value={form.image_url}
-                    onChange={(url) => setForm({ ...form, image_url: url })}
-                  />
-                </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Nome (opcional)</Label>
+                    <Input
+                      id="name"
+                      value={form.name}
+                      onChange={(e) => setForm({ ...form, name: e.target.value })}
+                      placeholder="Ex: Tropical Vibes"
+                    />
+                  </div>
 
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="is_active">Ativa</Label>
-                  <Switch
-                    id="is_active"
-                    checked={form.is_active}
-                    onCheckedChange={(checked) => setForm({ ...form, is_active: checked })}
-                  />
-                </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="category_id">Categoria</Label>
+                    <Select
+                      value={form.category_id}
+                      onValueChange={(value) => setForm({ ...form, category_id: value === "none" ? "" : value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione uma categoria" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Sem categoria</SelectItem>
+                        {categoryOptions.map((cat) => (
+                          <SelectItem key={cat.id} value={cat.id}>
+                            {cat.isSubcategory && <span className="text-muted-foreground">↳ </span>}
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {categories.length === 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        <Link to="/admin/print-categories" className="text-accent hover:underline">
+                          Crie categorias primeiro
+                        </Link>
+                      </p>
+                    )}
+                  </div>
 
-                <div className="flex justify-end gap-2 pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setDialogOpen(false)}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button type="submit" disabled={saveMutation.isPending}>
-                    {saveMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                    {editingPrint ? "Salvar" : "Criar"}
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
+                  <div className="space-y-2">
+                    <Label>Imagem *</Label>
+                    <ImageUpload
+                      bucket="prints"
+                      value={form.image_url}
+                      onChange={(url) => setForm({ ...form, image_url: url })}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="is_active">Ativa</Label>
+                    <Switch
+                      id="is_active"
+                      checked={form.is_active}
+                      onCheckedChange={(checked) => setForm({ ...form, is_active: checked })}
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setDialogOpen(false)}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button type="submit" disabled={saveMutation.isPending}>
+                      {saveMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                      {editingPrint ? "Salvar" : "Criar"}
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         <div className="bg-card rounded-xl border border-border overflow-hidden">
@@ -365,6 +464,12 @@ const PrintsAdmin = () => {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-12">
+                    <Checkbox
+                      checked={allSelected}
+                      onCheckedChange={(checked) => handleSelectAll(!!checked)}
+                    />
+                  </TableHead>
                   <TableHead className="w-12"></TableHead>
                   <TableHead className="w-20">Imagem</TableHead>
                   <TableHead>Código</TableHead>
@@ -376,7 +481,13 @@ const PrintsAdmin = () => {
               </TableHeader>
               <TableBody>
                 {prints.map((print) => (
-                  <TableRow key={print.id}>
+                  <TableRow key={print.id} className={selectedPrints.has(print.id) ? "bg-accent/10" : ""}>
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedPrints.has(print.id)}
+                        onCheckedChange={(checked) => handleSelectPrint(print.id, !!checked)}
+                      />
+                    </TableCell>
                     <TableCell>
                       <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
                     </TableCell>
