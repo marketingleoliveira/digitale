@@ -231,12 +231,7 @@ const RadarDigitale = () => {
                     {/* Edition Content - embedded file */}
                     <div>
                       {activeEdition.file_url.endsWith(".pdf") ? (
-                        <iframe
-                          src={activeEdition.file_url}
-                          className="w-full border-t border-border"
-                          style={{ height: "85vh", minHeight: "700px" }}
-                          title={activeEdition.title}
-                        />
+                        <PdfViewer url={activeEdition.file_url} title={activeEdition.title} />
                       ) : (
                         <img
                           src={activeEdition.file_url}
