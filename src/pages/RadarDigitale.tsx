@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, ChevronRight, Newspaper, Filter } from "lucide-react";
+import { PdfViewer } from "@/components/radar/PdfViewer";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
@@ -230,12 +231,7 @@ const RadarDigitale = () => {
                     {/* Edition Content - embedded file */}
                     <div>
                       {activeEdition.file_url.endsWith(".pdf") ? (
-                        <iframe
-                          src={activeEdition.file_url}
-                          className="w-full border-t border-border"
-                          style={{ height: "85vh", minHeight: "700px" }}
-                          title={activeEdition.title}
-                        />
+                        <PdfViewer url={activeEdition.file_url} title={activeEdition.title} />
                       ) : (
                         <img
                           src={activeEdition.file_url}
