@@ -73,7 +73,7 @@ export function CTA() {
                 {t("cta.button")}
               </Link>
               <a
-                href="tel:+551120649662"
+                href={`tel:+${whatsappNumber}`}
                 className="inline-flex items-center justify-center gap-3 border-2 border-primary-foreground/30 text-primary-foreground px-8 md:px-10 py-4 md:py-5 rounded-full font-semibold text-base md:text-lg hover:bg-primary-foreground/10 hover:border-primary-foreground/50 transition-all duration-300"
               >
                 <Phone className="h-5 w-5" />
@@ -90,13 +90,13 @@ export function CTA() {
               className="flex flex-col sm:flex-row justify-center items-center gap-6 md:gap-10 text-primary-foreground/60"
             >
               <a 
-                href="tel:+551120649662" 
+                href={`tel:+${whatsappNumber}`} 
                 className="flex items-center gap-3 hover:text-accent transition-colors duration-300 group"
               >
                 <div className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
                   <Phone className="h-4 w-4" />
                 </div>
-                <span className="text-sm md:text-base font-medium">+55 11 2064-9662</span>
+                <span className="text-sm md:text-base font-medium">{formatPhone(whatsappNumber)}</span>
               </a>
               <a 
                 href="mailto:atendimento@digitaletextil.com.br" 

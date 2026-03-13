@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Check, Phone, Mail, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { ColorGallery } from "./ColorGallery";
 import { FabricGallery } from "./FabricGallery";
 import { FavoriteButton } from "./FavoriteButton";

@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Check, Phone, Mail, ArrowRight, Heart } from "lucide-react";
 import { isVideoUrl } from "@/lib/media-utils";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ColorGallery } from "@/components/fabric/ColorGallery";
 import { FabricGallery } from "@/components/fabric/FabricGallery";

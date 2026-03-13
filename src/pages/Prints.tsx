@@ -320,7 +320,7 @@ const Prints = () => {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
-                <a href="https://wa.me/551120649662" target="_blank" rel="noopener noreferrer">
+                <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer">
                   <Button size="lg" variant="outline">
                     {t("prints.cta.whatsapp")}
                   </Button>
