@@ -13,6 +13,7 @@ import {
   CheckCircle
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -26,6 +27,7 @@ interface Print {
 
 const Prints = () => {
   const { t } = useLanguage();
+  const { whatsappNumber } = useSiteSettings();
 
   // Fetch latest 6 prints from database
   const { data: latestPrints, isLoading: printsLoading } = useQuery({
@@ -320,7 +322,7 @@ const Prints = () => {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
-                <a href="https://wa.me/551120649662" target="_blank" rel="noopener noreferrer">
+                <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer">
                   <Button size="lg" variant="outline">
                     {t("prints.cta.whatsapp")}
                   </Button>

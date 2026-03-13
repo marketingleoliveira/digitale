@@ -9,6 +9,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 // Fallback images
 import segmentPraiaImg from "@/assets/segment-praia.jpg";
@@ -49,6 +50,7 @@ const iconComponents: Record<string, React.ComponentType<{ className?: string }>
 
 const Segments = () => {
   const { t } = useLanguage();
+  const { whatsappNumber } = useSiteSettings();
   const [selectedSegment, setSelectedSegment] = useState<string | null>(null);
 
   const { data: segments, isLoading } = useQuery({
@@ -281,7 +283,7 @@ const Segments = () => {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
-                <a href="https://wa.me/551120649662" target="_blank" rel="noopener noreferrer">
+                <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer">
                   <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10">
                     WhatsApp
                   </Button>
