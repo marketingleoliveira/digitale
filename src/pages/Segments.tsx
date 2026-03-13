@@ -49,6 +49,7 @@ const iconComponents: Record<string, React.ComponentType<{ className?: string }>
 
 const Segments = () => {
   const { t } = useLanguage();
+  const { whatsappNumber } = useSiteSettings();
   const [selectedSegment, setSelectedSegment] = useState<string | null>(null);
 
   const { data: segments, isLoading } = useQuery({
