@@ -26,6 +26,7 @@ interface Print {
 
 const Prints = () => {
   const { t } = useLanguage();
+  const { whatsappNumber } = useSiteSettings();
 
   // Fetch latest 6 prints from database
   const { data: latestPrints, isLoading: printsLoading } = useQuery({
