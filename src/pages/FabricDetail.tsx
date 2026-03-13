@@ -37,6 +37,13 @@ interface GalleryImage {
 export default function FabricDetail() {
   const { slug } = useParams<{ slug: string }>();
   const { t } = useLanguage();
+  const { whatsappNumber } = useSiteSettings();
+
+  const formatPhone = (num: string) => {
+    if (num.length === 13) return `+${num.slice(0,2)} ${num.slice(2,4)} ${num.slice(4,9)}-${num.slice(9)}`;
+    if (num.length === 12) return `+${num.slice(0,2)} ${num.slice(2,4)} ${num.slice(4,8)}-${num.slice(8)}`;
+    return num;
+  };
 
   const { data: fabric, isLoading, error } = useQuery({
     queryKey: ["fabric", slug],
