@@ -10,9 +10,25 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const Contact = () => {
   const { t } = useLanguage();
+  const { whatsappNumber } = useSiteSettings();
+
+  // Format WhatsApp number for display (e.g. "5511945621254" -> "+55 11 94562-1254")
+  const formatPhoneDisplay = (num: string) => {
+    if (num.length === 13) {
+      return `+${num.slice(0,2)} ${num.slice(2,4)} ${num.slice(4,9)}-${num.slice(9)}`;
+    }
+    if (num.length === 12) {
+      return `+${num.slice(0,2)} ${num.slice(2,4)} ${num.slice(4,8)}-${num.slice(8)}`;
+    }
+    return num;
+  };
+
+  const phoneDisplay = formatPhoneDisplay(whatsappNumber);
+
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({
@@ -33,8 +49,8 @@ const Contact = () => {
     {
       icon: Phone,
       titleKey: "contact.info.phone",
-      value: "+55 11 2064-9662",
-      href: "tel:+551120649662",
+      value: phoneDisplay,
+      href: `tel:+${whatsappNumber}`,
     },
     {
       icon: MapPin,
