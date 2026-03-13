@@ -33,7 +33,7 @@ export function Footer() {
     empresa: [
       { name: t("nav.about"), href: "/sobre" },
       { name: t("nav.sustainability"), href: "/sustentabilidade" },
-      { name: t("nav.blog"), href: "/blog" },
+      { name: "Radar Digitale", href: "/radar-digitale" },
       { name: t("nav.contact"), href: "/contato" },
     ],
     produtos: [
