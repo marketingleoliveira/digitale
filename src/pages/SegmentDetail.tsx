@@ -109,6 +109,7 @@ const getTechBadge = (title: string): string | null => {
 const SegmentDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const { t } = useLanguage();
+  const { whatsappNumber } = useSiteSettings();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState(0);
 
