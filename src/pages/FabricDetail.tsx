@@ -251,9 +251,9 @@ export default function FabricDetail() {
                     {t("cta.button")}
                   </Link>
                   <div className="flex flex-col sm:flex-row gap-4 text-sm text-muted-foreground">
-                    <a href="tel:+551120649662" className="flex items-center gap-2 hover:text-accent">
+                    <a href={`tel:+${whatsappNumber}`} className="flex items-center gap-2 hover:text-accent">
                       <Phone className="h-4 w-4" />
-                      +55 11 2064-9662
+                      {formatPhone(whatsappNumber)}
                     </a>
                     <a href="mailto:atendimento@digitaletextil.com.br" className="flex items-center gap-2 hover:text-accent">
                       <Mail className="h-4 w-4" />
