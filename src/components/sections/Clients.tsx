@@ -1,14 +1,14 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const clients = [
-  { name: "Puma", logo: "https://digitaletextil.com.br/wp-content/uploads/2023/03/Puma-Logo.png" },
-  { name: "Fila", logo: "https://digitaletextil.com.br/wp-content/uploads/2023/03/Fila-Logo.png" },
-  { name: "Havaianas", logo: "https://digitaletextil.com.br/wp-content/webp-express/webp-images/uploads/2023/03/havaianas-logo-0-1.png.webp" },
-  { name: "Calvin Klein", logo: "https://digitaletextil.com.br/wp-content/webp-express/webp-images/uploads/2023/03/calvin-klein-logo-501C5505BD-seeklogo.com_.png.webp" },
-  { name: "Mash", logo: "https://digitaletextil.com.br/wp-content/webp-express/webp-images/uploads/2023/03/mash_marca.jpg.webp" },
-  { name: "Tip Top", logo: "https://digitaletextil.com.br/wp-content/webp-express/webp-images/uploads/2022/12/LogoTipTop.jpg.webp" },
-  { name: "Track & Field", logo: "https://digitaletextil.com.br/wp-content/webp-express/webp-images/uploads/2023/04/track-field-2-_1610030833.png.webp" },
-  { name: "Amir Slama", logo: "https://digitaletextil.com.br/wp-content/webp-express/webp-images/uploads/2022/12/amir-slama-.jpg.webp" },
+  { name: "Puma", logo: "/logos/puma.png" },
+  { name: "Fila", logo: "/logos/fila.png" },
+  { name: "Havaianas", logo: "/logos/havaianas.png" },
+  { name: "Calvin Klein", logo: "/logos/calvin-klein.png" },
+  { name: "Mash", logo: "/logos/mash.png" },
+  { name: "Tip Top", logo: "/logos/tiptop.png" },
+  { name: "Track & Field", logo: "/logos/track-field.png" },
+  { name: "Amir Slama", logo: "/logos/amir-slama.png" },
 ];
 
 export function Clients() {
