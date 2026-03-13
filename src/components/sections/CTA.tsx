@@ -2,9 +2,17 @@ import { motion } from "framer-motion";
 import { Phone, Mail, MessageCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export function CTA() {
   const { t } = useLanguage();
+  const { whatsappNumber, whatsappLink } = useSiteSettings();
+
+  const formatPhone = (num: string) => {
+    if (num.length === 13) return `+${num.slice(0,2)} ${num.slice(2,4)} ${num.slice(4,9)}-${num.slice(9)}`;
+    if (num.length === 12) return `+${num.slice(0,2)} ${num.slice(2,4)} ${num.slice(4,8)}-${num.slice(8)}`;
+    return num;
+  };
 
   return (
     <section className="py-20 md:py-28 relative overflow-hidden">
