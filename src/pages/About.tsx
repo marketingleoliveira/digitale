@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Award, Lightbulb, Leaf, Handshake, HeadphonesIcon, PackageCheck } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { Stats } from "@/components/sections/Stats";
+
 import { Clients } from "@/components/sections/Clients";
 import { useLanguage } from "@/contexts/LanguageContext";
 
