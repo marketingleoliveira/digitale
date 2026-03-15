@@ -48,7 +48,7 @@ export function Clients() {
                   src={client.logo}
                   alt={client.name}
                   loading="lazy"
-                  className="max-h-14 max-w-[140px] object-contain grayscale group-hover:grayscale-0 opacity-70 group-hover:opacity-100 transition-all duration-300"
+                  className="h-[80px] w-[150px] object-contain grayscale group-hover:grayscale-0 opacity-70 group-hover:opacity-100 transition-all duration-300"
                 />
               </div>
             </div>
