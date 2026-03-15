@@ -82,7 +82,8 @@ const About = () => {
       
       <Clients />
       <Footer />
-    </div>);
+    </div>
+  );
 
 };
 
