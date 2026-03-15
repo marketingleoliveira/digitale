@@ -43,12 +43,12 @@ export function Clients() {
               key={`${client.name}-${index}`}
               className="flex-shrink-0 group"
             >
-              <div className="w-[150px] h-[80px] bg-card rounded-2xl border border-border hover:border-accent/30 hover:shadow-lg transition-all duration-300 flex items-center justify-center px-4">
+              <div className="w-[200px] h-[100px] bg-card rounded-2xl border border-border hover:border-accent/30 hover:shadow-lg transition-all duration-300 flex items-center justify-center px-6">
                 <img
                   src={client.logo}
                   alt={client.name}
                   loading="lazy"
-                  className="max-h-12 max-w-[120px] object-contain grayscale group-hover:grayscale-0 opacity-50 group-hover:opacity-100 transition-all duration-300 group-hover:scale-110"
+                  className="max-h-16 max-w-[160px] object-contain grayscale group-hover:grayscale-0 opacity-60 group-hover:opacity-100 transition-all duration-300 group-hover:scale-110"
                 />
               </div>
             </div>
