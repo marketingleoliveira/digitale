@@ -79,7 +79,7 @@ const About = () => {
         </div>
       </section>
 
-      <Stats />
+      
       <Clients />
       <Footer />
     </div>);
