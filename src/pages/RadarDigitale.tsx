@@ -182,6 +182,10 @@ const RadarDigitale = () => {
                                   year: "numeric",
                                 })}
                               </span>
+                              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Eye className="h-3 w-3" />
+                                {formatViews(getViewCount(edition.id, edition.edition_date))}
+                              </span>
                               {edition.radar_categories && (
                                 <Badge variant="outline" className="text-[10px] px-1.5 py-0">
                                   {edition.radar_categories.name}
