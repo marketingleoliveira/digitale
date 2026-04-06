@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ColorGallery } from "@/components/fabric/ColorGallery";
 import { FabricGallery } from "@/components/fabric/FabricGallery";
 import { FavoriteButton } from "@/components/fabric/FavoriteButton";
+import { FabricLeadForm } from "@/components/fabric/FabricLeadForm";
 import fabricMilano from "@/assets/fabric-milano.jpg";
 import fabricLyon from "@/assets/fabric-lyon.jpg";
 import fabricAerodry from "@/assets/fabric-aerodry.jpg";
