@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calendar, ChevronRight, Newspaper, Filter } from "lucide-react";
+import { Calendar, ChevronRight, Newspaper, Filter, Eye } from "lucide-react";
 import { PdfViewer } from "@/components/radar/PdfViewer";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -27,6 +27,26 @@ interface RadarEdition {
   description: string | null;
   radar_categories: RadarCategory | null;
 }
+
+// Generate a deterministic fake view count per edition
+const getViewCount = (id: string, editionDate: string): number => {
+  // Hash the ID to get a stable base between 200-1000
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = ((hash << 5) - hash + id.charCodeAt(i)) | 0;
+  }
+  const base = 200 + Math.abs(hash % 801); // 200-1000
+
+  // Add daily growth (5-15 per day) since edition date
+  const daysSince = Math.max(0, Math.floor((Date.now() - new Date(editionDate).getTime()) / 86400000));
+  const dailyRate = 5 + Math.abs((hash >> 8) % 11); // 5-15
+  return base + daysSince * dailyRate;
+};
+
+const formatViews = (n: number): string => {
+  if (n >= 1000) return `${(n / 1000).toFixed(1).replace(/\.0$/, "")}k`;
+  return n.toString();
+};
 
 const RadarDigitale = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -162,6 +182,10 @@ const RadarDigitale = () => {
                                   year: "numeric",
                                 })}
                               </span>
+                              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Eye className="h-3 w-3" />
+                                {formatViews(getViewCount(edition.id, edition.edition_date))}
+                              </span>
                               {edition.radar_categories && (
                                 <Badge variant="outline" className="text-[10px] px-1.5 py-0">
                                   {edition.radar_categories.name}
@@ -218,6 +242,10 @@ const RadarDigitale = () => {
                               year: "numeric",
                             })}
                           </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+                          <Eye className="h-4 w-4" />
+                          <span>{formatViews(getViewCount(activeEdition.id, activeEdition.edition_date))} leituras</span>
                         </div>
                       </div>
                       <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground">
