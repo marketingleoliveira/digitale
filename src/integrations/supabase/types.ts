@@ -202,6 +202,53 @@ export type Database = {
         }
         Relationships: []
       }
+      fabric_leads: {
+        Row: {
+          cnpj: string
+          created_at: string
+          email: string
+          fabric_id: string | null
+          fabric_name: string
+          fabric_slug: string
+          id: string
+          status: string
+          updated_at: string
+          whatsapp: string
+        }
+        Insert: {
+          cnpj: string
+          created_at?: string
+          email: string
+          fabric_id?: string | null
+          fabric_name: string
+          fabric_slug: string
+          id?: string
+          status?: string
+          updated_at?: string
+          whatsapp: string
+        }
+        Update: {
+          cnpj?: string
+          created_at?: string
+          email?: string
+          fabric_id?: string | null
+          fabric_name?: string
+          fabric_slug?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          whatsapp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fabric_leads_fabric_id_fkey"
+            columns: ["fabric_id"]
+            isOneToOne: false
+            referencedRelation: "fabrics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fabrics: {
         Row: {
           applications: string[] | null

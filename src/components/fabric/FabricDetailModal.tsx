@@ -6,6 +6,7 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { ColorGallery } from "./ColorGallery";
 import { FabricGallery } from "./FabricGallery";
 import { FavoriteButton } from "./FavoriteButton";
+import { FabricLeadForm } from "./FabricLeadForm";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ColorVariant {
@@ -107,54 +108,12 @@ export function FabricDetailModal({
                   <ColorGallery colors={colorVariants} />
                 )}
 
-                {/* Features */}
-                {features.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-bold text-foreground mb-3">Características</h3>
-                    <div className="grid grid-cols-2 gap-2">
-                      {(features as string[]).map((feature, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <div className="w-5 h-5 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
-                            <Check className="h-3 w-3 text-accent" />
-                          </div>
-                          <span className="text-foreground text-sm">{feature}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Specifications */}
-                {Object.keys(specifications).length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-bold text-foreground mb-3">Especificações Técnicas</h3>
-                    <div className="bg-secondary/50 rounded-xl p-4 space-y-2">
-                      {Object.entries(specifications).map(([key, value]) => (
-                        <div key={key} className="flex justify-between items-center border-b border-border/50 pb-2 last:border-0 last:pb-0">
-                          <span className="text-muted-foreground text-sm capitalize">{key.replace(/_/g, " ")}</span>
-                          <span className="font-medium text-foreground text-sm">{value}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Applications */}
-                {applications.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-bold text-foreground mb-3">Aplicações</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {applications.map((app, index) => (
-                        <span
-                          key={index}
-                          className="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium"
-                        >
-                          {app}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                {/* Lead Form - replaces specs/features/applications */}
+                <FabricLeadForm
+                  fabricId={fabric.id}
+                  fabricName={fabric.name}
+                  fabricSlug={fabric.slug}
+                />
 
                 {/* CTA */}
                 <div className="pt-2 space-y-3">

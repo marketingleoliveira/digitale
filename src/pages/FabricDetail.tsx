@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ColorGallery } from "@/components/fabric/ColorGallery";
 import { FabricGallery } from "@/components/fabric/FabricGallery";
 import { FavoriteButton } from "@/components/fabric/FavoriteButton";
+import { FabricLeadForm } from "@/components/fabric/FabricLeadForm";
 import fabricMilano from "@/assets/fabric-milano.jpg";
 import fabricLyon from "@/assets/fabric-lyon.jpg";
 import fabricAerodry from "@/assets/fabric-aerodry.jpg";
@@ -193,54 +194,12 @@ export default function FabricDetail() {
                   <ColorGallery colors={colorVariants} />
                 )}
 
-                {/* Features */}
-                {features.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-bold text-foreground mb-4">Características</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {features.map((feature: string, index: number) => (
-                        <div key={index} className="flex items-center gap-3">
-                          <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
-                            <Check className="h-4 w-4 text-accent" />
-                          </div>
-                          <span className="text-foreground">{feature}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Specifications */}
-                {Object.keys(specifications).length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-bold text-foreground mb-4">Especificações Técnicas</h3>
-                    <div className="bg-secondary/50 rounded-2xl p-6 space-y-3">
-                      {Object.entries(specifications).map(([key, value]) => (
-                        <div key={key} className="flex justify-between items-center border-b border-border/50 pb-3 last:border-0 last:pb-0">
-                          <span className="text-muted-foreground capitalize">{key.replace(/_/g, ' ')}</span>
-                          <span className="font-medium text-foreground">{value}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Applications */}
-                {applications.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-bold text-foreground mb-4">Aplicações</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {applications.map((app: string, index: number) => (
-                        <span
-                          key={index}
-                          className="px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium"
-                        >
-                          {app}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                {/* Lead Form - replaces specs/features/applications */}
+                <FabricLeadForm
+                  fabricId={fabric.id}
+                  fabricName={fabric.name}
+                  fabricSlug={fabric.slug}
+                />
 
                 {/* CTA */}
                 <div className="pt-4 space-y-4">

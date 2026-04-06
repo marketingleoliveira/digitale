@@ -33,6 +33,7 @@ const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
   { icon: Images, label: "Carrossel", href: "/admin/carousel", adminOnly: true },
   { icon: FolderOpen, label: "Tecidos", href: "/admin/fabrics" },
+  { icon: MessageSquare, label: "Leads Tecidos", href: "/admin/fabric-leads" },
   { icon: Palette, label: "Estampas", href: "/admin/prints" },
   { icon: Layers, label: "Segmentos", href: "/admin/segments" },
   { icon: Quote, label: "Depoimentos", href: "/admin/testimonials" },
