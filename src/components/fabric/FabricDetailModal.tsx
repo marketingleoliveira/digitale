@@ -6,6 +6,7 @@ import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { ColorGallery } from "./ColorGallery";
 import { FabricGallery } from "./FabricGallery";
 import { FavoriteButton } from "./FavoriteButton";
+import { FabricLeadForm } from "./FabricLeadForm";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ColorVariant {
