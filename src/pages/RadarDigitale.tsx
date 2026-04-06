@@ -247,6 +247,7 @@ const RadarDigitale = () => {
                           <Eye className="h-4 w-4" />
                           <span>{formatViews(getViewCount(activeEdition.id, activeEdition.edition_date))} leituras</span>
                         </div>
+                      </div>
                       <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground">
                         {activeEdition.title}
                       </h2>
