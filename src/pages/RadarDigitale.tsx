@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calendar, ChevronRight, Newspaper, Filter } from "lucide-react";
+import { Calendar, ChevronRight, Newspaper, Filter, Eye } from "lucide-react";
 import { PdfViewer } from "@/components/radar/PdfViewer";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
