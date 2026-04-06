@@ -41,6 +41,7 @@ import Permissions from "./pages/admin/Permissions";
 import SegmentsAdmin from "./pages/admin/Segments";
 import RadarDigitale from "./pages/RadarDigitale";
 import RadarAdmin from "./pages/admin/RadarAdmin";
+import FabricLeads from "./pages/admin/FabricLeads";
 import { NewsletterPopup } from "./components/newsletter/NewsletterPopup";
 
 const queryClient = new QueryClient({
