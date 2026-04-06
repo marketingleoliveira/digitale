@@ -95,12 +95,21 @@ const RadarDigitale = () => {
       <main>
         {/* Hero */}
         <section className="bg-white py-8 md:py-12">
-          <div className="container mx-auto px-4 md:px-6 flex justify-center">
+          <div className="container mx-auto px-4 md:px-6 flex flex-col items-center gap-4">
             <img
               src={radarHeader}
               alt="Radar Digitale - Boletim Informativo"
               className="max-w-full h-auto max-h-[200px] md:max-h-[280px] object-contain"
             />
+            {editions.length > 0 && (
+              <p className="text-muted-foreground text-sm md:text-base font-medium">
+                Tivemos + de{" "}
+                <span className="text-accent font-bold text-lg md:text-xl">
+                  {formatViews(editions.reduce((sum, e) => sum + getViewCount(e.id, e.edition_date), 0))}
+                </span>{" "}
+                leitores
+              </p>
+            )}
           </div>
         </section>
 
