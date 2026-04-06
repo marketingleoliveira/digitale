@@ -243,7 +243,10 @@ const RadarDigitale = () => {
                             })}
                           </span>
                         </div>
-                      </div>
+                        <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+                          <Eye className="h-4 w-4" />
+                          <span>{formatViews(getViewCount(activeEdition.id, activeEdition.edition_date))} leituras</span>
+                        </div>
                       <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground">
                         {activeEdition.title}
                       </h2>
