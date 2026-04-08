@@ -1,7 +1,13 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calendar, ChevronRight, Newspaper, Filter, Eye } from "lucide-react";
+import { Calendar, ChevronRight, Newspaper, Filter, Eye, Sparkles, X } from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 import { PdfViewer } from "@/components/radar/PdfViewer";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -68,9 +74,16 @@ const formatViews = (n: number): string => {
   return n.toString();
 };
 
+const isNewEdition = (editionDate: string): boolean => {
+  const days = (Date.now() - new Date(editionDate).getTime()) / 86400000;
+  return days <= 7;
+};
+
 const RadarDigitale = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedEdition, setSelectedEdition] = useState<string | null>(null);
+  const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
+  const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
 
   const { data: categories = [] } = useQuery({
     queryKey: ["radar-categories"],
@@ -101,9 +114,21 @@ const RadarDigitale = () => {
     editions.some((e) => e.category_id === cat.id)
   );
 
-  const filteredEditions = selectedCategory
-    ? editions.filter((e) => e.category_id === selectedCategory)
-    : editions;
+  const filteredEditions = useMemo(() => {
+    let result = editions;
+    if (selectedCategory) {
+      result = result.filter((e) => e.category_id === selectedCategory);
+    }
+    if (dateFrom) {
+      result = result.filter((e) => new Date(e.edition_date) >= dateFrom);
+    }
+    if (dateTo) {
+      const endOfDay = new Date(dateTo);
+      endOfDay.setHours(23, 59, 59, 999);
+      result = result.filter((e) => new Date(e.edition_date) <= endOfDay);
+    }
+    return result;
+  }, [editions, selectedCategory, dateFrom, dateTo]);
 
   const activeEdition = selectedEdition
     ? editions.find((e) => e.id === selectedEdition)
@@ -173,6 +198,52 @@ const RadarDigitale = () => {
                     </div>
                   </div>
 
+                  {/* Date Filter */}
+                  <div className="bg-card rounded-2xl border border-border p-5">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Calendar className="h-4 w-4 text-accent" />
+                      <h3 className="font-semibold text-foreground text-sm uppercase tracking-wider">Filtrar por data</h3>
+                    </div>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-1 block">De</label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" className={cn("w-full justify-start text-left text-sm font-normal h-9", !dateFrom && "text-muted-foreground")}>
+                              <Calendar className="mr-2 h-3.5 w-3.5" />
+                              {dateFrom ? format(dateFrom, "dd/MM/yyyy") : "Selecionar"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <CalendarComponent mode="single" selected={dateFrom} onSelect={setDateFrom} locale={ptBR} initialFocus className="p-3 pointer-events-auto" />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-1 block">Até</label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" className={cn("w-full justify-start text-left text-sm font-normal h-9", !dateTo && "text-muted-foreground")}>
+                              <Calendar className="mr-2 h-3.5 w-3.5" />
+                              {dateTo ? format(dateTo, "dd/MM/yyyy") : "Selecionar"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <CalendarComponent mode="single" selected={dateTo} onSelect={setDateTo} locale={ptBR} initialFocus className="p-3 pointer-events-auto" />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                      {(dateFrom || dateTo) && (
+                        <button
+                          onClick={() => { setDateFrom(undefined); setDateTo(undefined); }}
+                          className="flex items-center gap-1 text-xs text-accent hover:underline"
+                        >
+                          <X className="h-3 w-3" /> Limpar filtro
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
                   {/* Editions List */}
                   <div className="bg-card rounded-2xl border border-border p-5">
                     <h3 className="font-semibold text-foreground text-sm uppercase tracking-wider mb-4">
@@ -198,11 +269,19 @@ const RadarDigitale = () => {
                                 : "hover:bg-muted"
                             }`}
                           >
-                            <p className={`text-sm font-medium truncate ${
-                              activeEdition?.id === edition.id ? "text-accent" : "text-foreground"
-                            }`}>
-                              {edition.title}
-                            </p>
+                            <div className="flex items-center gap-2">
+                              <p className={`text-sm font-medium truncate ${
+                                activeEdition?.id === edition.id ? "text-accent" : "text-foreground"
+                              }`}>
+                                {edition.title}
+                              </p>
+                              {isNewEdition(edition.edition_date) && (
+                                <Badge className="bg-green-500 text-white text-[10px] px-1.5 py-0 shrink-0 animate-pulse">
+                                  <Sparkles className="h-2.5 w-2.5 mr-0.5" />
+                                  NOVO
+                                </Badge>
+                              )}
+                            </div>
                             <div className="flex items-center gap-2 mt-0.5">
                               <span className="text-xs text-muted-foreground">
                                 {new Date(edition.edition_date).toLocaleDateString("pt-BR", {
