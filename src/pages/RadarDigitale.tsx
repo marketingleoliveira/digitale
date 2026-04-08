@@ -269,11 +269,19 @@ const RadarDigitale = () => {
                                 : "hover:bg-muted"
                             }`}
                           >
-                            <p className={`text-sm font-medium truncate ${
-                              activeEdition?.id === edition.id ? "text-accent" : "text-foreground"
-                            }`}>
-                              {edition.title}
-                            </p>
+                            <div className="flex items-center gap-2">
+                              <p className={`text-sm font-medium truncate ${
+                                activeEdition?.id === edition.id ? "text-accent" : "text-foreground"
+                              }`}>
+                                {edition.title}
+                              </p>
+                              {isNewEdition(edition.edition_date) && (
+                                <Badge className="bg-green-500 text-white text-[10px] px-1.5 py-0 shrink-0 animate-pulse">
+                                  <Sparkles className="h-2.5 w-2.5 mr-0.5" />
+                                  NOVO
+                                </Badge>
+                              )}
+                            </div>
                             <div className="flex items-center gap-2 mt-0.5">
                               <span className="text-xs text-muted-foreground">
                                 {new Date(edition.edition_date).toLocaleDateString("pt-BR", {
