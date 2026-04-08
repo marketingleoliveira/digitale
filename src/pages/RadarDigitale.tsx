@@ -198,6 +198,52 @@ const RadarDigitale = () => {
                     </div>
                   </div>
 
+                  {/* Date Filter */}
+                  <div className="bg-card rounded-2xl border border-border p-5">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Calendar className="h-4 w-4 text-accent" />
+                      <h3 className="font-semibold text-foreground text-sm uppercase tracking-wider">Filtrar por data</h3>
+                    </div>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-1 block">De</label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" className={cn("w-full justify-start text-left text-sm font-normal h-9", !dateFrom && "text-muted-foreground")}>
+                              <Calendar className="mr-2 h-3.5 w-3.5" />
+                              {dateFrom ? format(dateFrom, "dd/MM/yyyy") : "Selecionar"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <CalendarComponent mode="single" selected={dateFrom} onSelect={setDateFrom} locale={ptBR} initialFocus className="p-3 pointer-events-auto" />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground mb-1 block">Até</label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" className={cn("w-full justify-start text-left text-sm font-normal h-9", !dateTo && "text-muted-foreground")}>
+                              <Calendar className="mr-2 h-3.5 w-3.5" />
+                              {dateTo ? format(dateTo, "dd/MM/yyyy") : "Selecionar"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <CalendarComponent mode="single" selected={dateTo} onSelect={setDateTo} locale={ptBR} initialFocus className="p-3 pointer-events-auto" />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                      {(dateFrom || dateTo) && (
+                        <button
+                          onClick={() => { setDateFrom(undefined); setDateTo(undefined); }}
+                          className="flex items-center gap-1 text-xs text-accent hover:underline"
+                        >
+                          <X className="h-3 w-3" /> Limpar filtro
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
                   {/* Editions List */}
                   <div className="bg-card rounded-2xl border border-border p-5">
                     <h3 className="font-semibold text-foreground text-sm uppercase tracking-wider mb-4">
