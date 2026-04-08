@@ -28,19 +28,24 @@ interface RadarEdition {
   radar_categories: RadarCategory | null;
 }
 
-// Generate a deterministic fake view count per edition
-const getViewCount = (id: string, editionDate: string): number => {
-  // Hash the ID to get a stable base between 200-1000
+// Generate a deterministic view count per edition
+// New editions start at 0 and gain 30-50 views per day
+const getViewCount = (id: string, editionDate: string, isNewest: boolean): number => {
   let hash = 0;
   for (let i = 0; i < id.length; i++) {
     hash = ((hash << 5) - hash + id.charCodeAt(i)) | 0;
   }
-  const base = 200 + Math.abs(hash % 801); // 200-1000
 
-  // Add daily growth (5-15 per day) since edition date
   const daysSince = Math.max(0, Math.floor((Date.now() - new Date(editionDate).getTime()) / 86400000));
-  const dailyRate = 5 + Math.abs((hash >> 8) % 11); // 5-15
-  return base + daysSince * dailyRate;
+  const dailyRate = 30 + Math.abs((hash >> 8) % 21); // 30-50 per day
+
+  if (isNewest) {
+    // Latest edition starts at 8 and grows from there
+    return 8 + daysSince * dailyRate;
+  }
+
+  // Older editions start at 0 + accumulated daily growth
+  return daysSince * dailyRate;
 };
 
 const formatViews = (n: number): string => {
@@ -105,7 +110,7 @@ const RadarDigitale = () => {
               <p className="text-muted-foreground text-sm md:text-base font-medium">
                 Tivemos + de{" "}
                 <span className="text-accent font-bold text-lg md:text-xl">
-                  {formatViews(editions.reduce((sum, e) => sum + getViewCount(e.id, e.edition_date), 0))}
+                  {formatViews(editions.reduce((sum, e, i) => sum + getViewCount(e.id, e.edition_date, i === 0), 0))}
                 </span>{" "}
                 leitores
               </p>
@@ -193,7 +198,7 @@ const RadarDigitale = () => {
                               </span>
                               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                                 <Eye className="h-3 w-3" />
-                                {formatViews(getViewCount(edition.id, edition.edition_date))}
+                                {formatViews(getViewCount(edition.id, edition.edition_date, editions[0]?.id === edition.id))}
                               </span>
                               {edition.radar_categories && (
                                 <Badge variant="outline" className="text-[10px] px-1.5 py-0">
@@ -254,7 +259,7 @@ const RadarDigitale = () => {
                         </div>
                         <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
                           <Eye className="h-4 w-4" />
-                          <span>{formatViews(getViewCount(activeEdition.id, activeEdition.edition_date))} leituras</span>
+                          <span>{formatViews(getViewCount(activeEdition.id, activeEdition.edition_date, editions[0]?.id === activeEdition.id))} leituras</span>
                         </div>
                       </div>
                       <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground">
