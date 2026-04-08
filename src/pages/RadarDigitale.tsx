@@ -28,19 +28,24 @@ interface RadarEdition {
   radar_categories: RadarCategory | null;
 }
 
-// Generate a deterministic fake view count per edition
-const getViewCount = (id: string, editionDate: string): number => {
-  // Hash the ID to get a stable base between 200-1000
+// Generate a deterministic view count per edition
+// New editions start at 0 and gain 30-50 views per day
+const getViewCount = (id: string, editionDate: string, isNewest: boolean): number => {
   let hash = 0;
   for (let i = 0; i < id.length; i++) {
     hash = ((hash << 5) - hash + id.charCodeAt(i)) | 0;
   }
-  const base = 200 + Math.abs(hash % 801); // 200-1000
 
-  // Add daily growth (5-15 per day) since edition date
   const daysSince = Math.max(0, Math.floor((Date.now() - new Date(editionDate).getTime()) / 86400000));
-  const dailyRate = 5 + Math.abs((hash >> 8) % 11); // 5-15
-  return base + daysSince * dailyRate;
+  const dailyRate = 30 + Math.abs((hash >> 8) % 21); // 30-50 per day
+
+  if (isNewest) {
+    // Latest edition starts at 8 and grows from there
+    return 8 + daysSince * dailyRate;
+  }
+
+  // Older editions start at 0 + accumulated daily growth
+  return daysSince * dailyRate;
 };
 
 const formatViews = (n: number): string => {
