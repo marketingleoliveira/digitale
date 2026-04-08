@@ -114,9 +114,21 @@ const RadarDigitale = () => {
     editions.some((e) => e.category_id === cat.id)
   );
 
-  const filteredEditions = selectedCategory
-    ? editions.filter((e) => e.category_id === selectedCategory)
-    : editions;
+  const filteredEditions = useMemo(() => {
+    let result = editions;
+    if (selectedCategory) {
+      result = result.filter((e) => e.category_id === selectedCategory);
+    }
+    if (dateFrom) {
+      result = result.filter((e) => new Date(e.edition_date) >= dateFrom);
+    }
+    if (dateTo) {
+      const endOfDay = new Date(dateTo);
+      endOfDay.setHours(23, 59, 59, 999);
+      result = result.filter((e) => new Date(e.edition_date) <= endOfDay);
+    }
+    return result;
+  }, [editions, selectedCategory, dateFrom, dateTo]);
 
   const activeEdition = selectedEdition
     ? editions.find((e) => e.id === selectedEdition)
