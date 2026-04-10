@@ -305,6 +305,10 @@ const RadarAdmin = () => {
                   <img src={coverUrl} alt="Cover" className="mt-2 h-32 object-cover rounded-lg" />
                 )}
               </div>
+              <div>
+                <Label>Visualizações</Label>
+                <Input type="number" min={0} value={views} onChange={(e) => setViews(parseInt(e.target.value) || 0)} placeholder="0" />
+              </div>
               <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
