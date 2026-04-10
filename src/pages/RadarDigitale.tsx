@@ -1,7 +1,7 @@
-import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useMemo, useCallback } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calendar, ChevronRight, Newspaper, Filter, Eye, Sparkles, X } from "lucide-react";
+import { Calendar, ChevronRight, Newspaper, Filter, Eye, Sparkles, X, Heart } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
