@@ -107,6 +107,30 @@ const RadarDigitale = () => {
     ? editions.find((e) => e.id === selectedEdition)
     : filteredEditions[0];
 
+  const likeMutation = useMutation({
+    mutationFn: async (editionId: string) => {
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/radar-like`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
+          body: JSON.stringify({ edition_id: editionId }),
+        }
+      );
+      if (!res.ok) throw new Error("Erro ao curtir");
+      return res.json();
+    },
+    onSuccess: (data, editionId) => {
+      setLikedEditions((prev) => {
+        const next = new Set(prev);
+        if (data.liked) next.add(editionId);
+        else next.delete(editionId);
+        return next;
+      });
+      queryClient.invalidateQueries({ queryKey: ["radar-editions"] });
+    },
+  });
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
