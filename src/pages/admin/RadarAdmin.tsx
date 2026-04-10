@@ -74,6 +74,7 @@ interface RadarEdition {
   is_published: boolean;
   display_order: number;
   views: number;
+  likes: number;
   radar_categories: RadarCategory | null;
 }
 
