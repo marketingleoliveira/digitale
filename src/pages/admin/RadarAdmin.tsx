@@ -73,6 +73,7 @@ interface RadarEdition {
   description: string | null;
   is_published: boolean;
   display_order: number;
+  views: number;
   radar_categories: RadarCategory | null;
 }
 
@@ -91,6 +92,7 @@ const RadarAdmin = () => {
   const [fileUrl, setFileUrl] = useState("");
   const [coverUrl, setCoverUrl] = useState("");
   const [isPublished, setIsPublished] = useState(false);
+  const [views, setViews] = useState(0);
   const [newCategoryName, setNewCategoryName] = useState("");
 
   const { data: categories = [] } = useQuery({
@@ -125,6 +127,7 @@ const RadarAdmin = () => {
     setFileUrl("");
     setCoverUrl("");
     setIsPublished(false);
+    setViews(0);
     setEditingEdition(null);
   };
 
@@ -137,6 +140,7 @@ const RadarAdmin = () => {
     setFileUrl(edition.file_url);
     setCoverUrl(edition.cover_image_url || "");
     setIsPublished(edition.is_published);
+    setViews(edition.views ?? 0);
     setEditionDialog(true);
   };
 
@@ -183,6 +187,7 @@ const RadarAdmin = () => {
       file_url: fileUrl,
       cover_image_url: coverUrl || null,
       is_published: isPublished,
+      views,
       updated_at: new Date().toISOString(),
     };
 
