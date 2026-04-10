@@ -120,7 +120,7 @@ const RadarDigitale = () => {
               <p className="text-muted-foreground text-sm md:text-base font-medium">
                 Tivemos + de{" "}
                 <span className="text-accent font-bold text-lg md:text-xl">
-                  {formatViews(editions.reduce((sum, e, i) => sum + getViewCount(e.id, e.edition_date, i === 0), 0))}
+                  {formatViews(editions.reduce((sum, e) => sum + getViewCount(e), 0))}
                 </span>{" "}
                 leitores
               </p>
