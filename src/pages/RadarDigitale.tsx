@@ -32,6 +32,7 @@ interface RadarEdition {
   file_url: string;
   description: string | null;
   views: number;
+  likes: number;
   radar_categories: RadarCategory | null;
 }
 
