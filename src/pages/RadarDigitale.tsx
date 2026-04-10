@@ -1,7 +1,7 @@
-import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useMemo, useCallback } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calendar, ChevronRight, Newspaper, Filter, Eye, Sparkles, X } from "lucide-react";
+import { Calendar, ChevronRight, Newspaper, Filter, Eye, Sparkles, X, Heart } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -32,6 +32,7 @@ interface RadarEdition {
   file_url: string;
   description: string | null;
   views: number;
+  likes: number;
   radar_categories: RadarCategory | null;
 }
 
@@ -50,10 +51,12 @@ const isNewEdition = (editionDate: string): boolean => {
 };
 
 const RadarDigitale = () => {
+  const queryClient = useQueryClient();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedEdition, setSelectedEdition] = useState<string | null>(null);
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
+  const [likedEditions, setLikedEditions] = useState<Set<string>>(new Set());
 
   const { data: categories = [] } = useQuery({
     queryKey: ["radar-categories"],
@@ -103,6 +106,30 @@ const RadarDigitale = () => {
   const activeEdition = selectedEdition
     ? editions.find((e) => e.id === selectedEdition)
     : filteredEditions[0];
+
+  const likeMutation = useMutation({
+    mutationFn: async (editionId: string) => {
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/radar-like`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
+          body: JSON.stringify({ edition_id: editionId }),
+        }
+      );
+      if (!res.ok) throw new Error("Erro ao curtir");
+      return res.json();
+    },
+    onSuccess: (data, editionId) => {
+      setLikedEditions((prev) => {
+        const next = new Set(prev);
+        if (data.liked) next.add(editionId);
+        else next.delete(editionId);
+        return next;
+      });
+      queryClient.invalidateQueries({ queryKey: ["radar-editions"] });
+    },
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -264,6 +291,10 @@ const RadarDigitale = () => {
                                 <Eye className="h-3 w-3" />
                                 {formatViews(getViewCount(edition))}
                               </span>
+                              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Heart className={`h-3 w-3 ${likedEditions.has(edition.id) ? "fill-red-500 text-red-500" : ""}`} />
+                                {formatViews(edition.likes ?? 0)}
+                              </span>
                               {edition.radar_categories && (
                                 <Badge variant="outline" className="text-[10px] px-1.5 py-0">
                                   {edition.radar_categories.name}
@@ -325,6 +356,16 @@ const RadarDigitale = () => {
                           <Eye className="h-4 w-4" />
                           <span>{formatViews(getViewCount(activeEdition))} leituras</span>
                         </div>
+                        <button
+                          onClick={() => likeMutation.mutate(activeEdition.id)}
+                          disabled={likeMutation.isPending}
+                          className={`flex items-center gap-1.5 text-sm transition-colors hover:text-red-500 ${
+                            likedEditions.has(activeEdition.id) ? "text-red-500" : "text-muted-foreground"
+                          }`}
+                        >
+                          <Heart className={`h-4 w-4 ${likedEditions.has(activeEdition.id) ? "fill-red-500" : ""}`} />
+                          <span>{formatViews(activeEdition.likes ?? 0)} curtidas</span>
+                        </button>
                       </div>
                       <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground">
                         {activeEdition.title}

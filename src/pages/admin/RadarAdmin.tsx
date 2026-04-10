@@ -74,6 +74,7 @@ interface RadarEdition {
   is_published: boolean;
   display_order: number;
   views: number;
+  likes: number;
   radar_categories: RadarCategory | null;
 }
 
@@ -93,6 +94,7 @@ const RadarAdmin = () => {
   const [coverUrl, setCoverUrl] = useState("");
   const [isPublished, setIsPublished] = useState(false);
   const [views, setViews] = useState(0);
+  const [likes, setLikes] = useState(0);
   const [newCategoryName, setNewCategoryName] = useState("");
 
   const { data: categories = [] } = useQuery({
@@ -128,6 +130,7 @@ const RadarAdmin = () => {
     setCoverUrl("");
     setIsPublished(false);
     setViews(0);
+    setLikes(0);
     setEditingEdition(null);
   };
 
@@ -141,6 +144,7 @@ const RadarAdmin = () => {
     setCoverUrl(edition.cover_image_url || "");
     setIsPublished(edition.is_published);
     setViews(edition.views ?? 0);
+    setLikes(edition.likes ?? 0);
     setEditionDialog(true);
   };
 
@@ -188,6 +192,7 @@ const RadarAdmin = () => {
       cover_image_url: coverUrl || null,
       is_published: isPublished,
       views,
+      likes,
       updated_at: new Date().toISOString(),
     };
 
@@ -309,6 +314,10 @@ const RadarAdmin = () => {
                 <Label>Visualizações</Label>
                 <Input type="number" min={0} value={views} onChange={(e) => setViews(parseInt(e.target.value) || 0)} placeholder="0" />
               </div>
+              <div>
+                <Label>Curtidas</Label>
+                <Input type="number" min={0} value={likes} onChange={(e) => setLikes(parseInt(e.target.value) || 0)} placeholder="0" />
+              </div>
               <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
@@ -365,6 +374,7 @@ const RadarAdmin = () => {
               <TableHead>Categoria</TableHead>
               <TableHead>Data</TableHead>
               <TableHead>Views</TableHead>
+              <TableHead>Likes</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
@@ -372,13 +382,13 @@ const RadarAdmin = () => {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
+                <TableCell colSpan={7} className="text-center py-10 text-muted-foreground">
                   Carregando...
                 </TableCell>
               </TableRow>
             ) : editions.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
+                <TableCell colSpan={7} className="text-center py-10 text-muted-foreground">
                   Nenhuma edição cadastrada
                 </TableCell>
               </TableRow>
@@ -397,6 +407,7 @@ const RadarAdmin = () => {
                     {new Date(edition.edition_date).toLocaleDateString("pt-BR")}
                   </TableCell>
                   <TableCell className="text-muted-foreground">{edition.views ?? 0}</TableCell>
+                  <TableCell className="text-muted-foreground">{edition.likes ?? 0}</TableCell>
                   <TableCell>
                     <Badge variant={edition.is_published ? "default" : "outline"} className={edition.is_published ? "bg-green-500" : ""}>
                       {edition.is_published ? "Publicado" : "Rascunho"}

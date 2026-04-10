@@ -616,6 +616,7 @@ export type Database = {
           file_url: string
           id: string
           is_published: boolean
+          likes: number
           slug: string
           title: string
           updated_at: string
@@ -631,6 +632,7 @@ export type Database = {
           file_url: string
           id?: string
           is_published?: boolean
+          likes?: number
           slug: string
           title: string
           updated_at?: string
@@ -646,6 +648,7 @@ export type Database = {
           file_url?: string
           id?: string
           is_published?: boolean
+          likes?: number
           slug?: string
           title?: string
           updated_at?: string
@@ -657,6 +660,35 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "radar_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      radar_likes: {
+        Row: {
+          created_at: string
+          edition_id: string
+          id: string
+          ip_address: string
+        }
+        Insert: {
+          created_at?: string
+          edition_id: string
+          id?: string
+          ip_address: string
+        }
+        Update: {
+          created_at?: string
+          edition_id?: string
+          id?: string
+          ip_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "radar_likes_edition_id_fkey"
+            columns: ["edition_id"]
+            isOneToOne: false
+            referencedRelation: "radar_editions"
             referencedColumns: ["id"]
           },
         ]
