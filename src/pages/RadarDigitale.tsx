@@ -262,7 +262,7 @@ const RadarDigitale = () => {
                               </span>
                               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                                 <Eye className="h-3 w-3" />
-                                {formatViews(getViewCount(edition.id, edition.edition_date, editions[0]?.id === edition.id))}
+                                {formatViews(getViewCount(edition))}
                               </span>
                               {edition.radar_categories && (
                                 <Badge variant="outline" className="text-[10px] px-1.5 py-0">
@@ -323,7 +323,7 @@ const RadarDigitale = () => {
                         </div>
                         <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
                           <Eye className="h-4 w-4" />
-                          <span>{formatViews(getViewCount(activeEdition.id, activeEdition.edition_date, editions[0]?.id === activeEdition.id))} leituras</span>
+                          <span>{formatViews(getViewCount(activeEdition))} leituras</span>
                         </div>
                       </div>
                       <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground">
