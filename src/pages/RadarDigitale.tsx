@@ -51,10 +51,12 @@ const isNewEdition = (editionDate: string): boolean => {
 };
 
 const RadarDigitale = () => {
+  const queryClient = useQueryClient();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedEdition, setSelectedEdition] = useState<string | null>(null);
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
+  const [likedEditions, setLikedEditions] = useState<Set<string>>(new Set());
 
   const { data: categories = [] } = useQuery({
     queryKey: ["radar-categories"],
