@@ -31,42 +31,12 @@ interface RadarEdition {
   cover_image_url: string | null;
   file_url: string;
   description: string | null;
+  views: number;
   radar_categories: RadarCategory | null;
 }
 
-// Generate a deterministic view count per edition
-// Updates 2x/day at 10h and 16h, adding 15-25 views each time (30-50/day total)
-const getViewCount = (id: string, editionDate: string, isNewest: boolean): number => {
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = ((hash << 5) - hash + id.charCodeAt(i)) | 0;
-  }
-
-  const now = new Date();
-  const pubDate = new Date(editionDate);
-  
-  // Count how many update slots (10h and 16h) have passed since publication
-  let slots = 0;
-  const cursor = new Date(pubDate);
-  cursor.setHours(0, 0, 0, 0);
-  
-  while (cursor <= now) {
-    const slot10 = new Date(cursor);
-    slot10.setHours(10, 0, 0, 0);
-    const slot16 = new Date(cursor);
-    slot16.setHours(16, 0, 0, 0);
-    
-    if (slot10 > pubDate && slot10 <= now) slots++;
-    if (slot16 > pubDate && slot16 <= now) slots++;
-    
-    cursor.setDate(cursor.getDate() + 1);
-  }
-
-  // Each slot adds 15-25 views (deterministic per edition via hash)
-  const perSlot = 15 + Math.abs((hash >> 8) % 11); // 15-25 per slot
-  const base = isNewest ? 8 : 0;
-
-  return base + slots * perSlot;
+const getViewCount = (edition: RadarEdition): number => {
+  return edition.views ?? 0;
 };
 
 const formatViews = (n: number): string => {
@@ -150,7 +120,7 @@ const RadarDigitale = () => {
               <p className="text-muted-foreground text-sm md:text-base font-medium">
                 Tivemos + de{" "}
                 <span className="text-accent font-bold text-lg md:text-xl">
-                  {formatViews(editions.reduce((sum, e, i) => sum + getViewCount(e.id, e.edition_date, i === 0), 0))}
+                  {formatViews(editions.reduce((sum, e) => sum + getViewCount(e), 0))}
                 </span>{" "}
                 leitores
               </p>
@@ -292,7 +262,7 @@ const RadarDigitale = () => {
                               </span>
                               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                                 <Eye className="h-3 w-3" />
-                                {formatViews(getViewCount(edition.id, edition.edition_date, editions[0]?.id === edition.id))}
+                                {formatViews(getViewCount(edition))}
                               </span>
                               {edition.radar_categories && (
                                 <Badge variant="outline" className="text-[10px] px-1.5 py-0">
@@ -353,7 +323,7 @@ const RadarDigitale = () => {
                         </div>
                         <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
                           <Eye className="h-4 w-4" />
-                          <span>{formatViews(getViewCount(activeEdition.id, activeEdition.edition_date, editions[0]?.id === activeEdition.id))} leituras</span>
+                          <span>{formatViews(getViewCount(activeEdition))} leituras</span>
                         </div>
                       </div>
                       <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground">
