@@ -396,6 +396,7 @@ const RadarAdmin = () => {
                   <TableCell>
                     {new Date(edition.edition_date).toLocaleDateString("pt-BR")}
                   </TableCell>
+                  <TableCell className="text-muted-foreground">{edition.views ?? 0}</TableCell>
                   <TableCell>
                     <Badge variant={edition.is_published ? "default" : "outline"} className={edition.is_published ? "bg-green-500" : ""}>
                       {edition.is_published ? "Publicado" : "Rascunho"}
