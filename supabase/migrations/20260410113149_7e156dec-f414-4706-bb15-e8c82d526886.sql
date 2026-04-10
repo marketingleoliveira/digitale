@@ -1,0 +1,1 @@
+ALTER TABLE public.radar_editions ADD COLUMN views integer NOT NULL DEFAULT 0;

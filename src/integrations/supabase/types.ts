@@ -619,6 +619,7 @@ export type Database = {
           slug: string
           title: string
           updated_at: string
+          views: number
         }
         Insert: {
           category_id?: string | null
@@ -633,6 +634,7 @@ export type Database = {
           slug: string
           title: string
           updated_at?: string
+          views?: number
         }
         Update: {
           category_id?: string | null
@@ -647,6 +649,7 @@ export type Database = {
           slug?: string
           title?: string
           updated_at?: string
+          views?: number
         }
         Relationships: [
           {
