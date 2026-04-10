@@ -364,6 +364,7 @@ const RadarAdmin = () => {
               <TableHead>Título</TableHead>
               <TableHead>Categoria</TableHead>
               <TableHead>Data</TableHead>
+              <TableHead>Views</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
@@ -371,13 +372,13 @@ const RadarAdmin = () => {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
+                <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
                   Carregando...
                 </TableCell>
               </TableRow>
             ) : editions.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
+                <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
                   Nenhuma edição cadastrada
                 </TableCell>
               </TableRow>
