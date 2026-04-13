@@ -356,16 +356,21 @@ const RadarDigitale = () => {
                           <Eye className="h-4 w-4" />
                           <span>{formatViews(getViewCount(activeEdition))} leituras</span>
                         </div>
-                        <button
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => likeMutation.mutate(activeEdition.id)}
                           disabled={likeMutation.isPending}
-                          className={`flex items-center gap-1.5 text-sm transition-colors hover:text-red-500 ${
-                            likedEditions.has(activeEdition.id) ? "text-red-500" : "text-muted-foreground"
-                          }`}
+                          className={cn(
+                            "gap-2 transition-all",
+                            likedEditions.has(activeEdition.id)
+                              ? "border-red-300 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700"
+                              : "hover:border-red-300 hover:bg-red-50 hover:text-red-600"
+                          )}
                         >
-                          <Heart className={`h-4 w-4 ${likedEditions.has(activeEdition.id) ? "fill-red-500" : ""}`} />
-                          <span>{formatViews(activeEdition.likes ?? 0)} curtidas</span>
-                        </button>
+                          <Heart className={cn("h-4 w-4", likedEditions.has(activeEdition.id) && "fill-red-500")} />
+                          Curtir · {formatViews(activeEdition.likes ?? 0)}
+                        </Button>
                       </div>
                       <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground">
                         {activeEdition.title}
