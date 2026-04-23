@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { ChevronLeft, ChevronRight, Star, VolumeX } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,6 +19,7 @@ export function Testimonials() {
   const [current, setCurrent] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [isInView, setIsInView] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const { t } = useLanguage();
@@ -79,12 +80,20 @@ export function Testimonials() {
     const video = videoRef.current;
     if (!video) return;
     if (isInView) {
-      video.muted = true;
+      video.muted = isMuted;
       video.play().catch(() => {});
     } else {
       video.pause();
     }
-  }, [isInView, current, testimonials]);
+  }, [isInView, current, testimonials, isMuted]);
+
+  const handleUnmute = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = false;
+    setIsMuted(false);
+    video.play().catch(() => {});
+  };
 
   if (testimonials.length === 0) {
     return null;
@@ -132,18 +141,32 @@ export function Testimonials() {
                 {/* Media side - fixed compact size */}
                 <div className="relative bg-black w-full md:w-[250px] md:flex-shrink-0 h-[300px] flex items-center justify-center">
                   {hasVideo ? (
-                    <video
-                      key={t.id}
-                      ref={videoRef}
-                      src={t.video_url!}
-                      controls
-                      autoPlay
-                      muted
-                      playsInline
-                      loop
-                      poster={t.author_photo_url || undefined}
-                      className="w-full h-full object-cover"
-                    />
+                    <>
+                      <video
+                        key={t.id}
+                        ref={videoRef}
+                        src={t.video_url!}
+                        controls
+                        autoPlay
+                        muted={isMuted}
+                        playsInline
+                        loop
+                        preload="metadata"
+                        poster={t.author_photo_url || undefined}
+                        className="w-full h-full object-cover"
+                      />
+                      {isMuted && (
+                        <button
+                          type="button"
+                          onClick={handleUnmute}
+                          aria-label="Ativar som"
+                          className="absolute top-3 left-3 z-10 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-black/60 backdrop-blur-sm text-white text-[11px] font-semibold uppercase tracking-wider hover:bg-black/80 transition-colors animate-pulse"
+                        >
+                          <VolumeX className="h-3.5 w-3.5" />
+                          Clique para ativar o som
+                        </button>
+                      )}
+                    </>
                   ) : t.author_photo_url ? (
                     <img
                       src={t.author_photo_url}
