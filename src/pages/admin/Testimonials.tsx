@@ -467,6 +467,47 @@ const Testimonials = () => {
                 </div>
               </div>
 
+              {/* Video Upload */}
+              <div className="space-y-2">
+                <Label>Vídeo do depoimento (opcional, máx 50MB)</Label>
+                {editingTestimonial?.video_url ? (
+                  <div className="relative rounded-lg overflow-hidden border border-border bg-muted">
+                    <video
+                      src={editingTestimonial.video_url}
+                      controls
+                      className="w-full max-h-64 object-contain bg-black"
+                    />
+                    <button
+                      onClick={() => setEditingTestimonial(prev => prev ? { ...prev, video_url: "" } : null)}
+                      className="absolute top-2 right-2 w-7 h-7 bg-destructive rounded-full flex items-center justify-center"
+                      type="button"
+                    >
+                      <X className="w-4 h-4 text-destructive-foreground" />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="cursor-pointer block">
+                    <div className="border-2 border-dashed border-border rounded-lg p-6 flex flex-col items-center justify-center gap-2 hover:border-accent transition-colors">
+                      {uploadingVideo ? (
+                        <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
+                      ) : (
+                        <>
+                          <Upload className="w-6 h-6 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">Clique para enviar vídeo (MP4, WebM, MOV)</span>
+                        </>
+                      )}
+                    </div>
+                    <input
+                      type="file"
+                      accept="video/mp4,video/webm,video/ogg,video/quicktime"
+                      onChange={handleVideoUpload}
+                      className="hidden"
+                      disabled={uploadingVideo}
+                    />
+                  </label>
+                )}
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="author_name">Nome *</Label>
