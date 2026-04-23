@@ -10,6 +10,7 @@ interface Testimonial {
   author_name: string;
   author_company: string | null;
   author_photo_url: string | null;
+  video_url: string | null;
   rating: number;
   years_partnership: string | null;
 }
