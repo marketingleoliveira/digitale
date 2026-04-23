@@ -56,6 +56,7 @@ interface Testimonial {
   author_name: string;
   author_company: string | null;
   author_photo_url: string | null;
+  video_url: string | null;
   rating: number;
   years_partnership: string | null;
   is_active: boolean;
@@ -67,6 +68,7 @@ const emptyTestimonial: Omit<Testimonial, "id"> = {
   author_name: "",
   author_company: "",
   author_photo_url: "",
+  video_url: "",
   rating: 5,
   years_partnership: "",
   is_active: true,
@@ -78,6 +80,7 @@ const Testimonials = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTestimonial, setEditingTestimonial] = useState<Partial<Testimonial> | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
 
   // Query for testimonials
   const { data: testimonials = [], isLoading } = useQuery({
@@ -105,6 +108,7 @@ const Testimonials = () => {
             author_name: testimonial.author_name,
             author_company: testimonial.author_company || null,
             author_photo_url: testimonial.author_photo_url,
+            video_url: testimonial.video_url || null,
             rating: testimonial.rating,
             years_partnership: testimonial.years_partnership || null,
             is_active: testimonial.is_active,
@@ -122,6 +126,7 @@ const Testimonials = () => {
             author_name: testimonial.author_name,
             author_company: testimonial.author_company || null,
             author_photo_url: testimonial.author_photo_url,
+            video_url: testimonial.video_url || null,
             rating: testimonial.rating || 5,
             years_partnership: testimonial.years_partnership || null,
             is_active: testimonial.is_active ?? true,
@@ -228,6 +233,46 @@ const Testimonials = () => {
       toast.error("Erro ao enviar foto");
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("video/")) {
+      toast.error("Apenas vídeos são permitidos");
+      return;
+    }
+
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error("Vídeo muito grande (máximo 50MB)");
+      return;
+    }
+
+    setUploadingVideo(true);
+
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `video-${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("testimonials")
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("testimonials")
+        .getPublicUrl(fileName);
+
+      setEditingTestimonial(prev => prev ? { ...prev, video_url: publicUrl } : null);
+      toast.success("Vídeo enviado!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao enviar vídeo");
+    } finally {
+      setUploadingVideo(false);
     }
   };
 
@@ -420,6 +465,47 @@ const Testimonials = () => {
                   <p className="text-sm font-medium">Foto (opcional)</p>
                   <p className="text-xs text-muted-foreground">Clique para enviar</p>
                 </div>
+              </div>
+
+              {/* Video Upload */}
+              <div className="space-y-2">
+                <Label>Vídeo do depoimento (opcional, máx 50MB)</Label>
+                {editingTestimonial?.video_url ? (
+                  <div className="relative rounded-lg overflow-hidden border border-border bg-muted">
+                    <video
+                      src={editingTestimonial.video_url}
+                      controls
+                      className="w-full max-h-64 object-contain bg-black"
+                    />
+                    <button
+                      onClick={() => setEditingTestimonial(prev => prev ? { ...prev, video_url: "" } : null)}
+                      className="absolute top-2 right-2 w-7 h-7 bg-destructive rounded-full flex items-center justify-center"
+                      type="button"
+                    >
+                      <X className="w-4 h-4 text-destructive-foreground" />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="cursor-pointer block">
+                    <div className="border-2 border-dashed border-border rounded-lg p-6 flex flex-col items-center justify-center gap-2 hover:border-accent transition-colors">
+                      {uploadingVideo ? (
+                        <RefreshCw className="w-6 h-6 animate-spin text-muted-foreground" />
+                      ) : (
+                        <>
+                          <Upload className="w-6 h-6 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">Clique para enviar vídeo (MP4, WebM, MOV)</span>
+                        </>
+                      )}
+                    </div>
+                    <input
+                      type="file"
+                      accept="video/mp4,video/webm,video/ogg,video/quicktime"
+                      onChange={handleVideoUpload}
+                      className="hidden"
+                      disabled={uploadingVideo}
+                    />
+                  </label>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
