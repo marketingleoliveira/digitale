@@ -48,7 +48,7 @@ export function Testimonials() {
 
   useEffect(() => {
     if (!isAutoPlaying || testimonials.length === 0) return;
-    const timer = setInterval(next, 6000);
+    const timer = setInterval(next, 70000);
     return () => clearInterval(timer);
   }, [isAutoPlaying, next, testimonials.length]);
 
