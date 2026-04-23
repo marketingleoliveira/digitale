@@ -101,91 +101,88 @@ export function Testimonials() {
           </p>
         </div>
 
-        {/* Desktop: 3 Cards View */}
-        <div 
-          className="hidden lg:block relative"
+        {/* Featured Testimonial with Video */}
+        <div
+          className="relative max-w-6xl mx-auto"
           onMouseEnter={() => setIsAutoPlaying(false)}
           onMouseLeave={() => setIsAutoPlaying(true)}
         >
-          <div className="flex items-center justify-center gap-6">
-            {getVisibleTestimonials().map((index, position) => {
-              const testimonial = testimonials[index];
-              if (!testimonial) return null;
-              
-              const isCenter = testimonials.length < 3 ? true : position === 1;
-              
-              return (
-                <div
-                  key={testimonial.id}
-                  className={`w-[400px] transition-all duration-300 ${
-                    isCenter ? 'scale-100 opacity-100 z-10' : 'scale-90 opacity-50 z-0'
-                  }`}
-                >
-                  <div 
-                    className={`bg-card rounded-2xl p-8 transition-shadow duration-300 ${
-                      isCenter ? 'shadow-2xl shadow-black/20' : 'shadow-lg'
-                    }`}
-                  >
-                    {/* Rating Stars */}
-                    <div className="flex gap-1 mb-4">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="w-5 h-5 fill-accent text-accent" />
-                      ))}
+          {(() => {
+            const t = testimonials[current];
+            if (!t) return null;
+            const hasVideo = !!t.video_url;
+            return (
+              <div className="bg-card rounded-3xl shadow-2xl shadow-black/30 overflow-hidden grid md:grid-cols-2">
+                {/* Media side */}
+                <div className="relative bg-black aspect-video md:aspect-auto md:min-h-[420px] flex items-center justify-center">
+                  {hasVideo ? (
+                    <video
+                      key={t.id}
+                      src={t.video_url!}
+                      controls
+                      playsInline
+                      poster={t.author_photo_url || undefined}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : t.author_photo_url ? (
+                    <img
+                      src={t.author_photo_url}
+                      alt={t.author_name}
+                      loading="lazy"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-primary/70 text-primary-foreground text-7xl font-bold">
+                      {t.author_name.charAt(0)}
                     </div>
+                  )}
+                </div>
 
-                    {/* Quote */}
-                    <blockquote className="text-foreground text-lg leading-relaxed mb-6 line-clamp-4">
-                      "{testimonial.quote}"
-                    </blockquote>
+                {/* Content side */}
+                <div className="p-8 md:p-10 flex flex-col justify-center">
+                  {/* Rating */}
+                  <div className="flex gap-1 mb-5">
+                    {[...Array(t.rating)].map((_, i) => (
+                      <Star key={i} className="w-5 h-5 fill-accent text-accent" />
+                    ))}
+                  </div>
 
-                    {/* Author */}
-                    <div className="flex items-center gap-4 pt-4 border-t border-border">
-                      {testimonial.author_photo_url ? (
-                        <img
-                          src={testimonial.author_photo_url}
-                          alt={testimonial.author_name}
-                          loading="lazy"
-                          className="w-14 h-14 rounded-full object-cover border-2 border-border shadow-lg"
-                        />
-                      ) : (
-                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground text-xl font-bold shadow-lg">
-                          {testimonial.author_name.charAt(0)}
-                        </div>
-                      )}
-                      <div className="flex-1">
-                        <p className="font-bold text-foreground">{testimonial.author_name}</p>
-                        {testimonial.author_company && (
-                          <p className="text-accent text-sm font-medium">{testimonial.author_company}</p>
-                        )}
-                      </div>
-                    </div>
+                  {/* Quote */}
+                  <blockquote className="text-foreground text-lg md:text-xl leading-relaxed mb-6">
+                    "{t.quote}"
+                  </blockquote>
 
-                    {/* Years Badge */}
-                    {testimonial.years_partnership && (
-                      <div className="mt-4">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-medium">
-                          {testimonial.years_partnership}
-                        </span>
-                      </div>
+                  {/* Author */}
+                  <div className="pt-5 border-t border-border">
+                    <p className="font-bold text-foreground text-lg">{t.author_name}</p>
+                    {t.author_company && (
+                      <p className="text-accent text-sm font-medium mt-0.5">{t.author_company}</p>
+                    )}
+                    {t.years_partnership && (
+                      <span className="inline-flex items-center px-3 py-1 mt-3 rounded-full bg-accent/10 text-accent text-xs font-medium">
+                        {t.years_partnership}
+                      </span>
                     )}
                   </div>
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            );
+          })()}
 
           {/* Navigation Arrows */}
           {testimonials.length > 1 && (
             <>
               <button
                 onClick={prev}
-                className="absolute left-0 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-card border-2 border-border flex items-center justify-center hover:border-accent hover:text-accent transition-all shadow-lg z-20"
+                aria-label="Anterior"
+                className="hidden md:flex absolute -left-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-card border-2 border-border items-center justify-center hover:border-accent hover:text-accent transition-all shadow-lg z-20"
               >
                 <ChevronLeft className="h-6 w-6" />
               </button>
               <button
                 onClick={next}
-                className="absolute right-0 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-card border-2 border-border flex items-center justify-center hover:border-accent hover:text-accent transition-all shadow-lg z-20"
+                aria-label="Próximo"
+                className="hidden md:flex absolute -right-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-card border-2 border-border items-center justify-center hover:border-accent hover:text-accent transition-all shadow-lg z-20"
               >
                 <ChevronRight className="h-6 w-6" />
               </button>
@@ -193,105 +190,39 @@ export function Testimonials() {
           )}
         </div>
 
-        {/* Mobile: Single Card */}
-        <div 
-          className="lg:hidden"
-          onMouseEnter={() => setIsAutoPlaying(false)}
-          onMouseLeave={() => setIsAutoPlaying(true)}
-        >
-          <div className="bg-card rounded-2xl p-6 md:p-8 shadow-2xl">
-            {/* Rating Stars */}
-            <div className="flex gap-1 mb-4">
-              {[...Array(testimonials[current]?.rating || 5)].map((_, i) => (
-                <Star key={i} className="w-5 h-5 fill-accent text-accent" />
+        {/* Mobile arrows + Dots */}
+        {testimonials.length > 1 && (
+          <div className="flex items-center justify-center gap-6 mt-10">
+            <button
+              onClick={prev}
+              aria-label="Anterior"
+              className="md:hidden w-11 h-11 rounded-full bg-card/20 backdrop-blur-sm border border-primary-foreground/20 flex items-center justify-center text-primary-foreground hover:bg-accent hover:border-accent transition-all"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+
+            <div className="flex gap-2">
+              {testimonials.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrent(index)}
+                  aria-label={`Ir para depoimento ${index + 1}`}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    index === current
+                      ? "bg-accent w-8"
+                      : "bg-primary-foreground/30 hover:bg-primary-foreground/50 w-2"
+                  }`}
+                />
               ))}
             </div>
 
-            {/* Quote */}
-            <blockquote className="text-foreground text-lg md:text-xl leading-relaxed mb-6">
-              "{testimonials[current]?.quote}"
-            </blockquote>
-
-            {/* Author */}
-            <div className="flex items-center gap-4 pt-4 border-t border-border">
-              {testimonials[current]?.author_photo_url ? (
-                <img
-                  src={testimonials[current].author_photo_url}
-                  alt={testimonials[current].author_name}
-                  loading="lazy"
-                  className="w-14 h-14 rounded-full object-cover border-2 border-border shadow-lg"
-                />
-              ) : (
-                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground text-xl font-bold shadow-lg">
-                  {testimonials[current]?.author_name.charAt(0)}
-                </div>
-              )}
-              <div className="flex-1">
-                <p className="font-bold text-foreground">{testimonials[current]?.author_name}</p>
-                {testimonials[current]?.author_company && (
-                  <p className="text-accent text-sm font-medium">{testimonials[current].author_company}</p>
-                )}
-              </div>
-            </div>
-
-            {/* Years Badge */}
-            {testimonials[current]?.years_partnership && (
-              <div className="mt-4">
-                <span className="inline-flex items-center px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-medium">
-                  {testimonials[current].years_partnership}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile Navigation */}
-          {testimonials.length > 1 && (
-            <div className="flex items-center justify-center gap-6 mt-8">
-              <button
-                onClick={prev}
-                className="w-12 h-12 rounded-full bg-card/20 backdrop-blur-sm border border-primary-foreground/20 flex items-center justify-center text-primary-foreground hover:bg-accent hover:border-accent transition-all"
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-              
-              <div className="flex gap-2">
-                {testimonials.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrent(index)}
-                    className={`h-2 rounded-full transition-all duration-300 ${
-                      index === current 
-                        ? "bg-accent w-8" 
-                        : "bg-primary-foreground/30 hover:bg-primary-foreground/50 w-2"
-                    }`}
-                  />
-                ))}
-              </div>
-
-              <button
-                onClick={next}
-                className="w-12 h-12 rounded-full bg-card/20 backdrop-blur-sm border border-primary-foreground/20 flex items-center justify-center text-primary-foreground hover:bg-accent hover:border-accent transition-all"
-              >
-                <ChevronRight className="h-5 w-5" />
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Desktop Dots */}
-        {testimonials.length > 1 && (
-          <div className="hidden lg:flex justify-center gap-2 mt-10">
-            {testimonials.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrent(index)}
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  index === current 
-                    ? "bg-accent w-8" 
-                    : "bg-primary-foreground/30 hover:bg-primary-foreground/50 w-2"
-                }`}
-              />
-            ))}
+            <button
+              onClick={next}
+              aria-label="Próximo"
+              className="md:hidden w-11 h-11 rounded-full bg-card/20 backdrop-blur-sm border border-primary-foreground/20 flex items-center justify-center text-primary-foreground hover:bg-accent hover:border-accent transition-all"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
           </div>
         )}
       </div>
