@@ -812,6 +812,7 @@ export type Database = {
           quote: string
           rating: number
           updated_at: string
+          video_url: string | null
           years_partnership: string | null
         }
         Insert: {
@@ -825,6 +826,7 @@ export type Database = {
           quote: string
           rating?: number
           updated_at?: string
+          video_url?: string | null
           years_partnership?: string | null
         }
         Update: {
@@ -838,6 +840,7 @@ export type Database = {
           quote?: string
           rating?: number
           updated_at?: string
+          video_url?: string | null
           years_partnership?: string | null
         }
         Relationships: []
