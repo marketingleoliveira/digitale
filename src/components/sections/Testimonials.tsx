@@ -59,17 +59,6 @@ export function Testimonials() {
     }
   }, [testimonials.length, current]);
 
-  const getVisibleTestimonials = () => {
-    if (testimonials.length === 0) return [];
-    if (testimonials.length < 3) return testimonials.map((_, i) => i);
-    
-    const indices = [];
-    for (let i = -1; i <= 1; i++) {
-      indices.push((current + i + testimonials.length) % testimonials.length);
-    }
-    return indices;
-  };
-
   if (testimonials.length === 0) {
     return null;
   }
