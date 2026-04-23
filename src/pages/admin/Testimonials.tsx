@@ -56,6 +56,7 @@ interface Testimonial {
   author_name: string;
   author_company: string | null;
   author_photo_url: string | null;
+  video_url: string | null;
   rating: number;
   years_partnership: string | null;
   is_active: boolean;
@@ -67,6 +68,7 @@ const emptyTestimonial: Omit<Testimonial, "id"> = {
   author_name: "",
   author_company: "",
   author_photo_url: "",
+  video_url: "",
   rating: 5,
   years_partnership: "",
   is_active: true,
@@ -78,6 +80,7 @@ const Testimonials = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTestimonial, setEditingTestimonial] = useState<Partial<Testimonial> | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
 
   // Query for testimonials
   const { data: testimonials = [], isLoading } = useQuery({
@@ -105,6 +108,7 @@ const Testimonials = () => {
             author_name: testimonial.author_name,
             author_company: testimonial.author_company || null,
             author_photo_url: testimonial.author_photo_url,
+            video_url: testimonial.video_url || null,
             rating: testimonial.rating,
             years_partnership: testimonial.years_partnership || null,
             is_active: testimonial.is_active,
@@ -122,6 +126,7 @@ const Testimonials = () => {
             author_name: testimonial.author_name,
             author_company: testimonial.author_company || null,
             author_photo_url: testimonial.author_photo_url,
+            video_url: testimonial.video_url || null,
             rating: testimonial.rating || 5,
             years_partnership: testimonial.years_partnership || null,
             is_active: testimonial.is_active ?? true,
