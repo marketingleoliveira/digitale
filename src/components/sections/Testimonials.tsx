@@ -101,9 +101,9 @@ export function Testimonials() {
             if (!t) return null;
             const hasVideo = !!t.video_url;
             return (
-              <div className="bg-card rounded-3xl shadow-2xl shadow-black/30 overflow-hidden grid md:grid-cols-2">
-                {/* Media side */}
-                <div className="relative bg-black aspect-video md:aspect-auto md:min-h-[420px] flex items-center justify-center">
+              <div className="bg-card rounded-3xl shadow-2xl shadow-black/30 overflow-hidden flex flex-col md:flex-row items-stretch max-w-3xl mx-auto">
+                {/* Media side - fixed compact size */}
+                <div className="relative bg-black w-full md:w-[250px] md:flex-shrink-0 h-[300px] flex items-center justify-center">
                   {hasVideo ? (
                     <video
                       key={t.id}
@@ -121,29 +121,29 @@ export function Testimonials() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-primary/70 text-primary-foreground text-7xl font-bold">
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-primary/70 text-primary-foreground text-6xl font-bold">
                       {t.author_name.charAt(0)}
                     </div>
                   )}
                 </div>
 
                 {/* Content side */}
-                <div className="p-8 md:p-10 flex flex-col justify-center">
+                <div className="p-6 md:p-8 flex flex-col justify-center flex-1">
                   {/* Rating */}
-                  <div className="flex gap-1 mb-5">
+                  <div className="flex gap-1 mb-4">
                     {[...Array(t.rating)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 fill-accent text-accent" />
+                      <Star key={i} className="w-4 h-4 fill-accent text-accent" />
                     ))}
                   </div>
 
                   {/* Quote */}
-                  <blockquote className="text-foreground text-lg md:text-xl leading-relaxed mb-6">
+                  <blockquote className="text-foreground text-base md:text-lg leading-relaxed mb-5">
                     "{t.quote}"
                   </blockquote>
 
                   {/* Author */}
-                  <div className="pt-5 border-t border-border">
-                    <p className="font-bold text-foreground text-lg">{t.author_name}</p>
+                  <div className="pt-4 border-t border-border">
+                    <p className="font-bold text-foreground">{t.author_name}</p>
                     {t.author_company && (
                       <p className="text-accent text-sm font-medium mt-0.5">{t.author_company}</p>
                     )}
