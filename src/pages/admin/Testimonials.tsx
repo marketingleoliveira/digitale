@@ -236,6 +236,46 @@ const Testimonials = () => {
     }
   };
 
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("video/")) {
+      toast.error("Apenas vídeos são permitidos");
+      return;
+    }
+
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error("Vídeo muito grande (máximo 50MB)");
+      return;
+    }
+
+    setUploadingVideo(true);
+
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `video-${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("testimonials")
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("testimonials")
+        .getPublicUrl(fileName);
+
+      setEditingTestimonial(prev => prev ? { ...prev, video_url: publicUrl } : null);
+      toast.success("Vídeo enviado!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao enviar vídeo");
+    } finally {
+      setUploadingVideo(false);
+    }
+  };
+
   const openCreateDialog = () => {
     setEditingTestimonial({ ...emptyTestimonial });
     setDialogOpen(true);
