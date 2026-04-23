@@ -30,6 +30,7 @@ export function Header() {
       children: [
         { name: t("nav.about"), href: "/sobre" },
         { name: t("nav.sustainability"), href: "/sustentabilidade" },
+        { name: "Depoimentos", href: "/depoimentos" },
       ]
     },
     { name: t("nav.fabrics"), href: "/tecidos" },

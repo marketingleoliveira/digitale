@@ -17,6 +17,7 @@ import PrintsCatalog from "./pages/PrintsCatalog";
 import Segments from "./pages/Segments";
 import SegmentDetail from "./pages/SegmentDetail";
 import Sustainability from "./pages/Sustainability";
+import TestimonialsPage from "./pages/Testimonials";
 import Privacy from "./pages/Privacy";
 import WorkWithUs from "./pages/WorkWithUs";
 import NotFound from "./pages/NotFound";
@@ -97,6 +98,8 @@ const App = () => (
               <Route path="/sostenibilidad" element={<Navigate to="/sustentabilidade" replace />} />
               <Route path="/sustainability" element={<Navigate to="/sustentabilidade" replace />} />
               <Route path="/radar-digitale" element={<RadarDigitale />} />
+              <Route path="/depoimentos" element={<TestimonialsPage />} />
+              <Route path="/testimonials" element={<Navigate to="/depoimentos" replace />} />
               <Route path="/politica-de-privacidade" element={<Privacy />} />
               <Route path="/privacidade" element={<Navigate to="/politica-de-privacidade" replace />} />
               <Route path="/privacy" element={<Navigate to="/politica-de-privacidade" replace />} />
