@@ -134,9 +134,13 @@ export function Testimonials() {
                   {hasVideo ? (
                     <video
                       key={t.id}
+                      ref={videoRef}
                       src={t.video_url!}
                       controls
+                      autoPlay
+                      muted
                       playsInline
+                      loop
                       poster={t.author_photo_url || undefined}
                       className="w-full h-full object-cover"
                     />
