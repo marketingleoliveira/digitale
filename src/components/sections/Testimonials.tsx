@@ -80,12 +80,20 @@ export function Testimonials() {
     const video = videoRef.current;
     if (!video) return;
     if (isInView) {
-      video.muted = true;
+      video.muted = isMuted;
       video.play().catch(() => {});
     } else {
       video.pause();
     }
-  }, [isInView, current, testimonials]);
+  }, [isInView, current, testimonials, isMuted]);
+
+  const handleUnmute = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = false;
+    setIsMuted(false);
+    video.play().catch(() => {});
+  };
 
   if (testimonials.length === 0) {
     return null;
