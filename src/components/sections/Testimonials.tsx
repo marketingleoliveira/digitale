@@ -62,6 +62,30 @@ export function Testimonials() {
     }
   }, [testimonials.length, current]);
 
+  // Observe section to trigger autoplay when in view
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsInView(entry.isIntersecting),
+      { threshold: 0.4 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // Autoplay/pause video when in view or slide changes
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (isInView) {
+      video.muted = true;
+      video.play().catch(() => {});
+    } else {
+      video.pause();
+    }
+  }, [isInView, current, testimonials]);
+
   if (testimonials.length === 0) {
     return null;
   }
