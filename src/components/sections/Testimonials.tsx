@@ -18,6 +18,9 @@ interface Testimonial {
 export function Testimonials() {
   const [current, setCurrent] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [isInView, setIsInView] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const { t } = useLanguage();
 
   const { data: testimonials = [] } = useQuery({
