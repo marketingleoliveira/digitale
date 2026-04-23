@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
@@ -18,6 +18,9 @@ interface Testimonial {
 export function Testimonials() {
   const [current, setCurrent] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [isInView, setIsInView] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const { t } = useLanguage();
 
   const { data: testimonials = [] } = useQuery({
@@ -59,12 +62,36 @@ export function Testimonials() {
     }
   }, [testimonials.length, current]);
 
+  // Observe section to trigger autoplay when in view
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsInView(entry.isIntersecting),
+      { threshold: 0.4 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // Autoplay/pause video when in view or slide changes
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (isInView) {
+      video.muted = true;
+      video.play().catch(() => {});
+    } else {
+      video.pause();
+    }
+  }, [isInView, current, testimonials]);
+
   if (testimonials.length === 0) {
     return null;
   }
 
   return (
-    <section className="py-24 bg-primary relative overflow-hidden">
+    <section ref={sectionRef} className="py-24 bg-primary relative overflow-hidden">
       {/* Static Background Elements */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-accent/5 rounded-full blur-[150px] -translate-x-1/2 -translate-y-1/2" />
@@ -107,9 +134,13 @@ export function Testimonials() {
                   {hasVideo ? (
                     <video
                       key={t.id}
+                      ref={videoRef}
                       src={t.video_url!}
                       controls
+                      autoPlay
+                      muted
                       playsInline
+                      loop
                       poster={t.author_photo_url || undefined}
                       className="w-full h-full object-cover"
                     />
