@@ -141,18 +141,32 @@ export function Testimonials() {
                 {/* Media side - fixed compact size */}
                 <div className="relative bg-black w-full md:w-[250px] md:flex-shrink-0 h-[300px] flex items-center justify-center">
                   {hasVideo ? (
-                    <video
-                      key={t.id}
-                      ref={videoRef}
-                      src={t.video_url!}
-                      controls
-                      autoPlay
-                      muted
-                      playsInline
-                      loop
-                      poster={t.author_photo_url || undefined}
-                      className="w-full h-full object-cover"
-                    />
+                    <>
+                      <video
+                        key={t.id}
+                        ref={videoRef}
+                        src={t.video_url!}
+                        controls
+                        autoPlay
+                        muted={isMuted}
+                        playsInline
+                        loop
+                        preload="metadata"
+                        poster={t.author_photo_url || undefined}
+                        className="w-full h-full object-cover"
+                      />
+                      {isMuted && (
+                        <button
+                          type="button"
+                          onClick={handleUnmute}
+                          aria-label="Ativar som"
+                          className="absolute top-3 left-3 z-10 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-black/60 backdrop-blur-sm text-white text-[11px] font-semibold uppercase tracking-wider hover:bg-black/80 transition-colors animate-pulse"
+                        >
+                          <VolumeX className="h-3.5 w-3.5" />
+                          Clique para ativar o som
+                        </button>
+                      )}
+                    </>
                   ) : t.author_photo_url ? (
                     <img
                       src={t.author_photo_url}
