@@ -91,7 +91,7 @@ export function Testimonials() {
   }
 
   return (
-    <section className="py-24 bg-primary relative overflow-hidden">
+    <section ref={sectionRef} className="py-24 bg-primary relative overflow-hidden">
       {/* Static Background Elements */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-accent/5 rounded-full blur-[150px] -translate-x-1/2 -translate-y-1/2" />
