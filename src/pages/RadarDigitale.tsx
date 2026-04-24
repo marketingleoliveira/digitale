@@ -45,10 +45,6 @@ const formatViews = (n: number): string => {
   return n.toString();
 };
 
-const isNewEdition = (editionDate: string): boolean => {
-  const days = (Date.now() - new Date(editionDate).getTime()) / 86400000;
-  return days <= 7;
-};
 
 const RadarDigitale = () => {
   const queryClient = useQueryClient();
