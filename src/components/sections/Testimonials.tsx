@@ -69,7 +69,7 @@ export function Testimonials() {
     if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => setIsInView(entry.isIntersecting),
-      { threshold: 0.4 }
+      { threshold: 0.15 }
     );
     observer.observe(el);
     return () => observer.disconnect();
