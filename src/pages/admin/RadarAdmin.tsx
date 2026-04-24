@@ -96,6 +96,89 @@ interface RadarEdition {
   radar_categories: RadarCategory | null;
 }
 
+interface SortableEditionRowProps {
+  edition: RadarEdition;
+  onEdit: (e: RadarEdition) => void;
+  onDelete: (id: string) => void;
+  onTogglePublish: (e: RadarEdition) => void;
+}
+
+const SortableEditionRow = ({ edition, onEdit, onDelete, onTogglePublish }: SortableEditionRowProps) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: edition.id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+  return (
+    <TableRow ref={setNodeRef} style={style} className={isDragging ? "bg-muted" : ""}>
+      <TableCell className="w-10">
+        <button
+          type="button"
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing p-1 text-muted-foreground hover:text-foreground touch-none"
+          title="Arraste para reordenar"
+        >
+          <GripVertical className="h-4 w-4" />
+        </button>
+      </TableCell>
+      <TableCell className="font-medium">{edition.title}</TableCell>
+      <TableCell>
+        {edition.radar_categories ? (
+          <Badge variant="secondary">{edition.radar_categories.name}</Badge>
+        ) : (
+          <span className="text-muted-foreground text-sm">—</span>
+        )}
+      </TableCell>
+      <TableCell>{new Date(edition.edition_date).toLocaleDateString("pt-BR")}</TableCell>
+      <TableCell className="text-muted-foreground">{edition.views ?? 0}</TableCell>
+      <TableCell className="text-muted-foreground">{edition.likes ?? 0}</TableCell>
+      <TableCell>
+        <Badge variant={edition.is_published ? "default" : "outline"} className={edition.is_published ? "bg-green-500" : ""}>
+          {edition.is_published ? "Publicado" : "Oculto"}
+        </Badge>
+      </TableCell>
+      <TableCell className="text-right">
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onTogglePublish(edition)}
+            title={edition.is_published ? "Ocultar" : "Publicar"}
+          >
+            {edition.is_published ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => onEdit(edition)}>
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm">
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Excluir edição?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  A edição "{edition.title}" será removida permanentemente.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={() => onDelete(edition.id)} className="bg-destructive text-destructive-foreground">
+                  Excluir
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+};
+
 const RadarAdmin = () => {
   const queryClient = useQueryClient();
   const [editionDialog, setEditionDialog] = useState(false);
