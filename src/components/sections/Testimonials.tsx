@@ -18,10 +18,9 @@ interface Testimonial {
 export function Testimonials() {
   const [current, setCurrent] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-  const [isInView, setIsInView] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const sectionRef = useRef<HTMLElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const { t } = useLanguage();
 
   const { data: testimonials = [] } = useQuery({
@@ -63,36 +62,42 @@ export function Testimonials() {
     }
   }, [testimonials.length, current]);
 
-  // Observe section to trigger autoplay when in view
-  useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsInView(entry.isIntersecting),
-      { threshold: 0.15 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
+  // Callback ref: force play as soon as the video element mounts
+  const setVideoRef = useCallback((node: HTMLVideoElement | null) => {
+    videoRef.current = node;
+    if (!node) return;
+    node.muted = true;
+    node.playsInline = true;
+    const forcePlay = () => {
+      const p = node.play();
+      if (p && typeof p.catch === "function") p.catch(() => {});
+    };
+    forcePlay();
+    node.addEventListener("loadedmetadata", forcePlay, { once: true });
+    node.addEventListener("loadeddata", forcePlay, { once: true });
+    node.addEventListener("canplay", forcePlay, { once: true });
+    // Retry a few times in case of slow network
+    const retries = [200, 600, 1500, 3000];
+    retries.forEach((ms) => setTimeout(() => {
+      if (node.paused) forcePlay();
+    }, ms));
   }, []);
 
-  // Autoplay/pause video when in view or slide changes
+  // Try to play whenever the user interacts anywhere on the page (autoplay unlock)
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    if (isInView) {
-      video.muted = isMuted;
-      const tryPlay = () => video.play().catch(() => {});
-      if (video.readyState >= 2) {
-        tryPlay();
-      } else {
-        video.addEventListener("loadeddata", tryPlay, { once: true });
-        video.addEventListener("canplay", tryPlay, { once: true });
-        video.load();
-      }
-    } else {
-      video.pause();
-    }
-  }, [isInView, current, testimonials, isMuted]);
+    const unlock = () => {
+      const v = videoRef.current;
+      if (v && v.paused) v.play().catch(() => {});
+    };
+    window.addEventListener("click", unlock, { passive: true });
+    window.addEventListener("scroll", unlock, { passive: true });
+    window.addEventListener("touchstart", unlock, { passive: true });
+    return () => {
+      window.removeEventListener("click", unlock);
+      window.removeEventListener("scroll", unlock);
+      window.removeEventListener("touchstart", unlock);
+    };
+  }, []);
 
   const handleUnmute = () => {
     const video = videoRef.current;
@@ -151,10 +156,11 @@ export function Testimonials() {
                     <>
                       <video
                         key={t.id}
-                        ref={videoRef}
+                        ref={setVideoRef}
                         src={t.video_url!}
                         autoPlay
                         muted={isMuted}
+                        defaultMuted
                         playsInline
                         loop
                         preload="auto"
