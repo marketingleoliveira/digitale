@@ -81,7 +81,12 @@ export function Testimonials() {
     if (!video) return;
     if (isInView) {
       video.muted = isMuted;
-      video.play().catch(() => {});
+      const tryPlay = () => video.play().catch(() => {});
+      if (video.readyState >= 2) {
+        tryPlay();
+      } else {
+        video.addEventListener("loadeddata", tryPlay, { once: true });
+      }
     } else {
       video.pause();
     }
@@ -146,12 +151,11 @@ export function Testimonials() {
                         key={t.id}
                         ref={videoRef}
                         src={t.video_url!}
-                        controls
                         autoPlay
                         muted={isMuted}
                         playsInline
                         loop
-                        preload="metadata"
+                        preload="auto"
                         poster={t.author_photo_url || undefined}
                         className="w-full h-full object-cover"
                       />
