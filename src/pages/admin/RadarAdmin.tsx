@@ -11,9 +11,25 @@ import {
   Newspaper,
   FolderPlus,
   X,
-  ArrowUp,
-  ArrowDown,
+  GripVertical,
 } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -79,6 +95,89 @@ interface RadarEdition {
   likes: number;
   radar_categories: RadarCategory | null;
 }
+
+interface SortableEditionRowProps {
+  edition: RadarEdition;
+  onEdit: (e: RadarEdition) => void;
+  onDelete: (id: string) => void;
+  onTogglePublish: (e: RadarEdition) => void;
+}
+
+const SortableEditionRow = ({ edition, onEdit, onDelete, onTogglePublish }: SortableEditionRowProps) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: edition.id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+  return (
+    <TableRow ref={setNodeRef} style={style} className={isDragging ? "bg-muted" : ""}>
+      <TableCell className="w-10">
+        <button
+          type="button"
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing p-1 text-muted-foreground hover:text-foreground touch-none"
+          title="Arraste para reordenar"
+        >
+          <GripVertical className="h-4 w-4" />
+        </button>
+      </TableCell>
+      <TableCell className="font-medium">{edition.title}</TableCell>
+      <TableCell>
+        {edition.radar_categories ? (
+          <Badge variant="secondary">{edition.radar_categories.name}</Badge>
+        ) : (
+          <span className="text-muted-foreground text-sm">—</span>
+        )}
+      </TableCell>
+      <TableCell>{new Date(edition.edition_date).toLocaleDateString("pt-BR")}</TableCell>
+      <TableCell className="text-muted-foreground">{edition.views ?? 0}</TableCell>
+      <TableCell className="text-muted-foreground">{edition.likes ?? 0}</TableCell>
+      <TableCell>
+        <Badge variant={edition.is_published ? "default" : "outline"} className={edition.is_published ? "bg-green-500" : ""}>
+          {edition.is_published ? "Publicado" : "Oculto"}
+        </Badge>
+      </TableCell>
+      <TableCell className="text-right">
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onTogglePublish(edition)}
+            title={edition.is_published ? "Ocultar" : "Publicar"}
+          >
+            {edition.is_published ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => onEdit(edition)}>
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm">
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Excluir edição?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  A edição "{edition.title}" será removida permanentemente.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={() => onDelete(edition.id)} className="bg-destructive text-destructive-foreground">
+                  Excluir
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+};
 
 const RadarAdmin = () => {
   const queryClient = useQueryClient();
@@ -233,15 +332,23 @@ const RadarAdmin = () => {
   };
 
   const togglePublish = async (edition: RadarEdition) => {
-    const { error } = await supabase
+    const newValue = !edition.is_published;
+    const { data, error } = await supabase
       .from("radar_editions")
-      .update({ is_published: !edition.is_published })
-      .eq("id", edition.id);
-    if (error) toast.error("Erro");
-    else {
-      toast.success(edition.is_published ? "Despublicado" : "Publicado!");
-      queryClient.invalidateQueries({ queryKey: ["admin-radar-editions"] });
+      .update({ is_published: newValue })
+      .eq("id", edition.id)
+      .select();
+    if (error) {
+      console.error("togglePublish error:", error);
+      toast.error(`Erro ao alterar status: ${error.message}`);
+      return;
     }
+    if (!data || data.length === 0) {
+      toast.error("Sem permissão para alterar (verifique seu papel de admin)");
+      return;
+    }
+    toast.success(newValue ? "Publicado!" : "Ocultado");
+    queryClient.invalidateQueries({ queryKey: ["admin-radar-editions"] });
   };
 
   const handleAddCategory = async () => {
@@ -258,26 +365,39 @@ const RadarAdmin = () => {
     queryClient.invalidateQueries({ queryKey: ["admin-radar-categories"] });
   };
 
-  const handleMove = async (edition: RadarEdition, direction: "up" | "down") => {
-    const index = editions.findIndex((e) => e.id === edition.id);
-    const swapIndex = direction === "up" ? index - 1 : index + 1;
-    if (swapIndex < 0 || swapIndex >= editions.length) return;
-    const other = editions[swapIndex];
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
 
-    const currentOrder = edition.display_order ?? index;
-    const otherOrder = other.display_order ?? swapIndex;
-    // Ensure distinct values when both are equal (e.g. all zeros)
-    const newCurrent = otherOrder === currentOrder ? swapIndex : otherOrder;
-    const newOther = otherOrder === currentOrder ? index : currentOrder;
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
 
-    const [r1, r2] = await Promise.all([
-      supabase.from("radar_editions").update({ display_order: newCurrent }).eq("id", edition.id),
-      supabase.from("radar_editions").update({ display_order: newOther }).eq("id", other.id),
-    ]);
-    if (r1.error || r2.error) {
+    const oldIndex = editions.findIndex((e) => e.id === active.id);
+    const newIndex = editions.findIndex((e) => e.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const reordered = arrayMove(editions, oldIndex, newIndex);
+
+    // Optimistic update so UI moves immediately
+    queryClient.setQueryData(
+      ["admin-radar-editions"],
+      reordered.map((e, i) => ({ ...e, display_order: i })),
+    );
+
+    // Persist new display_order for every edition
+    const updates = await Promise.all(
+      reordered.map((e, i) =>
+        supabase.from("radar_editions").update({ display_order: i }).eq("id", e.id),
+      ),
+    );
+    if (updates.some((r) => r.error)) {
       toast.error("Erro ao reordenar");
+      queryClient.invalidateQueries({ queryKey: ["admin-radar-editions"] });
       return;
     }
+    toast.success("Ordem atualizada!");
     queryClient.invalidateQueries({ queryKey: ["admin-radar-editions"] });
   };
 
@@ -393,112 +513,52 @@ const RadarAdmin = () => {
 
       {/* Editions Table */}
       <div className="bg-card rounded-2xl border border-border overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Título</TableHead>
-              <TableHead>Categoria</TableHead>
-              <TableHead>Data</TableHead>
-              <TableHead>Views</TableHead>
-              <TableHead>Likes</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Ordem</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
+        <p className="px-4 pt-4 text-xs text-muted-foreground">
+          Arraste pelo ícone <GripVertical className="inline h-3 w-3" /> para reordenar as edições.
+        </p>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
-                  Carregando...
-                </TableCell>
+                <TableHead className="w-10"></TableHead>
+                <TableHead>Título</TableHead>
+                <TableHead>Categoria</TableHead>
+                <TableHead>Data</TableHead>
+                <TableHead>Views</TableHead>
+                <TableHead>Likes</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
               </TableRow>
-            ) : editions.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
-                  Nenhuma edição cadastrada
-                </TableCell>
-              </TableRow>
-            ) : (
-              editions.map((edition, idx) => (
-                <TableRow key={edition.id}>
-                  <TableCell className="font-medium">{edition.title}</TableCell>
-                  <TableCell>
-                    {edition.radar_categories ? (
-                      <Badge variant="secondary">{edition.radar_categories.name}</Badge>
-                    ) : (
-                      <span className="text-muted-foreground text-sm">—</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {new Date(edition.edition_date).toLocaleDateString("pt-BR")}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">{edition.views ?? 0}</TableCell>
-                  <TableCell className="text-muted-foreground">{edition.likes ?? 0}</TableCell>
-                  <TableCell>
-                    <Badge variant={edition.is_published ? "default" : "outline"} className={edition.is_published ? "bg-green-500" : ""}>
-                      {edition.is_published ? "Publicado" : "Rascunho"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleMove(edition, "up")}
-                        disabled={idx === 0}
-                        title="Mover para cima"
-                      >
-                        <ArrowUp className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleMove(edition, "down")}
-                        disabled={idx === editions.length - 1}
-                        title="Mover para baixo"
-                      >
-                        <ArrowDown className="h-4 w-4" />
-                      </Button>
-                      <span className="text-xs text-muted-foreground ml-1">{edition.display_order ?? 0}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button variant="outline" size="sm" onClick={() => togglePublish(edition)}>
-                        {edition.is_published ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={() => openEditDialog(edition)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="destructive" size="sm">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Excluir edição?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              A edição "{edition.title}" será removida permanentemente.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDeleteEdition(edition.id)} className="bg-destructive text-destructive-foreground">
-                              Excluir
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
+                    Carregando...
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ) : editions.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
+                    Nenhuma edição cadastrada
+                  </TableCell>
+                </TableRow>
+              ) : (
+                <SortableContext items={editions.map((e) => e.id)} strategy={verticalListSortingStrategy}>
+                  {editions.map((edition) => (
+                    <SortableEditionRow
+                      key={edition.id}
+                      edition={edition}
+                      onEdit={openEditDialog}
+                      onDelete={handleDeleteEdition}
+                      onTogglePublish={togglePublish}
+                    />
+                  ))}
+                </SortableContext>
+              )}
+            </TableBody>
+          </Table>
+        </DndContext>
       </div>
     </AdminLayout>
   );
