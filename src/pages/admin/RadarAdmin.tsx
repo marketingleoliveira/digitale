@@ -12,7 +12,13 @@ import {
   FolderPlus,
   X,
   GripVertical,
+  CalendarIcon,
 } from "lucide-react";
+import { format, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import {
   DndContext,
   closestCenter,
