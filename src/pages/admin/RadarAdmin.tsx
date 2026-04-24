@@ -513,112 +513,52 @@ const RadarAdmin = () => {
 
       {/* Editions Table */}
       <div className="bg-card rounded-2xl border border-border overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Título</TableHead>
-              <TableHead>Categoria</TableHead>
-              <TableHead>Data</TableHead>
-              <TableHead>Views</TableHead>
-              <TableHead>Likes</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Ordem</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
+        <p className="px-4 pt-4 text-xs text-muted-foreground">
+          Arraste pelo ícone <GripVertical className="inline h-3 w-3" /> para reordenar as edições.
+        </p>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
-                  Carregando...
-                </TableCell>
+                <TableHead className="w-10"></TableHead>
+                <TableHead>Título</TableHead>
+                <TableHead>Categoria</TableHead>
+                <TableHead>Data</TableHead>
+                <TableHead>Views</TableHead>
+                <TableHead>Likes</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
               </TableRow>
-            ) : editions.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
-                  Nenhuma edição cadastrada
-                </TableCell>
-              </TableRow>
-            ) : (
-              editions.map((edition, idx) => (
-                <TableRow key={edition.id}>
-                  <TableCell className="font-medium">{edition.title}</TableCell>
-                  <TableCell>
-                    {edition.radar_categories ? (
-                      <Badge variant="secondary">{edition.radar_categories.name}</Badge>
-                    ) : (
-                      <span className="text-muted-foreground text-sm">—</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {new Date(edition.edition_date).toLocaleDateString("pt-BR")}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">{edition.views ?? 0}</TableCell>
-                  <TableCell className="text-muted-foreground">{edition.likes ?? 0}</TableCell>
-                  <TableCell>
-                    <Badge variant={edition.is_published ? "default" : "outline"} className={edition.is_published ? "bg-green-500" : ""}>
-                      {edition.is_published ? "Publicado" : "Rascunho"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleMove(edition, "up")}
-                        disabled={idx === 0}
-                        title="Mover para cima"
-                      >
-                        <ArrowUp className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleMove(edition, "down")}
-                        disabled={idx === editions.length - 1}
-                        title="Mover para baixo"
-                      >
-                        <ArrowDown className="h-4 w-4" />
-                      </Button>
-                      <span className="text-xs text-muted-foreground ml-1">{edition.display_order ?? 0}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button variant="outline" size="sm" onClick={() => togglePublish(edition)}>
-                        {edition.is_published ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={() => openEditDialog(edition)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="destructive" size="sm">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Excluir edição?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              A edição "{edition.title}" será removida permanentemente.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDeleteEdition(edition.id)} className="bg-destructive text-destructive-foreground">
-                              Excluir
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
+                    Carregando...
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ) : editions.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
+                    Nenhuma edição cadastrada
+                  </TableCell>
+                </TableRow>
+              ) : (
+                <SortableContext items={editions.map((e) => e.id)} strategy={verticalListSortingStrategy}>
+                  {editions.map((edition) => (
+                    <SortableEditionRow
+                      key={edition.id}
+                      edition={edition}
+                      onEdit={openEditDialog}
+                      onDelete={handleDeleteEdition}
+                      onTogglePublish={togglePublish}
+                    />
+                  ))}
+                </SortableContext>
+              )}
+            </TableBody>
+          </Table>
+        </DndContext>
       </div>
     </AdminLayout>
   );
