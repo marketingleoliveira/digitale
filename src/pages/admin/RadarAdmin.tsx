@@ -445,7 +445,35 @@ const RadarAdmin = () => {
                 </div>
                 <div>
                   <Label>Data da Edição</Label>
-                  <Input type="date" value={editionDate} onChange={(e) => setEditionDate(e.target.value)} />
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !editionDate && "text-muted-foreground",
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {editionDate
+                          ? format(parseISO(editionDate), "dd/MM/yyyy", { locale: ptBR })
+                          : "Selecionar data"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={editionDate ? parseISO(editionDate) : undefined}
+                        onSelect={(d) => {
+                          if (d) setEditionDate(format(d, "yyyy-MM-dd"));
+                        }}
+                        locale={ptBR}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
               <div>
