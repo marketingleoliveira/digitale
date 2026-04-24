@@ -160,7 +160,6 @@ export function Testimonials() {
                         src={t.video_url!}
                         autoPlay
                         muted={isMuted}
-                        defaultMuted
                         playsInline
                         loop
                         preload="auto"
