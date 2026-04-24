@@ -11,6 +11,8 @@ import {
   Newspaper,
   FolderPlus,
   X,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminLayout } from "@/components/admin/AdminLayout";
@@ -115,6 +117,7 @@ const RadarAdmin = () => {
       const { data, error } = await supabase
         .from("radar_editions")
         .select("*, radar_categories(*)")
+        .order("display_order", { ascending: true })
         .order("edition_date", { ascending: false });
       if (error) throw error;
       return data as RadarEdition[];
@@ -255,6 +258,29 @@ const RadarAdmin = () => {
     queryClient.invalidateQueries({ queryKey: ["admin-radar-categories"] });
   };
 
+  const handleMove = async (edition: RadarEdition, direction: "up" | "down") => {
+    const index = editions.findIndex((e) => e.id === edition.id);
+    const swapIndex = direction === "up" ? index - 1 : index + 1;
+    if (swapIndex < 0 || swapIndex >= editions.length) return;
+    const other = editions[swapIndex];
+
+    const currentOrder = edition.display_order ?? index;
+    const otherOrder = other.display_order ?? swapIndex;
+    // Ensure distinct values when both are equal (e.g. all zeros)
+    const newCurrent = otherOrder === currentOrder ? swapIndex : otherOrder;
+    const newOther = otherOrder === currentOrder ? index : currentOrder;
+
+    const [r1, r2] = await Promise.all([
+      supabase.from("radar_editions").update({ display_order: newCurrent }).eq("id", edition.id),
+      supabase.from("radar_editions").update({ display_order: newOther }).eq("id", other.id),
+    ]);
+    if (r1.error || r2.error) {
+      toast.error("Erro ao reordenar");
+      return;
+    }
+    queryClient.invalidateQueries({ queryKey: ["admin-radar-editions"] });
+  };
+
   return (
     <AdminLayout title="Radar Digitale">
       {/* Actions */}
@@ -376,24 +402,25 @@ const RadarAdmin = () => {
               <TableHead>Views</TableHead>
               <TableHead>Likes</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Ordem</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-10 text-muted-foreground">
+                <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
                   Carregando...
                 </TableCell>
               </TableRow>
             ) : editions.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-10 text-muted-foreground">
+                <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
                   Nenhuma edição cadastrada
                 </TableCell>
               </TableRow>
             ) : (
-              editions.map((edition) => (
+              editions.map((edition, idx) => (
                 <TableRow key={edition.id}>
                   <TableCell className="font-medium">{edition.title}</TableCell>
                   <TableCell>
@@ -412,6 +439,29 @@ const RadarAdmin = () => {
                     <Badge variant={edition.is_published ? "default" : "outline"} className={edition.is_published ? "bg-green-500" : ""}>
                       {edition.is_published ? "Publicado" : "Rascunho"}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleMove(edition, "up")}
+                        disabled={idx === 0}
+                        title="Mover para cima"
+                      >
+                        <ArrowUp className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleMove(edition, "down")}
+                        disabled={idx === editions.length - 1}
+                        title="Mover para baixo"
+                      >
+                        <ArrowDown className="h-4 w-4" />
+                      </Button>
+                      <span className="text-xs text-muted-foreground ml-1">{edition.display_order ?? 0}</span>
+                    </div>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
