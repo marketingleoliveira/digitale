@@ -69,7 +69,7 @@ export function Testimonials() {
     if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => setIsInView(entry.isIntersecting),
-      { threshold: 0.4 }
+      { threshold: 0.15 }
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -86,6 +86,8 @@ export function Testimonials() {
         tryPlay();
       } else {
         video.addEventListener("loadeddata", tryPlay, { once: true });
+        video.addEventListener("canplay", tryPlay, { once: true });
+        video.load();
       }
     } else {
       video.pause();
