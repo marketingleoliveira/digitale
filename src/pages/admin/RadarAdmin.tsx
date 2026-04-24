@@ -274,26 +274,39 @@ const RadarAdmin = () => {
     queryClient.invalidateQueries({ queryKey: ["admin-radar-categories"] });
   };
 
-  const handleMove = async (edition: RadarEdition, direction: "up" | "down") => {
-    const index = editions.findIndex((e) => e.id === edition.id);
-    const swapIndex = direction === "up" ? index - 1 : index + 1;
-    if (swapIndex < 0 || swapIndex >= editions.length) return;
-    const other = editions[swapIndex];
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
 
-    const currentOrder = edition.display_order ?? index;
-    const otherOrder = other.display_order ?? swapIndex;
-    // Ensure distinct values when both are equal (e.g. all zeros)
-    const newCurrent = otherOrder === currentOrder ? swapIndex : otherOrder;
-    const newOther = otherOrder === currentOrder ? index : currentOrder;
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
 
-    const [r1, r2] = await Promise.all([
-      supabase.from("radar_editions").update({ display_order: newCurrent }).eq("id", edition.id),
-      supabase.from("radar_editions").update({ display_order: newOther }).eq("id", other.id),
-    ]);
-    if (r1.error || r2.error) {
+    const oldIndex = editions.findIndex((e) => e.id === active.id);
+    const newIndex = editions.findIndex((e) => e.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const reordered = arrayMove(editions, oldIndex, newIndex);
+
+    // Optimistic update so UI moves immediately
+    queryClient.setQueryData(
+      ["admin-radar-editions"],
+      reordered.map((e, i) => ({ ...e, display_order: i })),
+    );
+
+    // Persist new display_order for every edition
+    const updates = await Promise.all(
+      reordered.map((e, i) =>
+        supabase.from("radar_editions").update({ display_order: i }).eq("id", e.id),
+      ),
+    );
+    if (updates.some((r) => r.error)) {
       toast.error("Erro ao reordenar");
+      queryClient.invalidateQueries({ queryKey: ["admin-radar-editions"] });
       return;
     }
+    toast.success("Ordem atualizada!");
     queryClient.invalidateQueries({ queryKey: ["admin-radar-editions"] });
   };
 
