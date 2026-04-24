@@ -83,6 +83,9 @@ const RadarDigitale = () => {
     editions.some((e) => e.category_id === cat.id)
   );
 
+  // The "first" edition in the admin order — gets the NOVO badge
+  const firstEditionId = editions[0]?.id;
+
   const filteredEditions = useMemo(() => {
     let result = editions;
     if (selectedCategory) {
@@ -268,7 +271,7 @@ const RadarDigitale = () => {
                               }`}>
                                 {edition.title}
                               </p>
-                              {isNewEdition(edition.edition_date) && (
+                              {edition.id === firstEditionId && (
                                 <Badge className="bg-green-500 text-white text-[10px] px-1.5 py-0 shrink-0 animate-pulse">
                                   <Sparkles className="h-2.5 w-2.5 mr-0.5" />
                                   NOVO
