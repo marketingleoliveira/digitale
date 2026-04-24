@@ -249,15 +249,23 @@ const RadarAdmin = () => {
   };
 
   const togglePublish = async (edition: RadarEdition) => {
-    const { error } = await supabase
+    const newValue = !edition.is_published;
+    const { data, error } = await supabase
       .from("radar_editions")
-      .update({ is_published: !edition.is_published })
-      .eq("id", edition.id);
-    if (error) toast.error("Erro");
-    else {
-      toast.success(edition.is_published ? "Despublicado" : "Publicado!");
-      queryClient.invalidateQueries({ queryKey: ["admin-radar-editions"] });
+      .update({ is_published: newValue })
+      .eq("id", edition.id)
+      .select();
+    if (error) {
+      console.error("togglePublish error:", error);
+      toast.error(`Erro ao alterar status: ${error.message}`);
+      return;
     }
+    if (!data || data.length === 0) {
+      toast.error("Sem permissão para alterar (verifique seu papel de admin)");
+      return;
+    }
+    toast.success(newValue ? "Publicado!" : "Ocultado");
+    queryClient.invalidateQueries({ queryKey: ["admin-radar-editions"] });
   };
 
   const handleAddCategory = async () => {
