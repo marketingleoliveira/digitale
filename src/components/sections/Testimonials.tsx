@@ -86,6 +86,8 @@ export function Testimonials() {
         tryPlay();
       } else {
         video.addEventListener("loadeddata", tryPlay, { once: true });
+        video.addEventListener("canplay", tryPlay, { once: true });
+        video.load();
       }
     } else {
       video.pause();
