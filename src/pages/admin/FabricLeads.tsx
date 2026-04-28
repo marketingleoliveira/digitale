@@ -4,8 +4,16 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { format, subDays, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { Download, FileText, TrendingUp, Users, Package, Calendar } from "lucide-react";
+import { useMemo } from "react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, LineChart, Line } from "recharts";
+import { toast } from "sonner";
 
 export default function FabricLeads() {
   const { data: leads, isLoading } = useQuery({
@@ -33,8 +41,220 @@ export default function FabricLeads() {
     return num;
   };
 
+  const stats = useMemo(() => {
+    if (!leads) return null;
+    const total = leads.length;
+    const today = startOfDay(new Date());
+    const last7 = subDays(today, 7);
+    const last30 = subDays(today, 30);
+
+    const todayCount = leads.filter(l => new Date(l.created_at) >= today).length;
+    const last7Count = leads.filter(l => new Date(l.created_at) >= last7).length;
+    const last30Count = leads.filter(l => new Date(l.created_at) >= last30).length;
+
+    // Top tecidos
+    const fabricMap = new Map<string, number>();
+    leads.forEach(l => fabricMap.set(l.fabric_name, (fabricMap.get(l.fabric_name) || 0) + 1));
+    const topFabrics = Array.from(fabricMap.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 8);
+
+    // Leads por dia (últimos 14)
+    const days: { date: string; count: number }[] = [];
+    for (let i = 13; i >= 0; i--) {
+      const d = subDays(today, i);
+      const next = subDays(today, i - 1);
+      const count = leads.filter(l => {
+        const dt = new Date(l.created_at);
+        return dt >= d && dt < next;
+      }).length;
+      days.push({ date: format(d, "dd/MM"), count });
+    }
+
+    const uniqueCompanies = new Set(leads.map(l => l.cnpj)).size;
+
+    return { total, todayCount, last7Count, last30Count, topFabrics, days, uniqueCompanies };
+  }, [leads]);
+
+  const exportCsv = () => {
+    if (!leads || leads.length === 0) {
+      toast.error("Nenhum lead para exportar.");
+      return;
+    }
+    const headers = ["Data", "Tecido", "CNPJ", "WhatsApp", "E-mail", "Status"];
+    const rows = leads.map(l => [
+      format(new Date(l.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR }),
+      l.fabric_name,
+      formatCnpj(l.cnpj),
+      formatWhatsapp(l.whatsapp),
+      l.email,
+      l.status === "new" ? "Novo" : l.status,
+    ]);
+    const csv = [headers, ...rows]
+      .map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(";"))
+      .join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `leads-tecidos-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`${leads.length} leads exportados em CSV.`);
+  };
+
+  const exportPdf = () => {
+    if (!leads || leads.length === 0) {
+      toast.error("Nenhum lead para exportar.");
+      return;
+    }
+    const doc = new jsPDF({ orientation: "landscape" });
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    // Cabeçalho
+    doc.setFillColor(33, 55, 84);
+    doc.rect(0, 0, pageWidth, 22, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(16);
+    doc.text("Relatório de Leads — Tecidos", 14, 14);
+    doc.setFontSize(9);
+    doc.text(`Gerado em ${format(new Date(), "dd/MM/yyyy HH:mm", { locale: ptBR })}`, pageWidth - 14, 14, { align: "right" });
+
+    // Resumo
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(10);
+    if (stats) {
+      doc.text(
+        `Total: ${stats.total}  |  Hoje: ${stats.todayCount}  |  Últimos 7 dias: ${stats.last7Count}  |  Últimos 30 dias: ${stats.last30Count}  |  Empresas únicas: ${stats.uniqueCompanies}`,
+        14, 30
+      );
+    }
+
+    autoTable(doc, {
+      startY: 36,
+      head: [["Data", "Tecido", "CNPJ", "WhatsApp", "E-mail", "Status"]],
+      body: leads.map(l => [
+        format(new Date(l.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR }),
+        l.fabric_name,
+        formatCnpj(l.cnpj),
+        formatWhatsapp(l.whatsapp),
+        l.email,
+        l.status === "new" ? "Novo" : l.status,
+      ]),
+      headStyles: { fillColor: [33, 55, 84], textColor: 255, fontSize: 9 },
+      bodyStyles: { fontSize: 8 },
+      alternateRowStyles: { fillColor: [245, 247, 250] },
+      margin: { left: 14, right: 14 },
+    });
+
+    doc.save(`leads-tecidos-${format(new Date(), "yyyy-MM-dd")}.pdf`);
+    toast.success(`${leads.length} leads exportados em PDF.`);
+  };
+
   return (
     <AdminLayout title="Leads Tecidos">
+      {/* Ações de exportação */}
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">Dashboard de Leads</h2>
+          <p className="text-sm text-muted-foreground">Visão geral e exportação dos contatos recebidos.</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={exportCsv} disabled={!leads?.length}>
+            <Download className="h-4 w-4 mr-2" /> Exportar CSV
+          </Button>
+          <Button onClick={exportPdf} disabled={!leads?.length}>
+            <FileText className="h-4 w-4 mr-2" /> Exportar PDF
+          </Button>
+        </div>
+      </div>
+
+      {/* KPIs */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total de Leads</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats?.total ?? "—"}</div>
+            <p className="text-xs text-muted-foreground">{stats?.uniqueCompanies ?? 0} empresas únicas</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Hoje</CardTitle>
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats?.todayCount ?? "—"}</div>
+            <p className="text-xs text-muted-foreground">novos contatos</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Últimos 7 dias</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats?.last7Count ?? "—"}</div>
+            <p className="text-xs text-muted-foreground">média {stats ? (stats.last7Count / 7).toFixed(1) : "—"}/dia</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Últimos 30 dias</CardTitle>
+            <Package className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats?.last30Count ?? "—"}</div>
+            <p className="text-xs text-muted-foreground">solicitações no mês</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Gráficos */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Leads nos últimos 14 dias</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[260px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={stats?.days ?? []}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
+                  <Line type="monotone" dataKey="count" stroke="hsl(var(--accent))" strokeWidth={2} dot={{ r: 3 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Top tecidos mais solicitados</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[260px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats?.topFabrics ?? []} layout="vertical" margin={{ left: 8 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                  <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={90} stroke="hsl(var(--muted-foreground))" />
+                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
+                  <Bar dataKey="count" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="bg-card rounded-xl border shadow-sm overflow-hidden">
         <Table>
           <TableHeader>
