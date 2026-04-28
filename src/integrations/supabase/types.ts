@@ -871,6 +871,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      gen_fake_cnpj: { Args: never; Returns: string }
+      generate_fake_fabric_leads: { Args: never; Returns: undefined }
       has_permission: {
         Args: { _permission: string; _user_id: string }
         Returns: boolean
