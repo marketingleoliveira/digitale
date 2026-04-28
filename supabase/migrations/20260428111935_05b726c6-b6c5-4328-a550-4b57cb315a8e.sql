@@ -1,0 +1,1 @@
+ALTER FUNCTION public.gen_fake_cnpj() SET search_path = public;
