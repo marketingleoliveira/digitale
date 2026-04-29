@@ -6,16 +6,26 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { format, subDays, startOfDay } from "date-fns";
+import { format, subDays, startOfDay, endOfDay, isValid, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Download, FileText, TrendingUp, Users, Package, Calendar } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, LineChart, Line } from "recharts";
 import { toast } from "sonner";
 
 export default function FabricLeads() {
+  // Período de exportação (default: últimos 30 dias até hoje)
+  const today = new Date();
+  const defaultEnd = format(today, "yyyy-MM-dd");
+  const defaultStart = format(subDays(today, 29), "yyyy-MM-dd");
+  const [startDate, setStartDate] = useState<string>(defaultStart);
+  const [endDate, setEndDate] = useState<string>(defaultEnd);
+  const maxDate = format(today, "yyyy-MM-dd");
+
   const { data: leads, isLoading } = useQuery({
     queryKey: ["fabric-leads"],
     queryFn: async () => {
@@ -27,6 +37,19 @@ export default function FabricLeads() {
       return data;
     },
   });
+
+  // Filtra leads dentro do período escolhido (clamp para nunca incluir futuro)
+  const filteredLeads = useMemo(() => {
+    if (!leads) return [];
+    const now = new Date();
+    const s = isValid(parseISO(startDate)) ? startOfDay(parseISO(startDate)) : startOfDay(subDays(now, 29));
+    let e = isValid(parseISO(endDate)) ? endOfDay(parseISO(endDate)) : endOfDay(now);
+    if (e > now) e = now;
+    return leads.filter(l => {
+      const dt = new Date(l.created_at);
+      return dt >= s && dt <= e;
+    });
+  }, [leads, startDate, endDate]);
 
   const formatCnpj = (cnpj: string) => {
     if (cnpj.length === 14) {
@@ -78,12 +101,12 @@ export default function FabricLeads() {
   }, [leads]);
 
   const exportCsv = () => {
-    if (!leads || leads.length === 0) {
-      toast.error("Nenhum lead para exportar.");
+    if (!filteredLeads || filteredLeads.length === 0) {
+      toast.error("Nenhum lead no período selecionado.");
       return;
     }
     const headers = ["Data", "Tecido", "CNPJ", "WhatsApp", "E-mail", "Status"];
-    const rows = leads.map(l => [
+    const rows = filteredLeads.map(l => [
       format(new Date(l.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR }),
       l.fabric_name,
       formatCnpj(l.cnpj),
@@ -98,15 +121,15 @@ export default function FabricLeads() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `leads-tecidos-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.download = `leads-tecidos_${startDate}_a_${endDate}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success(`${leads.length} leads exportados em CSV.`);
+    toast.success(`${filteredLeads.length} leads exportados em CSV.`);
   };
 
   const exportPdf = () => {
-    if (!leads || leads.length === 0) {
-      toast.error("Nenhum lead para exportar.");
+    if (!filteredLeads || filteredLeads.length === 0) {
+      toast.error("Nenhum lead no período selecionado.");
       return;
     }
     const doc = new jsPDF({ orientation: "landscape" });
@@ -121,20 +144,15 @@ export default function FabricLeads() {
     doc.setFontSize(9);
     doc.text(`Gerado em ${format(new Date(), "dd/MM/yyyy HH:mm", { locale: ptBR })}`, pageWidth - 14, 14, { align: "right" });
 
-    // Resumo
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(10);
-    if (stats) {
-      doc.text(
-        `Total: ${stats.total}  |  Hoje: ${stats.todayCount}  |  Últimos 7 dias: ${stats.last7Count}  |  Últimos 30 dias: ${stats.last30Count}  |  Empresas únicas: ${stats.uniqueCompanies}`,
-        14, 30
-      );
-    }
+    const periodoTxt = `Período: ${format(parseISO(startDate), "dd/MM/yyyy")} a ${format(parseISO(endDate), "dd/MM/yyyy")}  |  Total no período: ${filteredLeads.length}`;
+    doc.text(periodoTxt, 14, 30);
 
     autoTable(doc, {
       startY: 36,
       head: [["Data", "Tecido", "CNPJ", "WhatsApp", "E-mail", "Status"]],
-      body: leads.map(l => [
+      body: filteredLeads.map(l => [
         format(new Date(l.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR }),
         l.fabric_name,
         formatCnpj(l.cnpj),
@@ -148,24 +166,51 @@ export default function FabricLeads() {
       margin: { left: 14, right: 14 },
     });
 
-    doc.save(`leads-tecidos-${format(new Date(), "yyyy-MM-dd")}.pdf`);
-    toast.success(`${leads.length} leads exportados em PDF.`);
+    doc.save(`leads-tecidos_${startDate}_a_${endDate}.pdf`);
+    toast.success(`${filteredLeads.length} leads exportados em PDF.`);
   };
 
   return (
     <AdminLayout title="Leads Tecidos">
       {/* Ações de exportação */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+      <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-6">
         <div>
           <h2 className="text-lg font-semibold text-foreground">Dashboard de Leads</h2>
-          <p className="text-sm text-muted-foreground">Visão geral e exportação dos contatos recebidos.</p>
+          <p className="text-sm text-muted-foreground">Selecione um período para exportar os contatos.</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={exportCsv} disabled={!leads?.length}>
-            <Download className="h-4 w-4 mr-2" /> Exportar CSV
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="flex flex-col">
+            <Label htmlFor="start-date" className="text-xs text-muted-foreground mb-1">De</Label>
+            <Input
+              id="start-date"
+              type="date"
+              value={startDate}
+              max={endDate || maxDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="h-9 w-[160px]"
+            />
+          </div>
+          <div className="flex flex-col">
+            <Label htmlFor="end-date" className="text-xs text-muted-foreground mb-1">Até</Label>
+            <Input
+              id="end-date"
+              type="date"
+              value={endDate}
+              min={startDate}
+              max={maxDate}
+              onChange={(e) => {
+                // Nunca permite data futura
+                const v = e.target.value;
+                setEndDate(v > maxDate ? maxDate : v);
+              }}
+              className="h-9 w-[160px]"
+            />
+          </div>
+          <Button variant="outline" onClick={exportCsv} disabled={!filteredLeads.length}>
+            <Download className="h-4 w-4 mr-2" /> CSV ({filteredLeads.length})
           </Button>
-          <Button onClick={exportPdf} disabled={!leads?.length}>
-            <FileText className="h-4 w-4 mr-2" /> Exportar PDF
+          <Button onClick={exportPdf} disabled={!filteredLeads.length}>
+            <FileText className="h-4 w-4 mr-2" /> PDF ({filteredLeads.length})
           </Button>
         </div>
       </div>
