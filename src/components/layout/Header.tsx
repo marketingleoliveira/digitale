@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, X, Clock, Headphones, ChevronDown, Quote } from "lucide-react";
+import { Menu, X, Clock, Headphones, ChevronDown } from "lucide-react";
 import logoColor from "@/assets/logo-color.png";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -95,14 +95,13 @@ export function Header() {
               </Link>
               <Link
                 to="/depoimentos"
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 md:px-3.5 md:py-2 rounded-full text-xs md:text-sm font-semibold border-2 transition-colors ${
+                className={`inline-flex items-center px-2.5 py-1.5 md:px-3.5 md:py-2 rounded-full text-xs md:text-sm font-semibold border-2 transition-colors ${
                   location.pathname === "/depoimentos"
                     ? "bg-accent text-white border-accent"
                     : "border-accent text-accent hover:bg-accent hover:text-white"
                 }`}
                 aria-label="Depoimentos"
               >
-                <Quote className="h-3.5 w-3.5 md:h-4 md:w-4" />
                 <span>Depoimentos</span>
               </Link>
             </div>
