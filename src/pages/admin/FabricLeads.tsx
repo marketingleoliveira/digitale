@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format, subDays, startOfDay, endOfDay, isValid, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Download, FileText, TrendingUp, Users, Package, Calendar } from "lucide-react";
+import { Download, FileText, TrendingUp, Users, Package, Calendar, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,8 +16,21 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, LineChart, Line } from "recharts";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function FabricLeads() {
+  const queryClient = useQueryClient();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   // Período de exportação (default: últimos 30 dias até hoje)
   const today = new Date();
   const defaultEnd = format(today, "yyyy-MM-dd");
@@ -37,6 +50,18 @@ export default function FabricLeads() {
       return data;
     },
   });
+
+  const handleDelete = async (id: string) => {
+    setDeletingId(id);
+    const { error } = await supabase.from("fabric_leads").delete().eq("id", id);
+    setDeletingId(null);
+    if (error) {
+      toast.error("Erro ao excluir lead: " + error.message);
+      return;
+    }
+    toast.success("Lead excluído.");
+    queryClient.invalidateQueries({ queryKey: ["fabric-leads"] });
+  };
 
   // Filtra leads dentro do período escolhido (clamp para nunca incluir futuro)
   const filteredLeads = useMemo(() => {
