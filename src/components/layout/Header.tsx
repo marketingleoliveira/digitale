@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, X, Clock, Headphones, ChevronDown } from "lucide-react";
+import { Menu, X, Clock, Headphones, ChevronDown, Quote } from "lucide-react";
 import logoColor from "@/assets/logo-color.png";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -30,7 +30,6 @@ export function Header() {
       children: [
         { name: t("nav.about"), href: "/sobre" },
         { name: t("nav.sustainability"), href: "/sustentabilidade" },
-        { name: "Depoimentos", href: "/depoimentos" },
       ]
     },
     { name: t("nav.fabrics"), href: "/tecidos" },
@@ -85,14 +84,28 @@ export function Header() {
       >
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex items-center justify-between">
-            {/* Logo */}
-            <Link to="/" className="flex-shrink-0">
-              <img 
-                src={logoColor} 
-                alt="Digitale Têxtil" 
-                className={`transition-all duration-300 ${isScrolled ? "h-10 md:h-12" : "h-11 md:h-14 lg:h-16"}`} 
-              />
-            </Link>
+            {/* Logo + Depoimentos Button */}
+            <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
+              <Link to="/" className="flex-shrink-0">
+                <img 
+                  src={logoColor} 
+                  alt="Digitale Têxtil" 
+                  className={`transition-all duration-300 ${isScrolled ? "h-10 md:h-12" : "h-11 md:h-14 lg:h-16"}`} 
+                />
+              </Link>
+              <Link
+                to="/depoimentos"
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 md:px-3.5 md:py-2 rounded-full text-xs md:text-sm font-semibold border-2 transition-colors ${
+                  location.pathname === "/depoimentos"
+                    ? "bg-accent text-white border-accent"
+                    : "border-accent text-accent hover:bg-accent hover:text-white"
+                }`}
+                aria-label="Depoimentos"
+              >
+                <Quote className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                <span>Depoimentos</span>
+              </Link>
+            </div>
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center">
