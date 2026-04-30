@@ -211,32 +211,24 @@ export default function AgenteCRM() {
         <CardContent className="p-6">
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className={`relative h-14 w-14 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center ${running ? "animate-pulse" : ""}`}>
+              <div className="relative h-14 w-14 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center animate-pulse">
                 <Bot className="h-7 w-7" />
-                {running && (
-                  <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-emerald-400 animate-ping" />
-                )}
+                <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-emerald-400 animate-ping" />
               </div>
               <div>
                 <h2 className="text-xl font-semibold flex items-center gap-2">
                   Agente IA de Validação B2B
                   <Sparkles className="h-4 w-4 text-amber-500" />
+                  <Badge variant="outline" className="ml-1 gap-1 border-emerald-300 bg-emerald-500/10 text-emerald-700 font-medium">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" /> Online 24/7
+                  </Badge>
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  Análise aprofundada de cada lead com validação de CNPJ, CNAE têxtil, domínio corporativo e potencial de venda real.
+                  Análise automática de cada novo lead — CNPJ, CNAE têxtil, domínio corporativo e potencial real de venda. Roda continuamente em segundo plano.
                 </p>
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
-              {!running ? (
-                <Button onClick={startValidation} className="gap-2">
-                  <Play className="h-4 w-4" /> Iniciar validação ({pendingLeads.length})
-                </Button>
-              ) : (
-                <Button variant="destructive" onClick={stopValidation} className="gap-2">
-                  <Pause className="h-4 w-4" /> Pausar
-                </Button>
-              )}
               <Button variant="outline" onClick={revalidateAll} className="gap-2">
                 <RefreshCw className="h-4 w-4" /> Re-validar tudo
               </Button>
@@ -249,17 +241,20 @@ export default function AgenteCRM() {
             </div>
           </div>
 
-          {running && (
-            <div className="mt-4">
-              <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                <span>Validando {progress.current} de {progress.total}…</span>
-                <span>{progress.total ? Math.round((progress.current / progress.total) * 100) : 0}%</span>
-              </div>
-              <Progress value={progress.total ? (progress.current / progress.total) * 100 : 0} />
-            </div>
-          )}
+          <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
+            <span>
+              <strong className="text-foreground">{pendingLeads.length}</strong> leads na fila ·{" "}
+              <strong className="text-foreground">{stats.validated}</strong> validados · ciclo a cada 2 min
+            </span>
+            <span>Última sincronização: agora há pouco</span>
+          </div>
         </CardContent>
       </Card>
+
+      {/* Console científica do Agente IA */}
+      <div className="mb-6">
+        <AgentConsole />
+      </div>
 
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
