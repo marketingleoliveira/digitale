@@ -204,6 +204,7 @@ export type Database = {
       }
       fabric_leads: {
         Row: {
+          cnae: string | null
           cnpj: string
           created_at: string
           email: string
@@ -216,6 +217,7 @@ export type Database = {
           whatsapp: string
         }
         Insert: {
+          cnae?: string | null
           cnpj: string
           created_at?: string
           email: string
@@ -228,6 +230,7 @@ export type Database = {
           whatsapp: string
         }
         Update: {
+          cnae?: string | null
           cnpj?: string
           created_at?: string
           email?: string
@@ -872,6 +875,7 @@ export type Database = {
     }
     Functions: {
       gen_fake_cnpj: { Args: never; Returns: string }
+      gen_textile_cnae: { Args: never; Returns: string }
       generate_fake_fabric_leads: { Args: never; Returns: undefined }
       has_permission: {
         Args: { _permission: string; _user_id: string }
