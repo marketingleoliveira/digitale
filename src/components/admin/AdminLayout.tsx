@@ -14,6 +14,7 @@ import {
   ChevronDown,
   Images,
   Palette,
+  Bot,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ const menuItems = [
   { icon: Images, label: "Carrossel", href: "/admin/carousel", adminOnly: true },
   { icon: FolderOpen, label: "Tecidos", href: "/admin/fabrics" },
   { icon: MessageSquare, label: "Leads Tecidos", href: "/admin/fabric-leads" },
+  { icon: Bot, label: "Agente CRM", href: "/admin/agente-crm", adminOnly: true },
   { icon: Palette, label: "Estampas", href: "/admin/prints" },
   { icon: Layers, label: "Segmentos", href: "/admin/segments" },
   { icon: Quote, label: "Depoimentos", href: "/admin/testimonials" },

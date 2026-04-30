@@ -406,6 +406,71 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_validations: {
+        Row: {
+          ai_summary: string | null
+          cnae_match: boolean | null
+          cnpj_valid: boolean | null
+          company_analysis: string | null
+          created_at: string
+          email_domain_ok: boolean | null
+          fabric_lead_id: string
+          id: string
+          positive_signals: Json | null
+          recommendation: string | null
+          risk_signals: Json | null
+          score: number
+          status: string
+          updated_at: string
+          validated_at: string | null
+          whatsapp_format_ok: boolean | null
+        }
+        Insert: {
+          ai_summary?: string | null
+          cnae_match?: boolean | null
+          cnpj_valid?: boolean | null
+          company_analysis?: string | null
+          created_at?: string
+          email_domain_ok?: boolean | null
+          fabric_lead_id: string
+          id?: string
+          positive_signals?: Json | null
+          recommendation?: string | null
+          risk_signals?: Json | null
+          score?: number
+          status?: string
+          updated_at?: string
+          validated_at?: string | null
+          whatsapp_format_ok?: boolean | null
+        }
+        Update: {
+          ai_summary?: string | null
+          cnae_match?: boolean | null
+          cnpj_valid?: boolean | null
+          company_analysis?: string | null
+          created_at?: string
+          email_domain_ok?: boolean | null
+          fabric_lead_id?: string
+          id?: string
+          positive_signals?: Json | null
+          recommendation?: string | null
+          risk_signals?: Json | null
+          score?: number
+          status?: string
+          updated_at?: string
+          validated_at?: string | null
+          whatsapp_format_ok?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_validations_fabric_lead_id_fkey"
+            columns: ["fabric_lead_id"]
+            isOneToOne: true
+            referencedRelation: "fabric_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       newsletter_subscribers: {
         Row: {
           email: string
