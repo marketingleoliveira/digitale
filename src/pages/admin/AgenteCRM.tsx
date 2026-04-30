@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Bot, ShieldCheck, ShieldAlert, ShieldX, Sparkles,
-  Play, Pause, Download, RefreshCw, CheckCircle2,
+  Download, RefreshCw, CheckCircle2,
   AlertTriangle, XCircle, Clock, FileText, Loader2,
 } from "lucide-react";
 import { format } from "date-fns";
@@ -18,6 +18,7 @@ import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { AgentConsole } from "@/components/admin/AgentConsole";
 
 type Lead = {
   id: string;
@@ -60,8 +61,6 @@ const STATUS_META: Record<string, { label: string; color: string; icon: any }> =
 
 export default function AgenteCRM() {
   const queryClient = useQueryClient();
-  const [running, setRunning] = useState(false);
-  const [progress, setProgress] = useState({ current: 0, total: 0 });
   const [activeLeadId, setActiveLeadId] = useState<string | null>(null);
 
   const { data: leads, isLoading: leadsLoading } = useQuery({
@@ -86,7 +85,7 @@ export default function AgenteCRM() {
       if (error) throw error;
       return data as Validation[];
     },
-    refetchInterval: running ? 1500 : false,
+    refetchInterval: 4000,
   });
 
   const validationMap = useMemo(() => {
@@ -115,66 +114,18 @@ export default function AgenteCRM() {
     return { total, validated: validated.length, qualified, suspicious, rejected, avgScore };
   }, [leads, validations]);
 
-  // Validador em loop (sequencial)
+  // Mantém o lead "ativo" piscando: pega o que está em validating (se houver)
   useEffect(() => {
-    if (!running) return;
-    let cancelled = false;
-
-    (async () => {
-      const queue = [...pendingLeads];
-      setProgress({ current: 0, total: queue.length });
-      for (let i = 0; i < queue.length; i++) {
-        if (cancelled) break;
-        const lead = queue[i];
-        setActiveLeadId(lead.id);
-        try {
-          const { error } = await supabase.functions.invoke("validate-lead", {
-            body: { lead_id: lead.id },
-          });
-          if (error) {
-            const msg = (error as any)?.message || "";
-            if (msg.includes("429")) toast.error("Limite de IA atingido. Pausando…");
-            else if (msg.includes("402")) toast.error("Créditos de IA esgotados.");
-            else toast.error("Falha ao validar lead.");
-            cancelled = true;
-            break;
-          }
-        } catch (e: any) {
-          toast.error("Erro: " + (e?.message || "desconhecido"));
-          cancelled = true;
-          break;
-        }
-        setProgress({ current: i + 1, total: queue.length });
-        // pequeno delay anti rate-limit
-        await new Promise(r => setTimeout(r, 800));
-        await queryClient.invalidateQueries({ queryKey: ["agente-crm-validations"] });
-      }
-      setActiveLeadId(null);
-      setRunning(false);
-      if (!cancelled) toast.success("Validação concluída.");
-    })();
-
-    return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [running]);
-
-  const startValidation = () => {
-    if (pendingLeads.length === 0) {
-      toast.info("Nenhum lead pendente para validar.");
-      return;
-    }
-    setRunning(true);
-    toast.info(`Agente IA iniciando validação de ${pendingLeads.length} leads…`);
-  };
-
-  const stopValidation = () => setRunning(false);
+    const active = (validations || []).find(v => v.status === "validating");
+    setActiveLeadId(active?.fabric_lead_id || null);
+  }, [validations]);
 
   const revalidateAll = async () => {
-    const ok = window.confirm("Re-validar TODOS os leads? Isso vai consumir créditos de IA.");
+    const ok = window.confirm("Re-validar TODOS os leads agora? O agente vai reprocessá-los nos próximos minutos.");
     if (!ok) return;
     await supabase.from("lead_validations").delete().neq("id", "00000000-0000-0000-0000-000000000000");
     await queryClient.invalidateQueries({ queryKey: ["agente-crm-validations"] });
-    setRunning(true);
+    toast.success("Fila zerada — agente vai re-validar nos próximos ciclos.");
   };
 
   const exportQualified = (formatType: "csv" | "pdf") => {
