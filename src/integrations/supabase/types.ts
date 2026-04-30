@@ -939,6 +939,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      auto_validate_pending_leads: { Args: never; Returns: undefined }
       gen_fake_cnpj: { Args: never; Returns: string }
       gen_textile_cnae: { Args: never; Returns: string }
       generate_fake_fabric_leads: { Args: never; Returns: undefined }
