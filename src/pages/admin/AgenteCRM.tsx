@@ -10,7 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Bot, ShieldCheck, ShieldAlert, ShieldX, Sparkles,
   Download, RefreshCw, CheckCircle2,
-  AlertTriangle, XCircle, Clock, FileText, Loader2,
+  AlertTriangle, XCircle, Clock, FileText, Loader2, CalendarIcon, X,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -18,6 +18,9 @@ import { toast } from "sonner";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { AgentConsole } from "@/components/admin/AgentConsole";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 
 type Lead = {
   id: string;
@@ -61,6 +64,8 @@ const STATUS_META: Record<string, { label: string; color: string; icon: any }> =
 export default function AgenteCRM() {
   const queryClient = useQueryClient();
   const [activeLeadId, setActiveLeadId] = useState<string | null>(null);
+  const [exportFrom, setExportFrom] = useState<Date | undefined>(undefined);
+  const [exportTo, setExportTo] = useState<Date | undefined>(undefined);
 
   const { data: leads, isLoading: leadsLoading } = useQuery({
     queryKey: ["agente-crm-leads"],
@@ -73,6 +78,20 @@ export default function AgenteCRM() {
       if (error) throw error;
       return data as Lead[];
     },
+    refetchInterval: 8000,
+  });
+
+  // Contagem REAL de leads no banco (sem limit), atualizada a cada 8s
+  const { data: totalLeadsCount } = useQuery({
+    queryKey: ["agente-crm-leads-count"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("fabric_leads")
+        .select("*", { count: "exact", head: true });
+      if (error) throw error;
+      return count || 0;
+    },
+    refetchInterval: 8000,
   });
 
   const { data: validations } = useQuery({
@@ -102,7 +121,7 @@ export default function AgenteCRM() {
   );
 
   const stats = useMemo(() => {
-    const total = leads?.length || 0;
+    const total = totalLeadsCount ?? (leads?.length || 0);
     const validated = (validations || []).filter(v => ["qualified", "suspicious", "rejected"].includes(v.status));
     const qualified = validated.filter(v => v.status === "qualified").length;
     const suspicious = validated.filter(v => v.status === "suspicious").length;
@@ -111,7 +130,7 @@ export default function AgenteCRM() {
       ? Math.round(validated.reduce((a, v) => a + v.score, 0) / validated.length)
       : 0;
     return { total, validated: validated.length, qualified, suspicious, rejected, avgScore };
-  }, [leads, validations]);
+  }, [leads, validations, totalLeadsCount]);
 
   // Mantém o lead "ativo" piscando: pega o que está em validating (se houver)
   useEffect(() => {
@@ -127,20 +146,67 @@ export default function AgenteCRM() {
     toast.success("Fila zerada — agente vai re-validar nos próximos ciclos.");
   };
 
-  const exportQualified = (formatType: "csv" | "pdf") => {
-    const qualified = (leads || [])
-      .map(l => ({ lead: l, val: validationMap.get(l.id) }))
+  const exportQualified = async (formatType: "csv" | "pdf") => {
+    // Busca leads qualificados direto do banco no intervalo escolhido (sem limite)
+    let leadsQuery = supabase
+      .from("fabric_leads")
+      .select("id,fabric_name,cnpj,whatsapp,email,cnae,created_at")
+      .order("created_at", { ascending: false });
+
+    if (exportFrom) {
+      const start = new Date(exportFrom);
+      start.setHours(0, 0, 0, 0);
+      leadsQuery = leadsQuery.gte("created_at", start.toISOString());
+    }
+    if (exportTo) {
+      const end = new Date(exportTo);
+      end.setHours(23, 59, 59, 999);
+      leadsQuery = leadsQuery.lte("created_at", end.toISOString());
+    }
+
+    const { data: leadsInRange, error: leadsErr } = await leadsQuery;
+    if (leadsErr) {
+      toast.error("Erro ao buscar leads: " + leadsErr.message);
+      return;
+    }
+
+    const ids = (leadsInRange || []).map(l => l.id);
+    if (ids.length === 0) {
+      toast.error("Nenhum lead encontrado no período selecionado.");
+      return;
+    }
+
+    const { data: vals, error: valsErr } = await supabase
+      .from("lead_validations")
+      .select("*")
+      .eq("status", "qualified")
+      .in("fabric_lead_id", ids);
+    if (valsErr) {
+      toast.error("Erro ao buscar validações: " + valsErr.message);
+      return;
+    }
+
+    const valMap = new Map<string, Validation>();
+    (vals || []).forEach(v => valMap.set(v.fabric_lead_id, v as Validation));
+
+    const qualified = (leadsInRange || [])
+      .map(l => ({ lead: l as Lead, val: valMap.get(l.id) }))
       .filter(x => x.val?.status === "qualified")
       .sort((a, b) => (b.val!.score - a.val!.score));
 
     if (qualified.length === 0) {
-      toast.error("Nenhum lead qualificado para exportar.");
+      toast.error("Nenhum lead qualificado no período selecionado.");
       return;
     }
 
+    const periodLabel = exportFrom || exportTo
+      ? `${exportFrom ? format(exportFrom, "dd/MM/yyyy") : "início"} → ${exportTo ? format(exportTo, "dd/MM/yyyy") : "hoje"}`
+      : "Todos os períodos";
+
     if (formatType === "csv") {
-      const headers = ["Score", "Empresa (e-mail)", "Tecido", "CNPJ", "WhatsApp", "E-mail", "CNAE", "Recomendação", "Resumo IA"];
+      const headers = ["Data", "Score", "Empresa (e-mail)", "Tecido", "CNPJ", "WhatsApp", "E-mail", "CNAE", "Recomendação", "Resumo IA"];
       const rows = qualified.map(({ lead, val }) => [
+        format(new Date(lead.created_at), "dd/MM/yyyy HH:mm"),
         val!.score,
         lead.email.split("@")[1] || "",
         lead.fabric_name,
@@ -157,25 +223,31 @@ export default function AgenteCRM() {
       const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
-      a.download = `contatos-qualificados_${format(new Date(), "yyyy-MM-dd")}.csv`;
+      const suffix = exportFrom || exportTo
+        ? `${exportFrom ? format(exportFrom, "yyyy-MM-dd") : "inicio"}_a_${exportTo ? format(exportTo, "yyyy-MM-dd") : "hoje"}`
+        : format(new Date(), "yyyy-MM-dd");
+      a.download = `contatos-qualificados_${suffix}.csv`;
       a.click();
-      toast.success(`${qualified.length} contatos exportados em CSV.`);
+      toast.success(`${qualified.length} contatos exportados em CSV (${periodLabel}).`);
       return;
     }
 
     const doc = new jsPDF({ orientation: "landscape" });
     const pageWidth = doc.internal.pageSize.getWidth();
     doc.setFillColor(33, 55, 84);
-    doc.rect(0, 0, pageWidth, 24, "F");
+    doc.rect(0, 0, pageWidth, 28, "F");
     doc.setTextColor(255);
     doc.setFontSize(16);
-    doc.text("Agente CRM — Contatos Qualificados", 14, 15);
+    doc.text("Agente CRM — Contatos Qualificados", 14, 13);
     doc.setFontSize(9);
-    doc.text(`Gerado em ${format(new Date(), "dd/MM/yyyy HH:mm", { locale: ptBR })}  |  ${qualified.length} contatos`, pageWidth - 14, 15, { align: "right" });
+    doc.text(`Período: ${periodLabel}`, 14, 22);
+    doc.setFontSize(9);
+    doc.text(`Gerado em ${format(new Date(), "dd/MM/yyyy HH:mm", { locale: ptBR })}  |  ${qualified.length} contatos`, pageWidth - 14, 13, { align: "right" });
     autoTable(doc, {
-      startY: 32,
-      head: [["Score", "Tecido", "CNPJ", "WhatsApp", "E-mail", "Recomendação"]],
+      startY: 36,
+      head: [["Data", "Score", "Tecido", "CNPJ", "WhatsApp", "E-mail", "Recomendação"]],
       body: qualified.map(({ lead, val }) => [
+        format(new Date(lead.created_at), "dd/MM/yy HH:mm"),
         val!.score,
         lead.fabric_name,
         formatCnpj(lead.cnpj),
@@ -188,8 +260,11 @@ export default function AgenteCRM() {
       alternateRowStyles: { fillColor: [245, 247, 250] },
       margin: { left: 14, right: 14 },
     });
-    doc.save(`contatos-qualificados_${format(new Date(), "yyyy-MM-dd")}.pdf`);
-    toast.success(`${qualified.length} contatos exportados em PDF.`);
+    const suffix = exportFrom || exportTo
+      ? `${exportFrom ? format(exportFrom, "yyyy-MM-dd") : "inicio"}_a_${exportTo ? format(exportTo, "yyyy-MM-dd") : "hoje"}`
+      : format(new Date(), "yyyy-MM-dd");
+    doc.save(`contatos-qualificados_${suffix}.pdf`);
+    toast.success(`${qualified.length} contatos exportados em PDF (${periodLabel}).`);
   };
 
   const renderStatusBadge = (status: string) => {
@@ -238,6 +313,75 @@ export default function AgenteCRM() {
                 <FileText className="h-4 w-4" /> PDF
               </Button>
             </div>
+          </div>
+
+          {/* Filtro de período para exportação */}
+          <div className="mt-4 pt-4 border-t border-border/60 flex flex-wrap items-center gap-2">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider mr-1">
+              Exportar período:
+            </span>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={cn("gap-2 h-8", !exportFrom && "text-muted-foreground")}
+                >
+                  <CalendarIcon className="h-3.5 w-3.5" />
+                  {exportFrom ? format(exportFrom, "dd/MM/yyyy") : "Data inicial"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={exportFrom}
+                  onSelect={setExportFrom}
+                  disabled={(d) => d > new Date() || (exportTo ? d > exportTo : false)}
+                  initialFocus
+                  locale={ptBR}
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+            <span className="text-xs text-muted-foreground">→</span>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={cn("gap-2 h-8", !exportTo && "text-muted-foreground")}
+                >
+                  <CalendarIcon className="h-3.5 w-3.5" />
+                  {exportTo ? format(exportTo, "dd/MM/yyyy") : "Data final"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={exportTo}
+                  onSelect={setExportTo}
+                  disabled={(d) => d > new Date() || (exportFrom ? d < exportFrom : false)}
+                  initialFocus
+                  locale={ptBR}
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+            {(exportFrom || exportTo) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => { setExportFrom(undefined); setExportTo(undefined); }}
+                className="h-8 gap-1 text-xs"
+              >
+                <X className="h-3 w-3" /> Limpar
+              </Button>
+            )}
+            <span className="text-xs text-muted-foreground ml-auto">
+              {exportFrom || exportTo
+                ? "Apenas leads qualificados deste período serão exportados."
+                : "Sem filtro: exporta todos os qualificados."}
+            </span>
           </div>
 
           <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
