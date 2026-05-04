@@ -89,30 +89,46 @@ export function AgentChat() {
   }, [messages, isTyping]);
 
   function simulateTyping(text: string, id: string, speedMs = 25, minDelay = 700) {
-    setIsTyping(true);
-    const totalDuration = Math.max(minDelay, Math.min(text.length * speedMs, 3500));
+    // Fase 1: "pensando" — pausa curta antes de aparecer "digitando..."
+    // Quanto mais longa a resposta, mais ele "pensa" (lê pergunta, pondera).
+    const len = text.length;
+    const thinkMs = Math.min(3500, 1200 + Math.random() * 800 + len * 8);
+
     setTimeout(() => {
-      setIsTyping(false);
-      // Stream characters
-      let i = 0;
-      const msg: Message = { id, role: "bot", content: "" };
-      setMessages((prev) => [...prev, msg]);
-      const charDelay = Math.max(15, Math.min(40, 1500 / Math.max(text.length, 1)));
-      const interval = setInterval(() => {
-        i += Math.max(1, Math.floor(text.length / 60));
-        const slice = text.slice(0, i);
-        setMessages((prev) =>
-          prev.map((m) => (m.id === id ? { ...m, content: slice } : m))
-        );
-        if (i >= text.length) {
-          clearInterval(interval);
+      // Fase 2: indicador de "digitando..." com tempo proporcional ao tamanho do texto
+      // Velocidade humana realista: ~45 palavras/min ≈ 4.5 chars/s ≈ 220ms/char digitando devagar
+      // Usamos ~55ms/char + variação para parecer natural, com piso e teto
+      setIsTyping(true);
+      const typingMs = Math.max(
+        minDelay + 600,
+        Math.min(12000, len * (speedMs + 25) + Math.random() * 600)
+      );
+
+      setTimeout(() => {
+        setIsTyping(false);
+        // Fase 3: revela a mensagem com streaming sutil de caracteres
+        let i = 0;
+        const msg: Message = { id, role: "bot", content: "" };
+        setMessages((prev) => [...prev, msg]);
+        // Streaming bem rápido só pra dar sensação de envio progressivo
+        const step = Math.max(2, Math.ceil(len / 40));
+        const charDelay = 20;
+        const interval = setInterval(() => {
+          i += step;
+          const slice = text.slice(0, i);
           setMessages((prev) =>
-            prev.map((m) => (m.id === id ? { ...m, content: text } : m))
+            prev.map((m) => (m.id === id ? { ...m, content: slice } : m))
           );
-          if (state !== "open") setUnread((u) => u + 1);
-        }
-      }, charDelay);
-    }, totalDuration);
+          if (i >= len) {
+            clearInterval(interval);
+            setMessages((prev) =>
+              prev.map((m) => (m.id === id ? { ...m, content: text } : m))
+            );
+            if (state !== "open") setUnread((u) => u + 1);
+          }
+        }, charDelay);
+      }, typingMs);
+    }, thinkMs);
   }
 
   async function sendMessage() {
