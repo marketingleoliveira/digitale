@@ -162,19 +162,19 @@ export function AgentChat() {
       <button
         onClick={() => setState("open")}
         aria-label="Abrir chat com vendedor"
-        className="fixed bottom-6 right-24 z-50 group flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full pl-4 pr-5 py-3 shadow-xl shadow-primary/30 transition-all hover:scale-105"
+        className="fixed bottom-6 right-24 z-50 group flex items-center gap-2 bg-accent hover:bg-accent/90 text-white rounded-full pl-4 pr-5 py-3 shadow-xl shadow-accent/30 transition-all hover:scale-105"
       >
         <div className="relative">
           <MessageCircle className="h-5 w-5" />
           {unread > 0 && (
-            <span className="absolute -top-2 -right-2 bg-accent text-accent-foreground text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+            <span className="absolute -top-2 -right-2 bg-white text-accent text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
               {unread}
             </span>
           )}
-          <span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-30" />
+          <span className="absolute inset-0 rounded-full bg-accent animate-ping opacity-30" />
         </div>
         <span className="text-sm font-medium hidden sm:inline">
-          {state === "minimized" ? `Voltar ao chat` : `Falar com ${agentName}`}
+          Falar com representante
         </span>
       </button>
     );
