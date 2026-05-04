@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { MessageCircle, X, Minus, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useLocation } from "react-router-dom";
 
 interface Message {
   id: string;
@@ -12,6 +13,30 @@ interface Message {
 const SESSION_KEY = "digitale_chat_session";
 const CONV_KEY = "digitale_chat_conv";
 const STATE_KEY = "digitale_chat_state"; // 'open' | 'minimized' | 'closed'
+const AUTO_OPEN_KEY = "digitale_chat_autoopened"; // marca páginas onde já abrimos automaticamente
+
+// Páginas onde o agente fica ativo, com saudação e contexto específicos.
+const PAGE_CONFIGS: Record<
+  string,
+  { context: string; greeting: (name: string) => string }
+> = {
+  tecidos: {
+    context: "tecidos",
+    greeting: (n) =>
+      `Oi! Aqui é o ${n}, consultor de tecidos da Digitale. 😊 Vi que você tá olhando nossa linha de tecidos — qual segmento da sua marca/confecção (fitness, moda íntima, praia, esportivo, profissional)?`,
+  },
+  estampas: {
+    context: "estampas",
+    greeting: (n) =>
+      `Oi! Aqui é o ${n}, consultor de estampas da Digitale. 🎨 Tô vendo que você curte nossa cartela de estampas — você procura algo pra qual coleção/segmento (fitness, praia, moda íntima)?`,
+  },
+};
+
+function detectPageConfig(pathname: string) {
+  if (pathname.startsWith("/tecidos")) return PAGE_CONFIGS.tecidos;
+  if (pathname.startsWith("/estampas")) return PAGE_CONFIGS.estampas;
+  return null;
+}
 
 function getSessionId(): string {
   let id = localStorage.getItem(SESSION_KEY);
@@ -23,6 +48,8 @@ function getSessionId(): string {
 }
 
 export function AgentChat() {
+  const location = useLocation();
+  const pageConfig = detectPageConfig(location.pathname);
   const [state, setState] = useState<"closed" | "open" | "minimized">("closed");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -64,18 +91,34 @@ export function AgentChat() {
 
   // Show bubble after delay
   useEffect(() => {
-    if (!isEnabled) return;
+    if (!isEnabled || !pageConfig) return;
     const timer = setTimeout(() => setShowBubble(true), 1500);
     return () => clearTimeout(timer);
-  }, [isEnabled]);
+  }, [isEnabled, pageConfig]);
+
+  // Auto-open chat on supported pages (once per page per session)
+  useEffect(() => {
+    if (!isEnabled || !pageConfig) return;
+    const key = `${AUTO_OPEN_KEY}_${pageConfig.context}`;
+    if (sessionStorage.getItem(key)) return;
+    const t = setTimeout(() => {
+      setState((s) => (s === "closed" ? "open" : s));
+      sessionStorage.setItem(key, "1");
+    }, 2500);
+    return () => clearTimeout(t);
+  }, [isEnabled, pageConfig]);
 
   // Auto-greet when opened first time
   useEffect(() => {
-    if (state === "open" && !hasGreeted && greeting) {
+    if (state !== "open" || hasGreeted) return;
+    const text = pageConfig
+      ? pageConfig.greeting(agentName || "Rafael")
+      : greeting;
+    if (text) {
       setHasGreeted(true);
-      simulateTyping(greeting, "greet-1");
+      simulateTyping(text, "greet-1");
     }
-  }, [state, hasGreeted, greeting]);
+  }, [state, hasGreeted, greeting, pageConfig, agentName]);
 
   // Persist state
   useEffect(() => {
@@ -146,6 +189,7 @@ export function AgentChat() {
           message: text,
           page_url: window.location.href,
           user_agent: navigator.userAgent,
+          page_context: pageConfig?.context,
         },
       });
       if (error) throw error;
@@ -191,7 +235,8 @@ export function AgentChat() {
     }
   }
 
-  if (!isEnabled || !showBubble) return null;
+  // Only render on supported pages (tecidos / estampas)
+  if (!isEnabled || !pageConfig || !showBubble) return null;
 
   // Closed/minimized: show bubble
   if (state !== "open") {

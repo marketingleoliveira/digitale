@@ -11,6 +11,7 @@ interface ChatRequest {
   message: string;
   page_url?: string;
   user_agent?: string;
+  page_context?: string; // 'tecidos' | 'estampas'
 }
 
 function normalize(text: string): string {
@@ -250,6 +251,17 @@ Deno.serve(async (req) => {
         ? qualificationQs.map((q, i) => `   ${i + 1}. ${q}`).join("\n")
         : "   (nenhuma definida — peça contato após 1-2 trocas)";
 
+      // Per-page focus: tailor qualification flow to the page the visitor is on
+      const pageFocus = (() => {
+        if (body.page_context === "tecidos") {
+          return `\nFOCO DESTA CONVERSA: TECIDOS. O lead está navegando na página de tecidos. Personalize as perguntas para entender:\n  - Qual tipo de peça produz (fitness, moda íntima, praia, esportivo, profissional)?\n  - Que tipo de tecido busca (suplex, microfibra, dryfit, helanca, etc.)?\n  - Volume aproximado mensal de metros?\n  - Está em fase de pesquisa, troca de fornecedor ou compra ativa?\nDirecione o papo para tecidos técnicos da Digitale e o benefício de ter um fornecedor industrial direto.`;
+        }
+        if (body.page_context === "estampas") {
+          return `\nFOCO DESTA CONVERSA: ESTAMPAS. O lead está navegando na página de estampas. Personalize as perguntas para entender:\n  - Para qual coleção/segmento ele quer estampas (fitness, praia, moda íntima)?\n  - Procura estampa exclusiva (desenvolvimento próprio) ou estampas do nosso catálogo?\n  - Já tem arte pronta ou precisa que a Digitale desenvolva?\n  - Quantos metros aproximadamente por estampa?\nDirecione o papo para o nosso ateliê de estampas, exclusividade, qualidade de impressão e desenvolvimento sob demanda.`;
+        }
+        return "";
+      })();
+
       const haveWhats = !!conversation?.visitor_whatsapp;
       const haveCnpj = !!conversation?.visitor_cnpj;
       const stage = haveWhats && haveCnpj
@@ -294,8 +306,10 @@ ${knowledgeContext}
 
 PÁGINAS DO SITE: Tecidos, Estampas, Segmentos, Sustentabilidade, Sobre Nós, RADAR DIGITALE, Trabalhe Conosco.`;
 
+      const finalSystemPrompt = systemPrompt + pageFocus;
+
       const messages = [
-        { role: "system", content: systemPrompt },
+        { role: "system", content: finalSystemPrompt },
         ...(history || []).map((m: any) => ({
           role: m.role === "bot" ? "assistant" : "user",
           content: m.content,
