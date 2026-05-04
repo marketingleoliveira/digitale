@@ -153,14 +153,35 @@ export function AgentChat() {
         conversationIdRef.current = data.conversation_id;
         localStorage.setItem(CONV_KEY, data.conversation_id);
       }
-      const reply = data?.reply || "Desculpa, não consegui te responder agora. Tenta de novo em instantes!";
-      simulateTyping(reply, `b_${Date.now()}`, data?.typing_speed_ms, data?.min_typing_delay_ms);
+      const blocks: string[] =
+        Array.isArray(data?.blocks) && data.blocks.length > 0
+          ? data.blocks
+          : [data?.reply || "Desculpa, não consegui te responder agora. Tenta de novo em instantes!"];
+      sendBlocks(blocks, data?.typing_speed_ms, data?.min_typing_delay_ms);
     } catch (e) {
-      simulateTyping(
+      sendBlocks([
         "Opa, tive um problema técnico aqui! Pode chamar a gente direto no WhatsApp pra eu te atender?",
-        `b_${Date.now()}`
-      );
+      ]);
     }
+  }
+
+  // Sends multiple blocks one after the other, each with its own typing animation,
+  // with a realistic short pause between them (as if the person sent two messages).
+  function sendBlocks(blocks: string[], speedMs?: number, minDelay?: number) {
+    let acc = 0;
+    blocks.forEach((b, idx) => {
+      const len = b.length;
+      // approximate total duration of this block (think + typing + reveal)
+      const estimate =
+        Math.min(3500, 1200 + len * 8) +
+        Math.min(12000, len * ((speedMs || 25) + 25)) +
+        300;
+      setTimeout(() => {
+        simulateTyping(b, `b_${Date.now()}_${idx}`, speedMs, minDelay);
+      }, acc);
+      // small extra human pause between blocks (400-900ms) on top of the block estimate
+      acc += estimate + 500 + Math.random() * 400;
+    });
   }
 
   function handleKey(e: React.KeyboardEvent<HTMLInputElement>) {
