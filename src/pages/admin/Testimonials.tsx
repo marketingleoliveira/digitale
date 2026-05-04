@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { 
   Plus, 
@@ -49,6 +48,23 @@ import {
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { useInvalidateCache } from "@/hooks/useInvalidateCache";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 interface Testimonial {
   id: string;
@@ -81,6 +97,12 @@ const Testimonials = () => {
   const [editingTestimonial, setEditingTestimonial] = useState<Partial<Testimonial> | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [reordering, setReordering] = useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   // Query for testimonials
   const { data: testimonials = [], isLoading } = useQuery({
@@ -95,6 +117,32 @@ const Testimonials = () => {
       return data as Testimonial[];
     },
   });
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = testimonials.findIndex((t) => t.id === active.id);
+    const newIndex = testimonials.findIndex((t) => t.id === over.id);
+    if (oldIndex < 0 || newIndex < 0) return;
+
+    const reordered = arrayMove(testimonials, oldIndex, newIndex);
+    setReordering(true);
+    try {
+      const updates = reordered.map((t, idx) =>
+        supabase.from("testimonials").update({ display_order: idx }).eq("id", t.id)
+      );
+      const results = await Promise.all(updates);
+      const firstError = results.find((r) => r.error)?.error;
+      if (firstError) throw firstError;
+      invalidateTestimonials();
+      toast.success("Ordem atualizada!");
+    } catch (e: any) {
+      toast.error("Erro ao reordenar: " + (e.message || ""));
+    } finally {
+      setReordering(false);
+    }
+  };
 
   // Save mutation (create/update)
   const saveMutation = useMutation({
@@ -310,111 +358,26 @@ const Testimonials = () => {
             Nenhum depoimento cadastrado. Clique em "Novo Depoimento" para adicionar.
           </div>
         ) : (
-          <div className="grid gap-4">
-            {testimonials.map((testimonial, index) => (
-              <motion.div
-                key={testimonial.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className={`bg-card border rounded-xl p-5 ${!testimonial.is_active ? "opacity-60" : ""}`}
-              >
-                <div className="flex items-start gap-4">
-                  <div className="cursor-move text-muted-foreground">
-                    <GripVertical className="h-5 w-5" />
-                  </div>
-
-                  {/* Photo */}
-                  <div className="flex-shrink-0">
-                    {testimonial.author_photo_url ? (
-                      <img
-                        src={testimonial.author_photo_url}
-                        alt={testimonial.author_name}
-                        className="w-14 h-14 rounded-full object-cover border-2 border-border"
-                      />
-                    ) : (
-                      <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xl font-bold">
-                        {testimonial.author_name.charAt(0)}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold text-foreground">{testimonial.author_name}</h3>
-                      {testimonial.author_company && (
-                        <span className="text-muted-foreground text-sm">• {testimonial.author_company}</span>
-                      )}
-                      {testimonial.years_partnership && (
-                        <Badge variant="secondary" className="text-xs">
-                          {testimonial.years_partnership}
-                        </Badge>
-                      )}
-                    </div>
-
-                    <div className="flex gap-0.5 mb-2">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-accent text-accent" />
-                      ))}
-                    </div>
-
-                    <p className="text-muted-foreground text-sm line-clamp-2">
-                      "{testimonial.quote}"
-                    </p>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => handleToggleActive(testimonial.id, testimonial.is_active)}
-                    >
-                      {testimonial.is_active ? (
-                        <Eye className="h-4 w-4" />
-                      ) : (
-                        <EyeOff className="h-4 w-4" />
-                      )}
-                    </Button>
-
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => openEditDialog(testimonial)}
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </Button>
-
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Excluir depoimento?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Esta ação não pode ser desfeita. O depoimento será removido permanentemente.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDelete(testimonial.id)}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          >
-                            Excluir
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
+          <>
+            <p className="text-xs text-muted-foreground -mt-2">
+              {reordering ? "Salvando nova ordem..." : "Arraste pelo ícone à esquerda para reordenar."}
+            </p>
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={testimonials.map((t) => t.id)} strategy={verticalListSortingStrategy}>
+                <div className="grid gap-4">
+                  {testimonials.map((testimonial) => (
+                    <SortableTestimonialRow
+                      key={testimonial.id}
+                      testimonial={testimonial}
+                      onToggleActive={handleToggleActive}
+                      onEdit={openEditDialog}
+                      onDelete={handleDelete}
+                    />
+                  ))}
                 </div>
-              </motion.div>
-            ))}
-          </div>
+              </SortableContext>
+            </DndContext>
+          </>
         )}
 
         {/* Edit/Create Dialog */}
