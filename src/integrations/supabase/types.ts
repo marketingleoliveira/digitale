@@ -14,6 +14,161 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_conversations: {
+        Row: {
+          created_at: string
+          id: string
+          needs_followup: boolean
+          page_url: string | null
+          session_id: string
+          status: string
+          updated_at: string
+          user_agent: string | null
+          visitor_name: string | null
+          visitor_whatsapp: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          needs_followup?: boolean
+          page_url?: string | null
+          session_id: string
+          status?: string
+          updated_at?: string
+          user_agent?: string | null
+          visitor_name?: string | null
+          visitor_whatsapp?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          needs_followup?: boolean
+          page_url?: string | null
+          session_id?: string
+          status?: string
+          updated_at?: string
+          user_agent?: string | null
+          visitor_name?: string | null
+          visitor_whatsapp?: string | null
+        }
+        Relationships: []
+      }
+      agent_knowledge: {
+        Row: {
+          answer: string
+          category: string
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          keywords: string
+          question: string
+          updated_at: string
+        }
+        Insert: {
+          answer: string
+          category?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          keywords?: string
+          question: string
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          category?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          keywords?: string
+          question?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      agent_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          is_fallback: boolean
+          matched_knowledge_id: string | null
+          role: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          is_fallback?: boolean
+          matched_knowledge_id?: string | null
+          role: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          is_fallback?: boolean
+          matched_knowledge_id?: string | null
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "agent_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_settings: {
+        Row: {
+          agent_name: string
+          created_at: string
+          fallback_message: string
+          greeting: string
+          id: string
+          is_enabled: boolean
+          key: string
+          min_typing_delay_ms: number
+          persona: string
+          typing_speed_ms: number
+          updated_at: string
+        }
+        Insert: {
+          agent_name?: string
+          created_at?: string
+          fallback_message?: string
+          greeting?: string
+          id?: string
+          is_enabled?: boolean
+          key?: string
+          min_typing_delay_ms?: number
+          persona?: string
+          typing_speed_ms?: number
+          updated_at?: string
+        }
+        Update: {
+          agent_name?: string
+          created_at?: string
+          fallback_message?: string
+          greeting?: string
+          id?: string
+          is_enabled?: boolean
+          key?: string
+          min_typing_delay_ms?: number
+          persona?: string
+          typing_speed_ms?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       blog_categories: {
         Row: {
           created_at: string
