@@ -17,37 +17,49 @@ export type Database = {
       agent_conversations: {
         Row: {
           created_at: string
+          handoff_at: string | null
           id: string
+          interest_level: string | null
           needs_followup: boolean
           page_url: string | null
+          qualification_summary: string | null
           session_id: string
           status: string
           updated_at: string
           user_agent: string | null
+          visitor_cnpj: string | null
           visitor_name: string | null
           visitor_whatsapp: string | null
         }
         Insert: {
           created_at?: string
+          handoff_at?: string | null
           id?: string
+          interest_level?: string | null
           needs_followup?: boolean
           page_url?: string | null
+          qualification_summary?: string | null
           session_id: string
           status?: string
           updated_at?: string
           user_agent?: string | null
+          visitor_cnpj?: string | null
           visitor_name?: string | null
           visitor_whatsapp?: string | null
         }
         Update: {
           created_at?: string
+          handoff_at?: string | null
           id?: string
+          interest_level?: string | null
           needs_followup?: boolean
           page_url?: string | null
+          qualification_summary?: string | null
           session_id?: string
           status?: string
           updated_at?: string
           user_agent?: string | null
+          visitor_cnpj?: string | null
           visitor_name?: string | null
           visitor_whatsapp?: string | null
         }

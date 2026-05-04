@@ -47,6 +47,36 @@ function findKnowledgeMatch(message: string, knowledge: any[]): any | null {
   return best && best.score >= 4 ? best.item : null;
 }
 
+// Extract phone (BR) and CNPJ from a free-text message
+function extractContactData(text: string): { whatsapp?: string; cnpj?: string } {
+  const result: { whatsapp?: string; cnpj?: string } = {};
+  const onlyDigits = (s: string) => s.replace(/\D/g, "");
+
+  // CNPJ: 14 digits
+  const cnpjMatch = text.match(/\d{2}[.\s-]?\d{3}[.\s-]?\d{3}[.\s-]?\d{4}[.\s-]?\d{2}/);
+  if (cnpjMatch) {
+    const d = onlyDigits(cnpjMatch[0]);
+    if (d.length === 14) result.cnpj = d;
+  } else {
+    const allDigits = onlyDigits(text);
+    if (allDigits.length === 14) result.cnpj = allDigits;
+  }
+
+  // WhatsApp BR: 10 or 11 digits, optional +55
+  const phoneRegex = /(?:\+?55\s?)?\(?\d{2}\)?\s?9?\s?\d{4}[\s-]?\d{4}/g;
+  const matches = text.match(phoneRegex);
+  if (matches) {
+    for (const m of matches) {
+      const d = onlyDigits(m).replace(/^55/, "");
+      if (d.length === 10 || d.length === 11) {
+        result.whatsapp = d;
+        break;
+      }
+    }
+  }
+  return result;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -79,10 +109,11 @@ Deno.serve(async (req) => {
 
     // Get/create conversation
     let conversationId = body.conversation_id;
+    let conversation: any = null;
     if (!conversationId) {
       const { data: existing } = await supabase
         .from("agent_conversations")
-        .select("id")
+        .select("*")
         .eq("session_id", body.session_id)
         .order("created_at", { ascending: false })
         .limit(1)
@@ -90,6 +121,7 @@ Deno.serve(async (req) => {
 
       if (existing) {
         conversationId = existing.id;
+        conversation = existing;
       } else {
         const { data: newConv, error: convErr } = await supabase
           .from("agent_conversations")
@@ -98,12 +130,38 @@ Deno.serve(async (req) => {
             page_url: body.page_url,
             user_agent: body.user_agent,
           })
-          .select("id")
+          .select("*")
           .single();
         if (convErr) throw convErr;
         conversationId = newConv.id;
+        conversation = newConv;
       }
+    } else {
+      const { data: c } = await supabase
+        .from("agent_conversations")
+        .select("*")
+        .eq("id", conversationId)
+        .maybeSingle();
+      conversation = c;
     }
+
+    // Try to extract WhatsApp/CNPJ from this user message and persist
+    const extracted = extractContactData(body.message);
+    const updateData: any = {};
+    if (extracted.whatsapp && !conversation?.visitor_whatsapp) {
+      updateData.visitor_whatsapp = extracted.whatsapp;
+    }
+    if (extracted.cnpj && !conversation?.visitor_cnpj) {
+      updateData.visitor_cnpj = extracted.cnpj;
+    }
+    if (Object.keys(updateData).length) {
+      await supabase.from("agent_conversations").update(updateData).eq("id", conversationId);
+      Object.assign(conversation, updateData);
+    }
+
+    // Detect handoff: when we now have BOTH whatsapp and cnpj → transfer to human
+    const hasContact = !!(conversation?.visitor_whatsapp && conversation?.visitor_cnpj);
+    const justQualified = hasContact && !conversation?.handoff_at;
 
     // Save user message
     await supabase.from("agent_messages").insert({
@@ -120,17 +178,33 @@ Deno.serve(async (req) => {
       .order("created_at", { ascending: true })
       .limit(20);
 
-    // Try direct knowledge match first
-    const match = findKnowledgeMatch(body.message, knowledge || []);
-
     let reply = "";
     let isFallback = false;
     let matchedId: string | null = null;
 
-    if (match) {
+    // If lead just provided contact, send handoff message immediately (skip AI/KB)
+    if (justQualified) {
+      const agentName = settings?.agent_name || "Rafael";
+      reply = `Perfeito! 🙌 Recebi seu WhatsApp e CNPJ. Vou transferir pro representante especialista no seu segmento agora — ele vai te chamar no WhatsApp em alguns minutos com tudo certinho. Muito obrigado pelo contato!`;
+      isFallback = false;
+      await supabase
+        .from("agent_conversations")
+        .update({
+          handoff_at: new Date().toISOString(),
+          interest_level: "quente",
+          needs_followup: true,
+          status: "handoff",
+        })
+        .eq("id", conversationId);
+    }
+
+    // Try direct knowledge match (only if not handoff)
+    const match = !justQualified ? findKnowledgeMatch(body.message, knowledge || []) : null;
+
+    if (!justQualified && match) {
       reply = match.answer;
       matchedId = match.id;
-    } else if (LOVABLE_API_KEY) {
+    } else if (!justQualified && LOVABLE_API_KEY) {
       // Use AI with knowledge as context
       const knowledgeContext = (knowledge || [])
         .map((k: any) => `- ${k.question}\n  Resposta: ${k.answer}`)
@@ -140,17 +214,38 @@ Deno.serve(async (req) => {
       const fallback = settings?.fallback_message || "Vou confirmar com nosso time e te retorno pelo WhatsApp.";
       const agentName = settings?.agent_name || "Rafael";
 
+      const haveWhats = !!conversation?.visitor_whatsapp;
+      const haveCnpj = !!conversation?.visitor_cnpj;
+      const stage = haveWhats && haveCnpj
+        ? "FECHAMENTO"
+        : haveWhats || haveCnpj
+        ? "COLETANDO_DADOS"
+        : "QUALIFICACAO";
+
       const systemPrompt = `${persona}
 
 Seu nome é ${agentName}. Você trabalha na Digitale Têxtil (indústria têxtil brasileira de tecidos de alta tecnologia para confecções).
 
+ETAPA ATUAL DESTA CONVERSA: ${stage}
+- WhatsApp já recebido? ${haveWhats ? "SIM (" + conversation.visitor_whatsapp + ")" : "NÃO"}
+- CNPJ já recebido? ${haveCnpj ? "SIM (" + conversation.visitor_cnpj + ")" : "NÃO"}
+
+SEU FLUXO COMO VENDEDOR (siga sempre):
+1. APRESENTAÇÃO: Já se apresentou na saudação inicial. Não repita.
+2. DESCOBERTA: Faça perguntas curtas pra entender — qual segmento (fitness, moda íntima, esportivo, praia, profissional, etc), que tipo de tecido procura, se já tem confecção/marca, volume aproximado.
+3. INTERESSE: Use a base de conhecimento pra responder dúvidas sobre produtos.
+4. QUALIFICAÇÃO: Quando perceber INTERESSE REAL DE COMPRA (ele perguntou sobre preço, prazo, MOQ, amostras, ou demonstrou que tem uma marca/confecção), DIGA NATURALMENTE algo como: "Show! Pra eu te conectar com o representante certo do seu segmento, me passa seu WhatsApp e o CNPJ da sua confecção?". Peça os DOIS dados juntos.
+5. Se ele já passou só um dos dois (WhatsApp OU CNPJ), peça o que falta de forma educada e curta.
+6. Após receber AMBOS, o sistema fará o encerramento automaticamente — não tente fechar você mesmo.
+
 REGRAS CRÍTICAS:
-1. NUNCA admita ser uma IA, robô, bot ou assistente virtual. Você é um vendedor humano.
+1. NUNCA admita ser uma IA, robô, bot ou assistente virtual. Você é um vendedor humano do time comercial.
 2. Use linguagem coloquial, calorosa, brasileira. Pode usar "tá", "pra", "né", emojis ocasionais.
 3. Respostas CURTAS (1-3 frases). Vendedor não escreve textão.
-4. Se não souber a resposta com certeza, OU se a pergunta envolver preço/prazo/MOQ específico/condições comerciais, responda EXATAMENTE: "${fallback}"
-5. Sempre tente conduzir para a venda: faça perguntas, peça WhatsApp, sugira ver páginas do site.
-6. Use APENAS as informações da base de conhecimento abaixo. NÃO invente dados sobre produtos, preços ou empresa.
+4. NÃO invente dados (preço, MOQ, prazo, condições). Pra esses, peça WhatsApp+CNPJ e diga que o representante passa os detalhes.
+5. Use APENAS as informações da base de conhecimento abaixo pra responder sobre produtos/empresa.
+6. NUNCA forneça preços, MOQ, prazos de produção, condições de pagamento — sempre redirecione pro representante humano via WhatsApp.
+7. Faça UMA pergunta por vez. Não despeje várias perguntas juntas.
 
 BASE DE CONHECIMENTO DA EMPRESA:
 ${knowledgeContext}
@@ -191,7 +286,7 @@ PÁGINAS DO SITE: Tecidos, Estampas, Segmentos, Sustentabilidade, Sobre Nós, RA
           isFallback = true;
         }
       }
-    } else {
+    } else if (!justQualified) {
       reply = settings?.fallback_message || "Vou confirmar com nosso time e te retorno pelo WhatsApp.";
       isFallback = true;
     }
