@@ -46,6 +46,7 @@ import RadarAdmin from "./pages/admin/RadarAdmin";
 import FabricLeads from "./pages/admin/FabricLeads";
 import AgenteCRM from "./pages/admin/AgenteCRM";
 import AgenteVendedor from "./pages/admin/AgenteVendedor";
+import AgenteLeads from "./pages/admin/AgenteLeads";
 import { NewsletterPopup } from "./components/newsletter/NewsletterPopup";
 
 const queryClient = new QueryClient({
@@ -116,6 +117,7 @@ const App = () => (
               <Route path="/admin/fabric-leads" element={<ProtectedRoute><FabricLeads /></ProtectedRoute>} />
               <Route path="/admin/agente-crm" element={<ProtectedRoute requireAdmin><AgenteCRM /></ProtectedRoute>} />
               <Route path="/admin/agente-vendedor" element={<ProtectedRoute requireAdmin><AgenteVendedor /></ProtectedRoute>} />
+              <Route path="/admin/agente-leads" element={<ProtectedRoute requireAdmin><AgenteLeads /></ProtectedRoute>} />
               <Route path="/admin/testimonials" element={<ProtectedRoute><AdminTestimonials /></ProtectedRoute>} />
               <Route path="/admin/job-openings" element={<ProtectedRoute><JobOpenings /></ProtectedRoute>} />
               <Route path="/admin/job-applications" element={<ProtectedRoute><JobApplications /></ProtectedRoute>} />

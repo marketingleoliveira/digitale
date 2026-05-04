@@ -101,6 +101,68 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_leads: {
+        Row: {
+          cnpj: string | null
+          conversation_id: string | null
+          created_at: string
+          email: string | null
+          id: string
+          interest_level: string
+          interest_summary: string | null
+          notes: string | null
+          page_url: string | null
+          segment: string | null
+          source: string | null
+          status: string
+          updated_at: string
+          visitor_name: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          cnpj?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          interest_level?: string
+          interest_summary?: string | null
+          notes?: string | null
+          page_url?: string | null
+          segment?: string | null
+          source?: string | null
+          status?: string
+          updated_at?: string
+          visitor_name?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          cnpj?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          interest_level?: string
+          interest_summary?: string | null
+          notes?: string | null
+          page_url?: string | null
+          segment?: string | null
+          source?: string | null
+          status?: string
+          updated_at?: string
+          visitor_name?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_leads_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "agent_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_messages: {
         Row: {
           content: string
