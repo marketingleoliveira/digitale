@@ -242,7 +242,6 @@ Deno.serve(async (req) => {
       const persona = settings?.persona || "Você é um vendedor consultivo brasileiro.";
       const fallback = settings?.fallback_message || "Vou confirmar com nosso time e te retorno pelo WhatsApp.";
       const agentName = settings?.agent_name || "Rafael";
-      const replyInBlocks = settings?.reply_in_blocks !== false;
       const qualificationQs: string[] = Array.isArray(settings?.qualification_questions)
         ? settings.qualification_questions
         : [];
