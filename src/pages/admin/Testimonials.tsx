@@ -91,6 +91,128 @@ const emptyTestimonial: Omit<Testimonial, "id"> = {
   display_order: 0,
 };
 
+function SortableTestimonialRow({
+  testimonial,
+  onToggleActive,
+  onEdit,
+  onDelete,
+}: {
+  testimonial: Testimonial;
+  onToggleActive: (id: string, currentState: boolean) => void;
+  onEdit: (t: Testimonial) => void;
+  onDelete: (id: string) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: testimonial.id,
+  });
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1,
+    zIndex: isDragging ? 50 : "auto",
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`bg-card border rounded-xl p-5 ${!testimonial.is_active ? "opacity-60" : ""} ${isDragging ? "shadow-lg ring-2 ring-accent/40" : ""}`}
+    >
+      <div className="flex items-start gap-4">
+        <button
+          type="button"
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground touch-none p-1 -m-1"
+          aria-label="Arrastar para reordenar"
+        >
+          <GripVertical className="h-5 w-5" />
+        </button>
+
+        {/* Photo */}
+        <div className="flex-shrink-0">
+          {testimonial.author_photo_url ? (
+            <img
+              src={testimonial.author_photo_url}
+              alt={testimonial.author_name}
+              className="w-14 h-14 rounded-full object-cover border-2 border-border"
+            />
+          ) : (
+            <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xl font-bold">
+              {testimonial.author_name.charAt(0)}
+            </div>
+          )}
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <h3 className="font-semibold text-foreground">{testimonial.author_name}</h3>
+            {testimonial.author_company && (
+              <span className="text-muted-foreground text-sm">• {testimonial.author_company}</span>
+            )}
+            {testimonial.years_partnership && (
+              <Badge variant="secondary" className="text-xs">
+                {testimonial.years_partnership}
+              </Badge>
+            )}
+          </div>
+
+          <div className="flex gap-0.5 mb-2">
+            {[...Array(testimonial.rating)].map((_, i) => (
+              <Star key={i} className="w-4 h-4 fill-accent text-accent" />
+            ))}
+          </div>
+
+          <p className="text-muted-foreground text-sm line-clamp-2">
+            "{testimonial.quote}"
+          </p>
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center gap-2">
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => onToggleActive(testimonial.id, testimonial.is_active)}
+          >
+            {testimonial.is_active ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+          </Button>
+
+          <Button size="icon" variant="ghost" onClick={() => onEdit(testimonial)}>
+            <Edit2 className="h-4 w-4" />
+          </Button>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button size="icon" variant="ghost" className="text-destructive hover:text-destructive">
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Excluir depoimento?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esta ação não pode ser desfeita. O depoimento será removido permanentemente.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => onDelete(testimonial.id)}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Excluir
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const Testimonials = () => {
   const { invalidateTestimonials } = useInvalidateCache();
   const [dialogOpen, setDialogOpen] = useState(false);
