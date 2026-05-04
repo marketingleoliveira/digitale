@@ -26,17 +26,30 @@ interface AdminLayoutProps {
   title: string;
 }
 
-import { Mail, Quote, Briefcase, FileCheck, ShieldCheck } from "lucide-react";
+import { Mail, Quote, Briefcase, FileCheck, ShieldCheck, Flame, Target, Layers } from "lucide-react";
 
-import { Layers } from "lucide-react";
+type MenuItem = {
+  icon: any;
+  label: string;
+  href?: string;
+  adminOnly?: boolean;
+  children?: MenuItem[];
+};
 
-const menuItems = [
+const menuItems: MenuItem[] = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
   { icon: Images, label: "Carrossel", href: "/admin/carousel", adminOnly: true },
   { icon: FolderOpen, label: "Tecidos", href: "/admin/fabrics" },
-  { icon: MessageSquare, label: "Leads Tecidos", href: "/admin/fabric-leads" },
-  { icon: Bot, label: "Agente CRM", href: "/admin/agente-crm", adminOnly: true },
-  { icon: MessageSquare, label: "Agente Vendedor", href: "/admin/agente-vendedor", adminOnly: true },
+  {
+    icon: Target,
+    label: "LEADS",
+    children: [
+      { icon: MessageSquare, label: "Leads Tecidos", href: "/admin/fabric-leads" },
+      { icon: Bot, label: "Agente CRM", href: "/admin/agente-crm", adminOnly: true },
+      { icon: MessageSquare, label: "Agente Vendedor", href: "/admin/agente-vendedor", adminOnly: true },
+      { icon: Flame, label: "Leads Agente", href: "/admin/agente-leads", adminOnly: true },
+    ],
+  },
   { icon: Palette, label: "Estampas", href: "/admin/prints" },
   { icon: Layers, label: "Segmentos", href: "/admin/segments" },
   { icon: Quote, label: "Depoimentos", href: "/admin/testimonials" },
@@ -57,13 +70,19 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
   const navigate = useNavigate();
   const { user, signOut, isAdmin, loading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
+    LEADS:
+      location.pathname === "/admin/fabric-leads" ||
+      location.pathname.startsWith("/admin/agente"),
+  });
 
   const handleSignOut = async () => {
     await signOut();
     navigate("/admin/login");
   };
 
-  const filteredMenuItems = menuItems.filter(item => !item.adminOnly || isAdmin);
+  const filterByRole = (it: MenuItem) => !it.adminOnly || isAdmin;
+  const filteredMenuItems = menuItems.filter(filterByRole);
 
   // Loading state
   if (loading) {
@@ -107,11 +126,58 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
           {/* Navigation */}
           <nav className="flex-1 py-4 lg:py-6 px-2 lg:px-3 space-y-1 overflow-y-auto">
             {filteredMenuItems.map((item) => {
+              if (item.children) {
+                const visibleChildren = item.children.filter(filterByRole);
+                if (!visibleChildren.length) return null;
+                const isOpen = !!openGroups[item.label];
+                const groupActive = visibleChildren.some((c) => c.href === location.pathname);
+                return (
+                  <div key={item.label}>
+                    <button
+                      type="button"
+                      onClick={() => setOpenGroups((g) => ({ ...g, [item.label]: !isOpen }))}
+                      className={cn(
+                        "w-full flex items-center gap-3 px-3 lg:px-4 py-2.5 lg:py-3 rounded-xl text-sm font-medium transition-colors",
+                        groupActive
+                          ? "bg-primary-foreground/15 text-primary-foreground"
+                          : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+                      )}
+                    >
+                      <item.icon className="h-5 w-5 flex-shrink-0" />
+                      <span className="flex-1 text-left truncate">{item.label}</span>
+                      <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
+                    </button>
+                    {isOpen && (
+                      <div className="mt-1 ml-3 pl-3 border-l border-primary-foreground/15 space-y-1">
+                        {visibleChildren.map((c) => {
+                          const cActive = location.pathname === c.href;
+                          return (
+                            <Link
+                              key={c.href}
+                              to={c.href!}
+                              onClick={() => setSidebarOpen(false)}
+                              className={cn(
+                                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors",
+                                cActive
+                                  ? "bg-primary-foreground text-primary"
+                                  : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+                              )}
+                            >
+                              <c.icon className="h-4 w-4 flex-shrink-0" />
+                              <span className="truncate">{c.label}</span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
               const isActive = location.pathname === item.href;
               return (
                 <Link
                   key={item.href}
-                  to={item.href}
+                  to={item.href!}
                   onClick={() => setSidebarOpen(false)}
                   className={cn(
                     "flex items-center gap-3 px-3 lg:px-4 py-2.5 lg:py-3 rounded-xl text-sm font-medium transition-colors",

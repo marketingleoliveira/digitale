@@ -212,6 +212,8 @@ export type Database = {
           key: string
           min_typing_delay_ms: number
           persona: string
+          qualification_questions: Json
+          reply_in_blocks: boolean
           typing_speed_ms: number
           updated_at: string
         }
@@ -225,6 +227,8 @@ export type Database = {
           key?: string
           min_typing_delay_ms?: number
           persona?: string
+          qualification_questions?: Json
+          reply_in_blocks?: boolean
           typing_speed_ms?: number
           updated_at?: string
         }
@@ -238,6 +242,8 @@ export type Database = {
           key?: string
           min_typing_delay_ms?: number
           persona?: string
+          qualification_questions?: Json
+          reply_in_blocks?: boolean
           typing_speed_ms?: number
           updated_at?: string
         }
