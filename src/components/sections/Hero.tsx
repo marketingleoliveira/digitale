@@ -94,8 +94,7 @@ export function Hero() {
               <img
                 src={slide.image_url}
                 alt={slide.alt_text || "Slide"}
-                className="w-full h-auto max-h-full object-contain"
-                style={{ maxWidth: "1900px", maxHeight: "500px" }}
+                className="w-full h-full object-contain"
                 loading={index === 0 ? "eager" : "lazy"}
               />
             </div>
