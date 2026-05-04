@@ -1,11 +1,18 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { Star, VolumeX, Volume2, Play, Maximize2, Quote, X } from "lucide-react";
+import { Star, VolumeX, Volume2, Play, Maximize2, Quote, X, Search, CalendarIcon } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 interface Testimonial {
   id: string;
@@ -16,6 +23,7 @@ interface Testimonial {
   video_url: string | null;
   rating: number;
   years_partnership: string | null;
+  created_at?: string;
 }
 
 function TestimonialCard({ t, onOpenVideo }: { t: Testimonial; onOpenVideo: (t: Testimonial) => void }) {
@@ -70,10 +78,10 @@ function TestimonialCard({ t, onOpenVideo }: { t: Testimonial; onOpenVideo: (t: 
   return (
     <div
       ref={containerRef}
-      className="group relative bg-card rounded-3xl overflow-hidden flex flex-col border border-border/60 shadow-[0_4px_24px_-8px_rgba(33,55,84,0.15)] hover:shadow-[0_20px_48px_-12px_rgba(33,55,84,0.25)] hover:-translate-y-1 transition-all duration-500"
+      className="group relative bg-card rounded-2xl overflow-hidden flex flex-col border border-border/60 shadow-[0_4px_20px_-8px_rgba(33,55,84,0.12)] hover:shadow-[0_16px_36px_-12px_rgba(33,55,84,0.22)] hover:-translate-y-1 transition-all duration-500"
     >
       {/* Mídia */}
-      <div className="relative bg-black aspect-[4/5] overflow-hidden">
+      <div className="relative bg-black aspect-[3/4] overflow-hidden">
         {hasVideo ? (
           <>
             <video
@@ -95,9 +103,9 @@ function TestimonialCard({ t, onOpenVideo }: { t: Testimonial; onOpenVideo: (t: 
               type="button"
               onClick={() => onOpenVideo(t)}
               aria-label="Ver em tela cheia"
-              className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-3 py-2 rounded-full bg-black/50 backdrop-blur-md text-white text-[11px] font-semibold uppercase tracking-wider hover:bg-accent hover:scale-105 transition-all"
+              className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-black/50 backdrop-blur-md text-white text-[10px] font-semibold uppercase tracking-wider hover:bg-accent hover:scale-105 transition-all"
             >
-              <Maximize2 className="h-3.5 w-3.5" />
+              <Maximize2 className="h-3 w-3" />
               <span className="hidden sm:inline">Tela cheia</span>
             </button>
 
@@ -106,9 +114,9 @@ function TestimonialCard({ t, onOpenVideo }: { t: Testimonial; onOpenVideo: (t: 
               type="button"
               onClick={toggleMute}
               aria-label={isMuted ? "Ativar som" : "Desativar som"}
-              className={`absolute top-3 left-3 z-10 flex items-center gap-1.5 px-3 py-2 rounded-full backdrop-blur-md text-white text-[11px] font-semibold uppercase tracking-wider transition-all ${isMuted ? "bg-accent/90 hover:bg-accent animate-pulse" : "bg-black/50 hover:bg-black/70"}`}
+              className={`absolute top-2.5 left-2.5 z-10 flex items-center gap-1 px-2.5 py-1.5 rounded-full backdrop-blur-md text-white text-[10px] font-semibold uppercase tracking-wider transition-all ${isMuted ? "bg-accent/90 hover:bg-accent animate-pulse" : "bg-black/50 hover:bg-black/70"}`}
             >
-              {isMuted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
+              {isMuted ? <VolumeX className="h-3 w-3" /> : <Volume2 className="h-3 w-3" />}
               {isMuted && <span className="hidden sm:inline">Som</span>}
             </button>
 
@@ -119,16 +127,16 @@ function TestimonialCard({ t, onOpenVideo }: { t: Testimonial; onOpenVideo: (t: 
               aria-label="Reproduzir em tela cheia"
               className="absolute inset-0 z-[5] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
             >
-              <span className="w-16 h-16 rounded-full bg-accent/95 flex items-center justify-center shadow-2xl scale-90 group-hover:scale-100 transition-transform">
-                <Play className="h-7 w-7 text-white fill-white ml-1" />
+              <span className="w-14 h-14 rounded-full bg-accent/95 flex items-center justify-center shadow-2xl scale-90 group-hover:scale-100 transition-transform">
+                <Play className="h-6 w-6 text-white fill-white ml-0.5" />
               </span>
             </button>
 
             {/* Identificação sobre o vídeo */}
-            <div className="absolute bottom-0 left-0 right-0 p-5 z-[6] pointer-events-none">
-              <p className="text-white font-bold text-lg leading-tight">{t.author_name}</p>
+            <div className="absolute bottom-0 left-0 right-0 p-4 z-[6] pointer-events-none">
+              <p className="text-white font-bold text-base leading-tight">{t.author_name}</p>
               {t.author_company && (
-                <p className="text-white/85 text-sm mt-0.5">{t.author_company}</p>
+                <p className="text-white/85 text-xs mt-0.5">{t.author_company}</p>
               )}
             </div>
           </>
@@ -141,37 +149,37 @@ function TestimonialCard({ t, onOpenVideo }: { t: Testimonial; onOpenVideo: (t: 
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-5">
-              <p className="text-white font-bold text-lg leading-tight">{t.author_name}</p>
+            <div className="absolute bottom-0 left-0 right-0 p-4">
+              <p className="text-white font-bold text-base leading-tight">{t.author_name}</p>
               {t.author_company && (
-                <p className="text-white/85 text-sm mt-0.5">{t.author_company}</p>
+                <p className="text-white/85 text-xs mt-0.5">{t.author_company}</p>
               )}
             </div>
           </>
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary via-primary to-primary/60 text-primary-foreground text-7xl font-bold">
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary via-primary to-primary/60 text-primary-foreground text-6xl font-bold">
             {t.author_name.charAt(0)}
           </div>
         )}
       </div>
 
       {/* Conteúdo */}
-      <div className="p-6 flex flex-col flex-1 relative">
-        <Quote className="absolute top-4 right-5 h-8 w-8 text-accent/15 rotate-180" />
+      <div className="p-5 flex flex-col flex-1 relative">
+        <Quote className="absolute top-3 right-4 h-7 w-7 text-accent/15 rotate-180" />
 
-        <div className="flex gap-0.5 mb-3">
+        <div className="flex gap-0.5 mb-2.5">
           {[...Array(t.rating)].map((_, i) => (
-            <Star key={i} className="w-4 h-4 fill-accent text-accent" />
+            <Star key={i} className="w-3.5 h-3.5 fill-accent text-accent" />
           ))}
         </div>
 
-        <blockquote className="text-foreground/90 text-[15px] leading-relaxed mb-4 flex-1 italic">
+        <blockquote className="text-foreground/90 text-sm leading-relaxed mb-3 flex-1 italic line-clamp-5">
           "{t.quote}"
         </blockquote>
 
         {t.years_partnership && (
-          <div className="pt-4 border-t border-border/60">
-            <span className="inline-flex items-center px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-semibold uppercase tracking-wider">
+          <div className="pt-3 border-t border-border/60">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-accent/10 text-accent text-[10px] font-semibold uppercase tracking-wider">
               {t.years_partnership}
             </span>
           </div>
@@ -228,6 +236,8 @@ function VideoLightbox({ testimonial, onClose }: { testimonial: Testimonial | nu
 
 export default function TestimonialsPage() {
   const [openVideo, setOpenVideo] = useState<Testimonial | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterDate, setFilterDate] = useState<Date | undefined>(undefined);
 
   useEffect(() => {
     document.title = "Depoimentos | Digitale Têxtil";
@@ -249,10 +259,22 @@ export default function TestimonialsPage() {
         .from("testimonials")
         .select("*")
         .eq("is_active", true)
-        .order("display_order", { ascending: true });
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data as Testimonial[];
     },
+  });
+
+  const filteredTestimonials = testimonials.filter((t) => {
+    const term = searchTerm.trim().toLowerCase();
+    const matchTerm = !term ||
+      (t.author_company || "").toLowerCase().includes(term) ||
+      (t.author_name || "").toLowerCase().includes(term);
+    const matchDate = !filterDate || (
+      t.created_at &&
+      format(new Date(t.created_at), "yyyy-MM-dd") === format(filterDate, "yyyy-MM-dd")
+    );
+    return matchTerm && matchDate;
   });
 
   const videoCount = testimonials.filter(t => t.video_url).length;
@@ -319,11 +341,61 @@ export default function TestimonialsPage() {
         {/* GRID */}
         <section className="py-12 md:py-20 bg-background">
           <div className="container mx-auto px-6">
+            {/* Filtros: busca por empresa/nome + data */}
+            {!isLoading && testimonials.length > 0 && (
+              <div className="max-w-7xl mx-auto mb-8 md:mb-10 flex flex-col md:flex-row gap-3 md:items-center">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Pesquisar por empresa ou nome..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 h-11 rounded-xl bg-card border-border/60"
+                  />
+                </div>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "h-11 rounded-xl justify-start text-left font-normal md:w-[220px]",
+                        !filterDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {filterDate ? format(filterDate, "dd 'de' MMMM, yyyy", { locale: ptBR }) : "Filtrar por data"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="end">
+                    <Calendar
+                      mode="single"
+                      selected={filterDate}
+                      onSelect={setFilterDate}
+                      initialFocus
+                      locale={ptBR}
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+                {(searchTerm || filterDate) && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => { setSearchTerm(""); setFilterDate(undefined); }}
+                    className="h-11 rounded-xl"
+                  >
+                    <X className="h-4 w-4 mr-1.5" />
+                    Limpar
+                  </Button>
+                )}
+              </div>
+            )}
+
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="bg-card rounded-3xl border border-border/60 overflow-hidden animate-pulse">
-                    <div className="aspect-[4/5] bg-muted" />
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 max-w-7xl mx-auto">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="bg-card rounded-2xl border border-border/60 overflow-hidden animate-pulse">
+                    <div className="aspect-[3/4] bg-muted" />
                     <div className="p-6 space-y-3">
                       <div className="h-3 bg-muted rounded w-1/3" />
                       <div className="h-3 bg-muted rounded w-full" />
@@ -337,9 +409,14 @@ export default function TestimonialsPage() {
                 <Quote className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
                 <p className="text-muted-foreground">Nenhum depoimento disponível no momento.</p>
               </div>
+            ) : filteredTestimonials.length === 0 ? (
+              <div className="text-center py-20">
+                <Search className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
+                <p className="text-muted-foreground">Nenhum depoimento encontrado para os filtros aplicados.</p>
+              </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 max-w-7xl mx-auto">
-                {testimonials.map((t) => (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 max-w-7xl mx-auto">
+                {filteredTestimonials.map((t) => (
                   <TestimonialCard key={t.id} t={t} onOpenVideo={setOpenVideo} />
                 ))}
               </div>
