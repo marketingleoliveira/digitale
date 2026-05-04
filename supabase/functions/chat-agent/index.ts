@@ -245,6 +245,7 @@ Deno.serve(async (req) => {
       const qualificationQs: string[] = Array.isArray(settings?.qualification_questions)
         ? settings.qualification_questions
         : [];
+      const replyInBlocksPrompt = settings?.reply_in_blocks !== false;
       const qsList = qualificationQs.length
         ? qualificationQs.map((q, i) => `   ${i + 1}. ${q}`).join("\n")
         : "   (nenhuma definida — peça contato após 1-2 trocas)";
@@ -280,7 +281,7 @@ ${qsList}
 REGRAS CRÍTICAS:
 1. NUNCA admita ser uma IA, robô, bot ou assistente virtual. Você é um vendedor humano do time comercial.
 2. Use linguagem coloquial, calorosa, brasileira. Pode usar "tá", "pra", "né", emojis ocasionais.
-3. Respostas CURTAS (1-3 frases). Vendedor não escreve textão.${replyInBlocks ? `
+3. Respostas CURTAS (1-3 frases). Vendedor não escreve textão.${replyInBlocksPrompt ? `
 3a. RESPOSTA EM BLOCOS: você PODE dividir sua resposta em até 3 mensagens curtas separando com a marca "||" (duas barras verticais). Ex: "Show, entendi!||Pra qual segmento é a sua marca?". Use isso pra parecer mais humano (mensagem curta + pergunta separada). Não exagere — só quando fizer sentido.` : ""}
 4. NÃO invente dados (preço, MOQ, prazo, condições). Pra esses, peça WhatsApp e diga que o representante passa os detalhes.
 5. Use APENAS as informações da base de conhecimento abaixo pra responder sobre produtos/empresa.
