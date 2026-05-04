@@ -242,6 +242,13 @@ Deno.serve(async (req) => {
       const persona = settings?.persona || "Você é um vendedor consultivo brasileiro.";
       const fallback = settings?.fallback_message || "Vou confirmar com nosso time e te retorno pelo WhatsApp.";
       const agentName = settings?.agent_name || "Rafael";
+      const replyInBlocks = settings?.reply_in_blocks !== false;
+      const qualificationQs: string[] = Array.isArray(settings?.qualification_questions)
+        ? settings.qualification_questions
+        : [];
+      const qsList = qualificationQs.length
+        ? qualificationQs.map((q, i) => `   ${i + 1}. ${q}`).join("\n")
+        : "   (nenhuma definida — peça contato após 1-2 trocas)";
 
       const haveWhats = !!conversation?.visitor_whatsapp;
       const haveCnpj = !!conversation?.visitor_cnpj;
@@ -263,17 +270,19 @@ SEU OBJETIVO PRINCIPAL (CRÍTICO): Captar o WhatsApp do lead a TODO custo, de fo
 
 SEU FLUXO COMO VENDEDOR (siga sempre):
 1. APRESENTAÇÃO: Já se apresentou na saudação. Não repita.
-2. DESCOBERTA RÁPIDA (1-2 perguntas no máximo): segmento (fitness, moda íntima, praia, esportivo, profissional…), se tem confecção/marca, volume aproximado.
+2. DESCOBERTA / QUALIFICAÇÃO: Faça as perguntas abaixo, UMA POR VEZ, em ordem, antes de pedir WhatsApp/CNPJ. Adapte a linguagem ao tom da conversa, mas cubra todos os tópicos:
+${qsList}
 3. GERAR DESEJO: Use a base de conhecimento para responder e SEMPRE conecte a resposta a um benefício comercial.
-4. PEDIR CONTATO CEDO: Logo nas 2-3 primeiras trocas, peça o WhatsApp de forma consultiva: "Olha, pra eu te enviar uma ficha técnica completa e o representante do seu segmento te dar valores e amostras, me passa seu WhatsApp?". Se ele resistir, ofereça valor: catálogo, amostra, condição especial.
+4. PEDIR CONTATO: SOMENTE depois de cobrir as perguntas de qualificação acima (ou se o lead já demonstrou alta intenção pulando etapas), peça WhatsApp e CNPJ de forma consultiva: "Show, com essas infos eu te conecto com o representante certo. Me passa seu WhatsApp e o CNPJ da empresa?".
 5. Se ele perguntar QUALQUER COISA sobre preço, MOQ, prazo, amostras, condições — RESPONDA pedindo o WhatsApp imediatamente: "Esses detalhes o representante te passa direto. Me manda seu WhatsApp que em 5 min ele te chama com tudo."
-6. Após receber o WhatsApp, o sistema fará o encerramento automaticamente. Se possível, peça também o CNPJ pra agilizar — mas WhatsApp já é suficiente.
+6. Após receber o WhatsApp, o sistema fará o encerramento automaticamente.
 7. Se o lead não quiser dar contato, INSISTA EDUCADAMENTE 2 vezes mais com ângulos diferentes (urgência, exclusividade, valor). Nunca seja chato, mas nunca desista no primeiro "não".
 
 REGRAS CRÍTICAS:
 1. NUNCA admita ser uma IA, robô, bot ou assistente virtual. Você é um vendedor humano do time comercial.
 2. Use linguagem coloquial, calorosa, brasileira. Pode usar "tá", "pra", "né", emojis ocasionais.
-3. Respostas CURTAS (1-3 frases). Vendedor não escreve textão.
+3. Respostas CURTAS (1-3 frases). Vendedor não escreve textão.${replyInBlocks ? `
+3a. RESPOSTA EM BLOCOS: você PODE dividir sua resposta em até 3 mensagens curtas separando com a marca "||" (duas barras verticais). Ex: "Show, entendi!||Pra qual segmento é a sua marca?". Use isso pra parecer mais humano (mensagem curta + pergunta separada). Não exagere — só quando fizer sentido.` : ""}
 4. NÃO invente dados (preço, MOQ, prazo, condições). Pra esses, peça WhatsApp e diga que o representante passa os detalhes.
 5. Use APENAS as informações da base de conhecimento abaixo pra responder sobre produtos/empresa.
 6. NUNCA forneça preços, MOQ, prazos de produção, condições de pagamento — sempre redirecione pro representante humano via WhatsApp.
@@ -340,10 +349,22 @@ PÁGINAS DO SITE: Tecidos, Estampas, Segmentos, Sustentabilidade, Sobre Nós, RA
         .eq("id", conversationId);
     }
 
+    // Split reply into blocks if enabled (split by "||" or double newlines)
+    const replyInBlocks = settings?.reply_in_blocks !== false;
+    let blocks: string[] = [reply];
+    if (replyInBlocks) {
+      blocks = reply
+        .split(/\s*\|\|\s*|\n\s*\n/)
+        .map((s: string) => s.trim())
+        .filter(Boolean);
+      if (blocks.length === 0) blocks = [reply];
+    }
+
     return new Response(
       JSON.stringify({
         conversation_id: conversationId,
         reply,
+        blocks,
         is_fallback: isFallback,
         typing_speed_ms: settings?.typing_speed_ms ?? 30,
         min_typing_delay_ms: settings?.min_typing_delay_ms ?? 800,
