@@ -36,6 +36,7 @@ const menuItems = [
   { icon: FolderOpen, label: "Tecidos", href: "/admin/fabrics" },
   { icon: MessageSquare, label: "Leads Tecidos", href: "/admin/fabric-leads" },
   { icon: Bot, label: "Agente CRM", href: "/admin/agente-crm", adminOnly: true },
+  { icon: MessageSquare, label: "Agente Vendedor", href: "/admin/agente-vendedor", adminOnly: true },
   { icon: Palette, label: "Estampas", href: "/admin/prints" },
   { icon: Layers, label: "Segmentos", href: "/admin/segments" },
   { icon: Quote, label: "Depoimentos", href: "/admin/testimonials" },

@@ -22,6 +22,7 @@ import Privacy from "./pages/Privacy";
 import WorkWithUs from "./pages/WorkWithUs";
 import NotFound from "./pages/NotFound";
 import { WhatsAppButton } from "./components/chat/WhatsAppButton";
+import { AgentChat } from "./components/chat/AgentChat";
 import Login from "./pages/admin/Login";
 import Dashboard from "./pages/admin/Dashboard";
 import Posts from "./pages/admin/Posts";
@@ -44,6 +45,7 @@ import RadarDigitale from "./pages/RadarDigitale";
 import RadarAdmin from "./pages/admin/RadarAdmin";
 import FabricLeads from "./pages/admin/FabricLeads";
 import AgenteCRM from "./pages/admin/AgenteCRM";
+import AgenteVendedor from "./pages/admin/AgenteVendedor";
 import { NewsletterPopup } from "./components/newsletter/NewsletterPopup";
 
 const queryClient = new QueryClient({
@@ -113,6 +115,7 @@ const App = () => (
               <Route path="/admin/fabrics" element={<ProtectedRoute><AdminFabrics /></ProtectedRoute>} />
               <Route path="/admin/fabric-leads" element={<ProtectedRoute><FabricLeads /></ProtectedRoute>} />
               <Route path="/admin/agente-crm" element={<ProtectedRoute requireAdmin><AgenteCRM /></ProtectedRoute>} />
+              <Route path="/admin/agente-vendedor" element={<ProtectedRoute requireAdmin><AgenteVendedor /></ProtectedRoute>} />
               <Route path="/admin/testimonials" element={<ProtectedRoute><AdminTestimonials /></ProtectedRoute>} />
               <Route path="/admin/job-openings" element={<ProtectedRoute><JobOpenings /></ProtectedRoute>} />
               <Route path="/admin/job-applications" element={<ProtectedRoute><JobApplications /></ProtectedRoute>} />
@@ -132,6 +135,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
             <WhatsAppButton />
+            <AgentChat />
             <NewsletterPopup />
           </BrowserRouter>
         </TooltipProvider>
