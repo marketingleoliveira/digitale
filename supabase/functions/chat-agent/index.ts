@@ -145,8 +145,9 @@ Deno.serve(async (req) => {
       conversation = c;
     }
 
-    // Try to extract WhatsApp/CNPJ from this user message and persist
+    // Try to extract WhatsApp/CNPJ/email/name from this user message and persist
     const extracted = extractContactData(body.message);
+    const emailMatch = body.message.match(/[\w._%+-]+@[\w.-]+\.[A-Za-z]{2,}/);
     const updateData: any = {};
     if (extracted.whatsapp && !conversation?.visitor_whatsapp) {
       updateData.visitor_whatsapp = extracted.whatsapp;
@@ -159,9 +160,9 @@ Deno.serve(async (req) => {
       Object.assign(conversation, updateData);
     }
 
-    // Detect handoff: when we now have BOTH whatsapp and cnpj → transfer to human
-    const hasContact = !!(conversation?.visitor_whatsapp && conversation?.visitor_cnpj);
-    const justQualified = hasContact && !conversation?.handoff_at;
+    // Detect handoff: when we have AT LEAST WhatsApp (CNPJ é bônus) → transfer to human
+    const hasWhats = !!conversation?.visitor_whatsapp;
+    const justQualified = hasWhats && !conversation?.handoff_at;
 
     // Save user message
     await supabase.from("agent_messages").insert({
@@ -184,8 +185,7 @@ Deno.serve(async (req) => {
 
     // If lead just provided contact, send handoff message immediately (skip AI/KB)
     if (justQualified) {
-      const agentName = settings?.agent_name || "Rafael";
-      reply = `Perfeito! 🙌 Recebi seu WhatsApp e CNPJ. Vou transferir pro representante especialista no seu segmento agora — ele vai te chamar no WhatsApp em alguns minutos com tudo certinho. Muito obrigado pelo contato!`;
+      reply = `Perfeito! 🙌 Recebi seu contato. Vou transferir pro representante especialista no seu segmento agora — ele vai te chamar no WhatsApp em alguns minutos com tudo certinho. Muito obrigado!`;
       isFallback = false;
       await supabase
         .from("agent_conversations")
@@ -196,6 +196,35 @@ Deno.serve(async (req) => {
           status: "handoff",
         })
         .eq("id", conversationId);
+
+      // Cria lead na tabela agent_leads (uma vez por conversa)
+      const { data: existingLead } = await supabase
+        .from("agent_leads")
+        .select("id")
+        .eq("conversation_id", conversationId)
+        .maybeSingle();
+
+      if (!existingLead) {
+        // Resumo de interesse: últimas mensagens do visitante
+        const userMsgs = (history || [])
+          .filter((m: any) => m.role === "user")
+          .map((m: any) => m.content)
+          .slice(-5)
+          .join(" | ");
+
+        await supabase.from("agent_leads").insert({
+          conversation_id: conversationId,
+          visitor_name: conversation?.visitor_name || null,
+          whatsapp: conversation?.visitor_whatsapp || null,
+          cnpj: conversation?.visitor_cnpj || null,
+          email: emailMatch ? emailMatch[0] : null,
+          interest_summary: userMsgs.slice(0, 500),
+          interest_level: "quente",
+          status: "new",
+          page_url: conversation?.page_url || null,
+          source: "agente-vendedor",
+        });
+      }
     }
 
     // Try direct knowledge match (only if not handoff)
@@ -230,22 +259,26 @@ ETAPA ATUAL DESTA CONVERSA: ${stage}
 - WhatsApp já recebido? ${haveWhats ? "SIM (" + conversation.visitor_whatsapp + ")" : "NÃO"}
 - CNPJ já recebido? ${haveCnpj ? "SIM (" + conversation.visitor_cnpj + ")" : "NÃO"}
 
+SEU OBJETIVO PRINCIPAL (CRÍTICO): Captar o WhatsApp do lead a TODO custo, de forma natural e consultiva. Cada interação deve avançar para esse objetivo.
+
 SEU FLUXO COMO VENDEDOR (siga sempre):
-1. APRESENTAÇÃO: Já se apresentou na saudação inicial. Não repita.
-2. DESCOBERTA: Faça perguntas curtas pra entender — qual segmento (fitness, moda íntima, esportivo, praia, profissional, etc), que tipo de tecido procura, se já tem confecção/marca, volume aproximado.
-3. INTERESSE: Use a base de conhecimento pra responder dúvidas sobre produtos.
-4. QUALIFICAÇÃO: Quando perceber INTERESSE REAL DE COMPRA (ele perguntou sobre preço, prazo, MOQ, amostras, ou demonstrou que tem uma marca/confecção), DIGA NATURALMENTE algo como: "Show! Pra eu te conectar com o representante certo do seu segmento, me passa seu WhatsApp e o CNPJ da sua confecção?". Peça os DOIS dados juntos.
-5. Se ele já passou só um dos dois (WhatsApp OU CNPJ), peça o que falta de forma educada e curta.
-6. Após receber AMBOS, o sistema fará o encerramento automaticamente — não tente fechar você mesmo.
+1. APRESENTAÇÃO: Já se apresentou na saudação. Não repita.
+2. DESCOBERTA RÁPIDA (1-2 perguntas no máximo): segmento (fitness, moda íntima, praia, esportivo, profissional…), se tem confecção/marca, volume aproximado.
+3. GERAR DESEJO: Use a base de conhecimento para responder e SEMPRE conecte a resposta a um benefício comercial.
+4. PEDIR CONTATO CEDO: Logo nas 2-3 primeiras trocas, peça o WhatsApp de forma consultiva: "Olha, pra eu te enviar uma ficha técnica completa e o representante do seu segmento te dar valores e amostras, me passa seu WhatsApp?". Se ele resistir, ofereça valor: catálogo, amostra, condição especial.
+5. Se ele perguntar QUALQUER COISA sobre preço, MOQ, prazo, amostras, condições — RESPONDA pedindo o WhatsApp imediatamente: "Esses detalhes o representante te passa direto. Me manda seu WhatsApp que em 5 min ele te chama com tudo."
+6. Após receber o WhatsApp, o sistema fará o encerramento automaticamente. Se possível, peça também o CNPJ pra agilizar — mas WhatsApp já é suficiente.
+7. Se o lead não quiser dar contato, INSISTA EDUCADAMENTE 2 vezes mais com ângulos diferentes (urgência, exclusividade, valor). Nunca seja chato, mas nunca desista no primeiro "não".
 
 REGRAS CRÍTICAS:
 1. NUNCA admita ser uma IA, robô, bot ou assistente virtual. Você é um vendedor humano do time comercial.
 2. Use linguagem coloquial, calorosa, brasileira. Pode usar "tá", "pra", "né", emojis ocasionais.
 3. Respostas CURTAS (1-3 frases). Vendedor não escreve textão.
-4. NÃO invente dados (preço, MOQ, prazo, condições). Pra esses, peça WhatsApp+CNPJ e diga que o representante passa os detalhes.
+4. NÃO invente dados (preço, MOQ, prazo, condições). Pra esses, peça WhatsApp e diga que o representante passa os detalhes.
 5. Use APENAS as informações da base de conhecimento abaixo pra responder sobre produtos/empresa.
 6. NUNCA forneça preços, MOQ, prazos de produção, condições de pagamento — sempre redirecione pro representante humano via WhatsApp.
-7. Faça UMA pergunta por vez. Não despeje várias perguntas juntas.
+7. Faça UMA pergunta por vez. Termine quase toda mensagem com uma pergunta que avance a venda.
+8. SEJA COMERCIAL E PERSUASIVO. Você é um vendedor que precisa bater meta — toda conversa precisa virar lead.
 
 BASE DE CONHECIMENTO DA EMPRESA:
 ${knowledgeContext}
