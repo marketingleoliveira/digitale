@@ -319,6 +319,25 @@ export default function AgenteVendedor() {
                       <p className="text-xs text-muted-foreground mt-1 truncate max-w-md">
                         {c.page_url}
                       </p>
+                      {(c.visitor_whatsapp || c.visitor_cnpj) && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {c.visitor_whatsapp && (
+                            <span className="text-xs bg-green-500/10 text-green-700 px-2 py-0.5 rounded-full">
+                              WhatsApp: {c.visitor_whatsapp}
+                            </span>
+                          )}
+                          {c.visitor_cnpj && (
+                            <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                              CNPJ: {c.visitor_cnpj}
+                            </span>
+                          )}
+                          {c.handoff_at && (
+                            <span className="text-xs bg-accent text-white px-2 py-0.5 rounded-full font-semibold">
+                              ✓ Lead qualificado
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                     {c.needs_followup && (
                       <span className="text-xs bg-accent/20 text-accent px-2 py-0.5 rounded-full">
