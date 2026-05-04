@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Trash2, Save, MessageSquare } from "lucide-react";
+import { Plus, Trash2, Save, MessageSquare, GripVertical } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -81,7 +81,7 @@ export default function AgenteVendedor() {
   async function saveSettings() {
     if (!settings) return;
     setSavingSettings(true);
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from("agent_settings")
       .update({
         agent_name: settings.agent_name,
@@ -91,6 +91,8 @@ export default function AgenteVendedor() {
         is_enabled: settings.is_enabled,
         typing_speed_ms: settings.typing_speed_ms,
         min_typing_delay_ms: settings.min_typing_delay_ms,
+        qualification_questions: settings.qualification_questions || [],
+        reply_in_blocks: settings.reply_in_blocks !== false,
       })
       .eq("key", "main");
     setSavingSettings(false);
@@ -235,6 +237,84 @@ export default function AgenteVendedor() {
                   <p className="text-xs text-muted-foreground mt-1">
                     Usada quando o agente não tem resposta — geralmente pedindo WhatsApp pra retornar.
                   </p>
+                </div>
+
+                <div className="border-t pt-4 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Switch
+                      checked={settings.reply_in_blocks !== false}
+                      onCheckedChange={(v) => setSettings({ ...settings, reply_in_blocks: v })}
+                    />
+                    <Label>Respostas em blocos (mais humano)</Label>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Quando ligado, o agente pode quebrar a resposta em até 3 mensagens curtas, com pausa entre elas — como uma pessoa real digitando.
+                  </p>
+                </div>
+
+                <div className="border-t pt-4">
+                  <Label className="text-base">Perguntas de qualificação</Label>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    O agente fará essas perguntas (uma por vez, em ordem) para qualificar o lead ANTES de pedir WhatsApp e CNPJ.
+                  </p>
+                  <div className="space-y-2">
+                    {(settings.qualification_questions || []).map((q: string, idx: number) => (
+                      <div key={idx} className="flex gap-2 items-start">
+                        <span className="text-xs font-mono bg-muted px-2 py-2 rounded">
+                          {idx + 1}
+                        </span>
+                        <Textarea
+                          rows={2}
+                          value={q}
+                          onChange={(e) => {
+                            const arr = [...(settings.qualification_questions || [])];
+                            arr[idx] = e.target.value;
+                            setSettings({ ...settings, qualification_questions: arr });
+                          }}
+                          className="flex-1"
+                        />
+                        <div className="flex flex-col gap-1">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            disabled={idx === 0}
+                            onClick={() => {
+                              const arr = [...(settings.qualification_questions || [])];
+                              [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
+                              setSettings({ ...settings, qualification_questions: arr });
+                            }}
+                            title="Mover para cima"
+                          >
+                            ↑
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              const arr = [...(settings.qualification_questions || [])];
+                              arr.splice(idx, 1);
+                              setSettings({ ...settings, qualification_questions: arr });
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const arr = [...(settings.qualification_questions || []), ""];
+                        setSettings({ ...settings, qualification_questions: arr });
+                      }}
+                    >
+                      <Plus className="h-4 w-4 mr-2" /> Adicionar pergunta
+                    </Button>
+                  </div>
                 </div>
 
                 <Button onClick={saveSettings} disabled={savingSettings}>
