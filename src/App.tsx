@@ -111,28 +111,28 @@ const App = () => (
               
               {/* Admin Routes */}
               <Route path="/admin/login" element={<Login />} />
-              <Route path="/admin" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/admin" element={<ProtectedRoute requireAdmin><Dashboard /></ProtectedRoute>} />
               <Route path="/admin/carousel" element={<ProtectedRoute requireAdmin><Carousel /></ProtectedRoute>} />
-              <Route path="/admin/fabrics" element={<ProtectedRoute><AdminFabrics /></ProtectedRoute>} />
-              <Route path="/admin/fabric-leads" element={<ProtectedRoute><FabricLeads /></ProtectedRoute>} />
+              <Route path="/admin/fabrics" element={<ProtectedRoute requireAdmin><AdminFabrics /></ProtectedRoute>} />
+              <Route path="/admin/fabric-leads" element={<ProtectedRoute allowedRoles={["sdr","vendedor"]}><FabricLeads /></ProtectedRoute>} />
               <Route path="/admin/agente-crm" element={<ProtectedRoute requireAdmin><AgenteCRM /></ProtectedRoute>} />
               <Route path="/admin/agente-vendedor" element={<ProtectedRoute requireAdmin><AgenteVendedor /></ProtectedRoute>} />
               <Route path="/admin/agente-leads" element={<ProtectedRoute requireAdmin><AgenteLeads /></ProtectedRoute>} />
-              <Route path="/admin/testimonials" element={<ProtectedRoute><AdminTestimonials /></ProtectedRoute>} />
-              <Route path="/admin/job-openings" element={<ProtectedRoute><JobOpenings /></ProtectedRoute>} />
-              <Route path="/admin/job-applications" element={<ProtectedRoute><JobApplications /></ProtectedRoute>} />
-              <Route path="/admin/posts" element={<ProtectedRoute><Posts /></ProtectedRoute>} />
-              <Route path="/admin/posts/:id" element={<ProtectedRoute><PostEditor /></ProtectedRoute>} />
-              <Route path="/admin/categories" element={<ProtectedRoute><Categories /></ProtectedRoute>} />
-              <Route path="/admin/contacts" element={<ProtectedRoute><Contacts /></ProtectedRoute>} />
-              <Route path="/admin/newsletter" element={<ProtectedRoute requireAdmin><Newsletter /></ProtectedRoute>} />
+              <Route path="/admin/testimonials" element={<ProtectedRoute requireAdmin><AdminTestimonials /></ProtectedRoute>} />
+              <Route path="/admin/job-openings" element={<ProtectedRoute requireAdmin><JobOpenings /></ProtectedRoute>} />
+              <Route path="/admin/job-applications" element={<ProtectedRoute requireAdmin><JobApplications /></ProtectedRoute>} />
+              <Route path="/admin/posts" element={<ProtectedRoute requireAdmin><Posts /></ProtectedRoute>} />
+              <Route path="/admin/posts/:id" element={<ProtectedRoute requireAdmin><PostEditor /></ProtectedRoute>} />
+              <Route path="/admin/categories" element={<ProtectedRoute requireAdmin><Categories /></ProtectedRoute>} />
+              <Route path="/admin/contacts" element={<ProtectedRoute allowedRoles={["sdr","vendedor"]}><Contacts /></ProtectedRoute>} />
+              <Route path="/admin/newsletter" element={<ProtectedRoute allowedRoles={["sdr","vendedor"]}><Newsletter /></ProtectedRoute>} />
               <Route path="/admin/settings" element={<ProtectedRoute requireAdmin><Settings /></ProtectedRoute>} />
               <Route path="/admin/users" element={<ProtectedRoute requireAdmin><Users /></ProtectedRoute>} />
               <Route path="/admin/permissions" element={<ProtectedRoute requireAdmin><Permissions /></ProtectedRoute>} />
-              <Route path="/admin/prints" element={<ProtectedRoute><PrintsAdmin /></ProtectedRoute>} />
-              <Route path="/admin/print-categories" element={<ProtectedRoute><PrintCategories /></ProtectedRoute>} />
-              <Route path="/admin/segments" element={<ProtectedRoute><SegmentsAdmin /></ProtectedRoute>} />
-              <Route path="/admin/radar" element={<ProtectedRoute><RadarAdmin /></ProtectedRoute>} />
+              <Route path="/admin/prints" element={<ProtectedRoute requireAdmin><PrintsAdmin /></ProtectedRoute>} />
+              <Route path="/admin/print-categories" element={<ProtectedRoute requireAdmin><PrintCategories /></ProtectedRoute>} />
+              <Route path="/admin/segments" element={<ProtectedRoute requireAdmin><SegmentsAdmin /></ProtectedRoute>} />
+              <Route path="/admin/radar" element={<ProtectedRoute requireAdmin><RadarAdmin /></ProtectedRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>
