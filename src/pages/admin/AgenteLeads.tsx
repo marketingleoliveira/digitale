@@ -16,10 +16,16 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Flame, Snowflake, ThermometerSun, Phone, Building2,
   MessageSquare, TrendingUp, Users, CheckCircle2, Clock, ExternalLink,
+  Trash2, Bot, Loader2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
+  AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const formatCnpj = (c?: string | null) =>
   c && c.length === 14 ? `${c.slice(0,2)}.${c.slice(2,5)}.${c.slice(5,8)}/${c.slice(8,12)}-${c.slice(12)}` : (c || "—");
@@ -38,6 +44,7 @@ export default function AgenteLeads() {
   const qc = useQueryClient();
   const [selected, setSelected] = useState<any>(null);
   const [tab, setTab] = useState("leads");
+  const [simulating, setSimulating] = useState(false);
 
   const { data: leads } = useQuery({
     queryKey: ["agent-leads"],
@@ -122,6 +129,33 @@ export default function AgenteLeads() {
     qc.invalidateQueries({ queryKey: ["agent-leads"] });
   }
 
+  async function deleteLead(id: string) {
+    const { error } = await (supabase as any).from("agent_leads").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Lead excluído");
+    setSelected(null);
+    qc.invalidateQueries({ queryKey: ["agent-leads"] });
+  }
+
+  async function simulateBatch() {
+    setSimulating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("simulate-agent-conversation", {
+        body: { limit: 5 },
+      });
+      if (error) throw error;
+      const n = (data as any)?.processed ?? 0;
+      toast.success(n ? `${n} conversas geradas com sucesso!` : "Nenhum lead novo para atender.");
+      qc.invalidateQueries({ queryKey: ["agent-leads"] });
+      qc.invalidateQueries({ queryKey: ["agent-messages-all"] });
+      qc.invalidateQueries({ queryKey: ["agent-conversations-stats"] });
+    } catch (e: any) {
+      toast.error(e.message || "Falha ao simular conversas");
+    } finally {
+      setSimulating(false);
+    }
+  }
+
   const interestBadge = (level: string) => {
     if (level === "quente") return <Badge className="bg-rose-500/15 text-rose-700 border-rose-300 gap-1"><Flame className="h-3 w-3" />Quente</Badge>;
     if (level === "morno") return <Badge className="bg-amber-500/15 text-amber-700 border-amber-300 gap-1"><ThermometerSun className="h-3 w-3" />Morno</Badge>;
@@ -130,6 +164,12 @@ export default function AgenteLeads() {
 
   return (
     <AdminLayout title="Leads do Agente">
+      <div className="flex justify-end mb-4">
+        <Button onClick={simulateBatch} disabled={simulating} className="gap-2">
+          {simulating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Bot className="h-4 w-4" />}
+          Atender qualificados do CRM
+        </Button>
+      </div>
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
           <TabsTrigger value="leads">Leads ({stats.totalLeads})</TabsTrigger>
@@ -184,6 +224,27 @@ export default function AgenteLeads() {
                             <Phone className="h-3 w-3" /> WhatsApp
                           </a>
                         )}
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-rose-600 hover:text-rose-700 hover:bg-rose-50 ml-1">
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Excluir este lead?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Essa ação não pode ser desfeita. O lead será removido permanentemente.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => deleteLead(l.id)} className="bg-rose-600 hover:bg-rose-700">
+                                Excluir
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -297,6 +358,28 @@ export default function AgenteLeads() {
                   </a>
                 </Button>
               )}
+
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" className="gap-2 text-rose-600 border-rose-200 hover:bg-rose-50 hover:text-rose-700">
+                    <Trash2 className="h-4 w-4" /> Excluir lead
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Excluir este lead?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Essa ação não pode ser desfeita.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => deleteLead(selected.id)} className="bg-rose-600 hover:bg-rose-700">
+                      Excluir
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           )}
         </DialogContent>
