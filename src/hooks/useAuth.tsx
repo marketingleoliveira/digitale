@@ -10,6 +10,7 @@ interface AuthContextType {
   reconnecting: boolean;
   isAdmin: boolean;
   isEditor: boolean;
+  role: string | null;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
@@ -25,11 +26,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [reconnecting, setReconnecting] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditor, setIsEditor] = useState(false);
+  const [role, setRole] = useState<string | null>(null);
   
   const refreshIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const currentUserIdRef = useRef<string | null>(null);
 
-  const fetchRoles = useCallback(async (userId: string): Promise<{ admin: boolean; editor: boolean }> => {
+  const fetchRoles = useCallback(async (userId: string): Promise<{ admin: boolean; editor: boolean; primary: string | null }> => {
     try {
       const { data: roles, error } = await supabase
         .from("user_roles")
@@ -38,19 +40,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         console.error("Error fetching roles:", error);
-        return { admin: false, editor: false };
+        return { admin: false, editor: false, primary: null };
       }
 
       const userRoles = roles?.map((r) => String(r.role)) || [];
       const admin = userRoles.some(role => role === "admin" || role === "desenvolvedor");
       const editor = userRoles.some(role => 
-        role === "editor" || role === "redator" || role === "vendedor"
+        role === "editor" || role === "redator" || role === "vendedor" || role === "sdr"
       ) || admin;
-      
-      return { admin, editor };
+      // Pick highest-priority role for menu logic
+      const priority = ["desenvolvedor", "admin", "editor", "redator", "vendedor", "sdr", "user"];
+      const primary = priority.find(p => userRoles.includes(p)) || userRoles[0] || null;
+      return { admin, editor, primary };
     } catch (error) {
       console.error("Error fetching roles:", error);
-      return { admin: false, editor: false };
+      return { admin: false, editor: false, primary: null };
     }
   }, []);
 
@@ -79,13 +83,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     currentUserIdRef.current = newSession?.user?.id ?? null;
 
     if (newSession?.user) {
-      const { admin, editor } = await fetchRoles(newSession.user.id);
+      const { admin, editor, primary } = await fetchRoles(newSession.user.id);
       setIsAdmin(admin);
       setIsEditor(editor);
+      setRole(primary);
       startRefreshInterval();
     } else {
       setIsAdmin(false);
       setIsEditor(false);
+      setRole(null);
       stopRefreshInterval();
     }
   }, [fetchRoles, startRefreshInterval, stopRefreshInterval]);
@@ -104,6 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(null);
           setIsAdmin(false);
           setIsEditor(false);
+          setRole(null);
           currentUserIdRef.current = null;
           stopRefreshInterval();
           setLoading(false);
@@ -123,6 +130,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setUser(null);
             setIsAdmin(false);
             setIsEditor(false);
+            setRole(null);
             currentUserIdRef.current = null;
             setLoading(false);
           }
@@ -165,6 +173,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(null);
           setIsAdmin(false);
           setIsEditor(false);
+          setRole(null);
           currentUserIdRef.current = null;
           stopRefreshInterval();
           toast.error("Sessão expirada", {
@@ -210,7 +219,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
     <AuthContext.Provider value={{ 
       user, session, loading, reconnecting, 
-      isAdmin, isEditor, signIn, signOut
+      isAdmin, isEditor, role, signIn, signOut
     }}>
       {children}
     </AuthContext.Provider>

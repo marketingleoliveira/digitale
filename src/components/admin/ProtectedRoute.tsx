@@ -4,10 +4,11 @@ import { useAuth } from "@/hooks/useAuth";
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAdmin?: boolean;
+  allowedRoles?: string[];
 }
 
-export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
-  const { user, loading, isAdmin, isEditor, reconnecting } = useAuth();
+export function ProtectedRoute({ children, requireAdmin = false, allowedRoles }: ProtectedRouteProps) {
+  const { user, loading, isAdmin, isEditor, role, reconnecting } = useAuth();
 
   if (loading) {
     return (
@@ -29,7 +30,11 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
   }
 
   if (requireAdmin && !isAdmin) {
-    return <Navigate to="/admin" replace />;
+    return <Navigate to="/admin/fabric-leads" replace />;
+  }
+
+  if (allowedRoles && !isAdmin && (!role || !allowedRoles.includes(role))) {
+    return <Navigate to="/admin/fabric-leads" replace />;
   }
 
   return <>{children}</>;
