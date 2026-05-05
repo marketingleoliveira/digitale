@@ -33,33 +33,34 @@ type MenuItem = {
   label: string;
   href?: string;
   adminOnly?: boolean;
+  allowedRoles?: string[]; // if defined, only these roles (besides admin/dev) can see
   children?: MenuItem[];
 };
 
 const menuItems: MenuItem[] = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
+  { icon: LayoutDashboard, label: "Dashboard", href: "/admin", adminOnly: true },
   { icon: Images, label: "Carrossel", href: "/admin/carousel", adminOnly: true },
-  { icon: FolderOpen, label: "Tecidos", href: "/admin/fabrics" },
+  { icon: FolderOpen, label: "Tecidos", href: "/admin/fabrics", adminOnly: true },
   {
     icon: Target,
     label: "LEADS",
     children: [
-      { icon: MessageSquare, label: "Leads Tecidos", href: "/admin/fabric-leads" },
+      { icon: MessageSquare, label: "Leads Tecidos", href: "/admin/fabric-leads", allowedRoles: ["sdr", "vendedor"] },
       { icon: Bot, label: "Agente CRM", href: "/admin/agente-crm", adminOnly: true },
       { icon: MessageSquare, label: "Agente Vendedor", href: "/admin/agente-vendedor", adminOnly: true },
       { icon: Flame, label: "Leads Agente", href: "/admin/agente-leads", adminOnly: true },
     ],
   },
-  { icon: Palette, label: "Estampas", href: "/admin/prints" },
-  { icon: Layers, label: "Segmentos", href: "/admin/segments" },
-  { icon: Quote, label: "Depoimentos", href: "/admin/testimonials" },
-  { icon: Briefcase, label: "Vagas", href: "/admin/job-openings" },
-  { icon: FileCheck, label: "Candidaturas", href: "/admin/job-applications" },
-  { icon: FileText, label: "Posts", href: "/admin/posts" },
-  { icon: FolderOpen, label: "Categorias", href: "/admin/categories" },
-  { icon: MessageSquare, label: "Contatos", href: "/admin/contacts" },
-  { icon: Mail, label: "Newsletter", href: "/admin/newsletter", adminOnly: true },
-  { icon: FileText, label: "Radar Digitale", href: "/admin/radar" },
+  { icon: Palette, label: "Estampas", href: "/admin/prints", adminOnly: true },
+  { icon: Layers, label: "Segmentos", href: "/admin/segments", adminOnly: true },
+  { icon: Quote, label: "Depoimentos", href: "/admin/testimonials", adminOnly: true },
+  { icon: Briefcase, label: "Vagas", href: "/admin/job-openings", adminOnly: true },
+  { icon: FileCheck, label: "Candidaturas", href: "/admin/job-applications", adminOnly: true },
+  { icon: FileText, label: "Posts", href: "/admin/posts", adminOnly: true },
+  { icon: FolderOpen, label: "Categorias", href: "/admin/categories", adminOnly: true },
+  { icon: MessageSquare, label: "Contatos", href: "/admin/contacts", allowedRoles: ["sdr", "vendedor"] },
+  { icon: Mail, label: "Newsletter", href: "/admin/newsletter", allowedRoles: ["sdr", "vendedor"] },
+  { icon: FileText, label: "Radar Digitale", href: "/admin/radar", adminOnly: true },
   { icon: Users, label: "Usuários", href: "/admin/users", adminOnly: true },
   { icon: ShieldCheck, label: "Permissões", href: "/admin/permissions", adminOnly: true },
   { icon: Settings, label: "Configurações", href: "/admin/settings", adminOnly: true },
@@ -68,7 +69,7 @@ const menuItems: MenuItem[] = [
 export function AdminLayout({ children, title }: AdminLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, signOut, isAdmin, loading } = useAuth();
+  const { user, signOut, isAdmin, role, loading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
     LEADS:
@@ -81,7 +82,12 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
     navigate("/admin/login");
   };
 
-  const filterByRole = (it: MenuItem) => !it.adminOnly || isAdmin;
+  const filterByRole = (it: MenuItem) => {
+    if (isAdmin) return true;
+    if (it.adminOnly) return false;
+    if (it.allowedRoles && role) return it.allowedRoles.includes(role);
+    return !it.adminOnly && !it.allowedRoles;
+  };
   const filteredMenuItems = menuItems.filter(filterByRole);
 
   // Loading state
@@ -206,7 +212,7 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
                   {user?.email}
                 </p>
                 <p className="text-xs text-primary-foreground/60">
-                  {isAdmin ? "Administrador" : "Editor"}
+                  {isAdmin ? "DEV" : (role ? role.toUpperCase() : "—")}
                 </p>
               </div>
             </div>
