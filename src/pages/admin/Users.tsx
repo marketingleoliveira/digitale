@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Search, Shield, UserPlus, Trash2 } from "lucide-react";
+import { Search, Shield, UserPlus, Trash2, Crown, Zap, Briefcase } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -30,9 +30,33 @@ interface UserWithRole {
 }
 
 const ROLES = [
-  { value: "desenvolvedor", label: "Desenvolvedor", description: "Acesso total ao sistema" },
-  { value: "redator", label: "Redator", description: "Gerencia conteúdo e blog" },
-  { value: "vendedor", label: "Vendedor", description: "Acesso a contatos e pedidos" },
+  {
+    value: "desenvolvedor",
+    label: "DEV",
+    description: "Acesso total ao sistema",
+    icon: Crown,
+    color: "from-purple-500 to-fuchsia-600",
+    badge: "bg-purple-100 text-purple-700",
+    permissions: ["Todos os menus e configurações"],
+  },
+  {
+    value: "sdr",
+    label: "SDR",
+    description: "Pré-venda — qualificação de leads",
+    icon: Zap,
+    color: "from-orange-500 to-amber-500",
+    badge: "bg-orange-100 text-orange-700",
+    permissions: ["Leads Tecidos", "Newsletter", "Contatos"],
+  },
+  {
+    value: "vendedor",
+    label: "Vendedor",
+    description: "Comercial — atendimento e fechamento",
+    icon: Briefcase,
+    color: "from-emerald-500 to-green-600",
+    badge: "bg-emerald-100 text-emerald-700",
+    permissions: ["Leads Tecidos", "Newsletter", "Contatos"],
+  },
 ];
 
 const Users = () => {
@@ -43,7 +67,7 @@ const Users = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState("");
-  const [newUserRole, setNewUserRole] = useState<string>("redator");
+  const [newUserRole, setNewUserRole] = useState<string>("sdr");
   const [newUserPassword, setNewUserPassword] = useState("");
   const [newUserName, setNewUserName] = useState("");
 
@@ -107,7 +131,7 @@ const Users = () => {
         setNewUserEmail("");
         setNewUserPassword("");
         setNewUserName("");
-        setNewUserRole("redator");
+        setNewUserRole("sdr");
         fetchUsers();
       }
     } catch (err: any) {
@@ -142,18 +166,10 @@ const Users = () => {
   };
 
   const getRoleBadge = (role: string) => {
-    switch (role) {
-      case "admin":
-      case "desenvolvedor":
-        return "bg-purple-100 text-purple-700";
-      case "redator":
-      case "editor":
-        return "bg-blue-100 text-blue-700";
-      case "vendedor":
-        return "bg-green-100 text-green-700";
-      default:
-        return "bg-gray-100 text-gray-700";
-    }
+    const r = ROLES.find(rl => rl.value === role);
+    if (r) return r.badge;
+    if (role === "admin") return "bg-purple-100 text-purple-700";
+    return "bg-gray-100 text-gray-700";
   };
 
   const getRoleLabel = (role: string) => {
@@ -162,6 +178,7 @@ const Users = () => {
     switch (role) {
       case "admin": return "Administrador";
       case "editor": return "Editor";
+      case "redator": return "Redator";
       default: return "Usuário";
     }
   };
@@ -173,6 +190,39 @@ const Users = () => {
 
   return (
     <AdminLayout title="Usuários">
+      {/* Ranks / cargos cards */}
+      <div className="grid gap-4 md:grid-cols-3 mb-6">
+        {ROLES.map((r) => {
+          const count = users.filter((u) => u.role === r.value).length;
+          const Icon = r.icon;
+          return (
+            <div
+              key={r.value}
+              className="relative overflow-hidden rounded-2xl border border-border bg-card p-5"
+            >
+              <div className={`absolute inset-0 opacity-[0.07] bg-gradient-to-br ${r.color}`} />
+              <div className="relative flex items-start justify-between mb-3">
+                <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${r.color} flex items-center justify-center text-white shadow-md`}>
+                  <Icon className="h-5 w-5" />
+                </div>
+                <span className="text-2xl font-bold text-foreground">{count}</span>
+              </div>
+              <div className="relative">
+                <h3 className="font-semibold text-foreground">Rank {r.label}</h3>
+                <p className="text-xs text-muted-foreground mb-3">{r.description}</p>
+                <div className="flex flex-wrap gap-1">
+                  {r.permissions.map((p) => (
+                    <span key={p} className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">
+                      {p}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
       <div className="bg-card rounded-2xl border border-border p-6">
         <div className="flex flex-col sm:flex-row gap-4 justify-between mb-6">
           <div className="relative w-full sm:w-72">
