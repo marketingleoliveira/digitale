@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { MessageCircle, X, Minus, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useLocation } from "react-router-dom";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 
 interface Message {
   id: string;
@@ -50,6 +52,7 @@ function getSessionId(): string {
 export function AgentChat() {
   const location = useLocation();
   const pageConfig = detectPageConfig(location.pathname);
+  const { whatsappLink } = useSiteSettings();
   const [state, setState] = useState<"closed" | "open" | "minimized">("closed");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -309,7 +312,14 @@ export function AgentChat() {
                   : "bg-background text-foreground border border-border rounded-bl-sm shadow-sm"
               }`}
             >
-              {m.content}
+              {renderContent(m.content, () =>
+                window.open(
+                  whatsappLink(
+                    "Olá! Vim pelo chat do site e gostaria de falar com um representante."
+                  ),
+                  "_blank"
+                )
+              )}
             </div>
           </div>
         ))}
@@ -354,5 +364,31 @@ export function AgentChat() {
         .typing-dot { animation: typingDot 1.2s infinite ease-in-out; }
       `}</style>
     </div>
+  );
+}
+
+const HANDOFF_TAG = "[FALAR_REPRESENTANTE]";
+
+function renderContent(content: string, onClick: () => void) {
+  if (!content.includes(HANDOFF_TAG)) return content;
+  const parts = content.split(HANDOFF_TAG);
+  return (
+    <>
+      {parts.map((p, i) => (
+        <span key={i}>
+          {p}
+          {i < parts.length - 1 && (
+            <button
+              type="button"
+              onClick={onClick}
+              className="mt-2 inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-white font-semibold text-xs px-4 py-2 rounded-full shadow-md shadow-accent/30 transition-all hover:scale-[1.02]"
+            >
+              <WhatsAppIcon className="h-4 w-4" />
+              FALAR COM REPRESENTANTE
+            </button>
+          )}
+        </span>
+      ))}
+    </>
   );
 }
