@@ -365,3 +365,21 @@ html {
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--accent));
 }
+
+/* Cloud marquee animations for testimonial company names */
+@keyframes cloud-marquee-ltr-anim {
+  0% { transform: translateX(-33.333%); }
+  100% { transform: translateX(0%); }
+}
+@keyframes cloud-marquee-rtl-anim {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-33.333%); }
+}
+.cloud-marquee-ltr {
+  animation: cloud-marquee-ltr-anim linear infinite;
+  width: max-content;
+}
+.cloud-marquee-rtl {
+  animation: cloud-marquee-rtl-anim linear infinite;
+  width: max-content;
+}
