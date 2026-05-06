@@ -96,11 +96,13 @@ function SortableTestimonialRow({
   onToggleActive,
   onEdit,
   onDelete,
+  onOrderChange,
 }: {
   testimonial: Testimonial;
   onToggleActive: (id: string, currentState: boolean) => void;
   onEdit: (t: Testimonial) => void;
   onDelete: (id: string) => void;
+  onOrderChange: (id: string, newOrder: number) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: testimonial.id,
@@ -128,6 +130,26 @@ function SortableTestimonialRow({
         >
           <GripVertical className="h-5 w-5" />
         </button>
+
+        <div className="flex flex-col items-center gap-1">
+          <Label className="text-[10px] uppercase text-muted-foreground tracking-wider">Ordem</Label>
+          <Input
+            type="number"
+            min={1}
+            defaultValue={testimonial.display_order}
+            key={testimonial.display_order}
+            onBlur={(e) => {
+              const v = parseInt(e.target.value, 10);
+              if (!isNaN(v) && v !== testimonial.display_order) {
+                onOrderChange(testimonial.id, v);
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+            }}
+            className="w-16 h-9 text-center font-semibold"
+          />
+        </div>
 
         {/* Photo */}
         <div className="flex-shrink-0">
@@ -252,6 +274,30 @@ const Testimonials = () => {
     setReordering(true);
     try {
       const updates = reordered.map((t, idx) =>
+        supabase.from("testimonials").update({ display_order: idx }).eq("id", t.id)
+      );
+      const results = await Promise.all(updates);
+      const firstError = results.find((r) => r.error)?.error;
+      if (firstError) throw firstError;
+      invalidateTestimonials();
+      toast.success("Ordem atualizada!");
+    } catch (e: any) {
+      toast.error("Erro ao reordenar: " + (e.message || ""));
+    } finally {
+      setReordering(false);
+    }
+  };
+
+  const handleOrderChange = async (id: string, newOrder: number) => {
+    const current = [...testimonials].sort((a, b) => a.display_order - b.display_order);
+    const oldIndex = current.findIndex((t) => t.id === id);
+    if (oldIndex < 0) return;
+    const targetIndex = Math.max(0, Math.min(current.length - 1, newOrder - 1));
+    const [moved] = current.splice(oldIndex, 1);
+    current.splice(targetIndex, 0, moved);
+    setReordering(true);
+    try {
+      const updates = current.map((t, idx) =>
         supabase.from("testimonials").update({ display_order: idx }).eq("id", t.id)
       );
       const results = await Promise.all(updates);
@@ -494,6 +540,7 @@ const Testimonials = () => {
                       onToggleActive={handleToggleActive}
                       onEdit={openEditDialog}
                       onDelete={handleDelete}
+                      onOrderChange={handleOrderChange}
                     />
                   ))}
                 </div>
