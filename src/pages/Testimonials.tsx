@@ -82,9 +82,12 @@ function TestimonialCard({ t, onOpenVideo, isNew }: { t: Testimonial; onOpenVide
       className={`group relative bg-card rounded-2xl overflow-hidden flex flex-col border ${isNew ? "border-accent/60 ring-2 ring-accent/30" : "border-border/60"} shadow-[0_4px_20px_-8px_rgba(33,55,84,0.12)] hover:shadow-[0_16px_36px_-12px_rgba(33,55,84,0.22)] hover:-translate-y-1 transition-all duration-500`}
     >
       {isNew && (
-        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/95 backdrop-blur-md text-white text-[9px] font-bold uppercase tracking-[0.18em] shadow-lg shadow-accent/40 ring-1 ring-white/20">
-            <Sparkles className="h-2.5 w-2.5" />
+        <div className="absolute bottom-3 right-3 z-30 pointer-events-none">
+          <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-green-500 text-white text-xs font-bold uppercase tracking-[0.2em] shadow-lg shadow-green-500/50 ring-2 ring-white/30">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-white opacity-75 animate-ping" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
+            </span>
             Novo
           </div>
         </div>
