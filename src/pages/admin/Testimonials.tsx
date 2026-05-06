@@ -288,6 +288,30 @@ const Testimonials = () => {
     }
   };
 
+  const handleOrderChange = async (id: string, newOrder: number) => {
+    const current = [...testimonials].sort((a, b) => a.display_order - b.display_order);
+    const oldIndex = current.findIndex((t) => t.id === id);
+    if (oldIndex < 0) return;
+    const targetIndex = Math.max(0, Math.min(current.length - 1, newOrder - 1));
+    const [moved] = current.splice(oldIndex, 1);
+    current.splice(targetIndex, 0, moved);
+    setReordering(true);
+    try {
+      const updates = current.map((t, idx) =>
+        supabase.from("testimonials").update({ display_order: idx }).eq("id", t.id)
+      );
+      const results = await Promise.all(updates);
+      const firstError = results.find((r) => r.error)?.error;
+      if (firstError) throw firstError;
+      invalidateTestimonials();
+      toast.success("Ordem atualizada!");
+    } catch (e: any) {
+      toast.error("Erro ao reordenar: " + (e.message || ""));
+    } finally {
+      setReordering(false);
+    }
+  };
+
   // Save mutation (create/update)
   const saveMutation = useMutation({
     mutationFn: async (testimonial: Partial<Testimonial>) => {
@@ -516,6 +540,7 @@ const Testimonials = () => {
                       onToggleActive={handleToggleActive}
                       onEdit={openEditDialog}
                       onDelete={handleDelete}
+                      onOrderChange={handleOrderChange}
                     />
                   ))}
                 </div>
