@@ -96,11 +96,13 @@ function SortableTestimonialRow({
   onToggleActive,
   onEdit,
   onDelete,
+  onOrderChange,
 }: {
   testimonial: Testimonial;
   onToggleActive: (id: string, currentState: boolean) => void;
   onEdit: (t: Testimonial) => void;
   onDelete: (id: string) => void;
+  onOrderChange: (id: string, newOrder: number) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: testimonial.id,
@@ -128,6 +130,26 @@ function SortableTestimonialRow({
         >
           <GripVertical className="h-5 w-5" />
         </button>
+
+        <div className="flex flex-col items-center gap-1">
+          <Label className="text-[10px] uppercase text-muted-foreground tracking-wider">Ordem</Label>
+          <Input
+            type="number"
+            min={1}
+            defaultValue={testimonial.display_order}
+            key={testimonial.display_order}
+            onBlur={(e) => {
+              const v = parseInt(e.target.value, 10);
+              if (!isNaN(v) && v !== testimonial.display_order) {
+                onOrderChange(testimonial.id, v);
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+            }}
+            className="w-16 h-9 text-center font-semibold"
+          />
+        </div>
 
         {/* Photo */}
         <div className="flex-shrink-0">
