@@ -305,6 +305,38 @@ export default function TestimonialsPage() {
           <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-accent/20 blur-3xl" />
           <div className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full bg-accent/10 blur-3xl" />
 
+          {/* Nuvens de nomes de empresas */}
+          {!isLoading && testimonials.length > 0 && (
+            <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+              {[0, 1, 2].map((rowIdx) => {
+                const companies = testimonials
+                  .map((t) => t.author_company)
+                  .filter((c): c is string => !!c);
+                if (companies.length === 0) return null;
+                const loop = [...companies, ...companies, ...companies];
+                const durations = ["80s", "110s", "95s"];
+                const tops = ["12%", "48%", "78%"];
+                const directions = rowIdx % 2 === 0 ? "cloud-marquee-ltr" : "cloud-marquee-rtl";
+                return (
+                  <div
+                    key={rowIdx}
+                    className={`absolute left-0 right-0 flex gap-16 whitespace-nowrap ${directions}`}
+                    style={{ top: tops[rowIdx], animationDuration: durations[rowIdx] }}
+                  >
+                    {loop.map((name, i) => (
+                      <span
+                        key={`${rowIdx}-${i}`}
+                        className="text-primary-foreground/10 font-bold uppercase tracking-[0.2em] text-3xl md:text-5xl lg:text-6xl select-none"
+                      >
+                        {name}
+                      </span>
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
           <div className="container relative mx-auto px-6 py-24 md:py-32 text-center">
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/15 border border-accent/30 text-accent text-xs uppercase tracking-[0.25em] font-semibold">
               <Quote className="h-3.5 w-3.5" />
