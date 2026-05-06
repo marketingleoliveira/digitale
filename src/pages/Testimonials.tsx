@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { Star, VolumeX, Volume2, Play, Maximize2, Quote, X, Search, CalendarIcon } from "lucide-react";
+import { Star, VolumeX, Volume2, Play, Maximize2, Quote, X, Search, CalendarIcon, Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -24,9 +24,10 @@ interface Testimonial {
   rating: number;
   years_partnership: string | null;
   created_at?: string;
+  display_order?: number;
 }
 
-function TestimonialCard({ t, onOpenVideo }: { t: Testimonial; onOpenVideo: (t: Testimonial) => void }) {
+function TestimonialCard({ t, onOpenVideo, isNew }: { t: Testimonial; onOpenVideo: (t: Testimonial) => void; isNew?: boolean }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isMuted, setIsMuted] = useState(true);
   const [isInView, setIsInView] = useState(false);
@@ -78,8 +79,15 @@ function TestimonialCard({ t, onOpenVideo }: { t: Testimonial; onOpenVideo: (t: 
   return (
     <div
       ref={containerRef}
-      className="group relative bg-card rounded-2xl overflow-hidden flex flex-col border border-border/60 shadow-[0_4px_20px_-8px_rgba(33,55,84,0.12)] hover:shadow-[0_16px_36px_-12px_rgba(33,55,84,0.22)] hover:-translate-y-1 transition-all duration-500"
+      className={`group relative bg-card rounded-2xl overflow-hidden flex flex-col border ${isNew ? "border-accent/60 ring-2 ring-accent/30" : "border-border/60"} shadow-[0_4px_20px_-8px_rgba(33,55,84,0.12)] hover:shadow-[0_16px_36px_-12px_rgba(33,55,84,0.22)] hover:-translate-y-1 transition-all duration-500`}
     >
+      {isNew && (
+        <div className="absolute top-0 left-0 right-0 z-20 bg-gradient-to-r from-accent via-accent to-accent/90 text-white text-[10px] font-bold uppercase tracking-[0.2em] py-1.5 px-3 flex items-center justify-center gap-1.5 shadow-lg">
+          <Sparkles className="h-3 w-3 animate-pulse" />
+          Novo Depoimento
+          <Sparkles className="h-3 w-3 animate-pulse" />
+        </div>
+      )}
       {/* Mídia */}
       <div className="relative bg-black aspect-[3/4] overflow-hidden">
         {hasVideo ? (
@@ -418,7 +426,12 @@ export default function TestimonialsPage() {
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 max-w-7xl mx-auto">
                 {filteredTestimonials.map((t) => (
-                  <TestimonialCard key={t.id} t={t} onOpenVideo={setOpenVideo} />
+                  <TestimonialCard
+                    key={t.id}
+                    t={t}
+                    onOpenVideo={setOpenVideo}
+                    isNew={(t.display_order ?? -1) === 0}
+                  />
                 ))}
               </div>
             )}
