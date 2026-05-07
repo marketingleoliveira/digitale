@@ -160,7 +160,6 @@ const SegmentDetail = () => {
     return (
       <div className="min-h-screen">
         <Header />
-      <SEO title="Segmento Têxtil Digitale" description="Conheça os tecidos da Digitale Têxtil ideais para cada segmento de moda: fitness, praia, sportwear e mais com tecnologia e qualidade." keywords="segmento têxtil, tecidos por segmento, fitness, praia, sportwear" />
         <main>
           <Skeleton className="h-[60vh] w-full" />
           <div className="container mx-auto px-6 py-16">
@@ -191,6 +190,12 @@ const SegmentDetail = () => {
   return (
     <div className="min-h-screen">
       <Header />
+      <SEO
+        title={`Tecidos para ${segment.name} – Segmento Digitale Têxtil`}
+        description={(segment.description || `Tecidos técnicos Digitale Têxtil para o segmento ${segment.name}: performance, conforto e tecnologia para sua confecção.`).slice(0, 160)}
+        keywords={`tecidos ${segment.name}, malhas ${segment.name}, segmento ${segment.name}, tecido para ${segment.name}, fornecedor ${segment.name}`}
+        image={heroImage}
+      />
       <main>
         {/* Hero Section */}
         <section className="relative h-[50vh] md:h-[60vh] overflow-hidden">
