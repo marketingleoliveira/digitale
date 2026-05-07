@@ -1,5 +1,6 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { SEO } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -92,6 +93,7 @@ const PrintsCatalog = () => {
   return (
     <div className="min-h-screen">
       <Header />
+      <SEO title="Catálogo de Estampas – Coleções de Prints Digitais" description="Explore o catálogo completo de estampas digitais Digitale Têxtil: coleções por categoria, temas e tendências para confecção de moda fitness e praia." keywords="catálogo de estampas, prints digitais, estampas para confecção, padronagem fitness, coleção de estampas" />
       <main className="py-12 md:py-20">
         <div className="container mx-auto px-6">
           {/* Header */}

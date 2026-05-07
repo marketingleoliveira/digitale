@@ -1,5 +1,6 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { SEO } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Shield, FileText, Lock, Eye, Database, Mail } from "lucide-react";
@@ -57,6 +58,7 @@ const Privacy = () => {
   return (
     <div className="min-h-screen">
       <Header />
+      <SEO title="Política de Privacidade – Digitale Têxtil" description="Conheça a Política de Privacidade da Digitale Têxtil e como tratamos seus dados pessoais conforme a LGPD." keywords="política de privacidade, LGPD, proteção de dados Digitale" />
       <main>
         {/* Hero Section */}
         <section className="relative py-20 md:py-28 bg-gradient-to-br from-primary via-primary/95 to-primary/90">

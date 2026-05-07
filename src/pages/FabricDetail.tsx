@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { SEO } from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -83,6 +84,7 @@ export default function FabricDetail() {
     return (
       <div className="min-h-screen">
         <Header />
+      <SEO title="Detalhes do Tecido Digitale Têxtil" description="Especificações técnicas, composição, gramatura e variações de cores dos tecidos Digitale Têxtil. Solicite amostra ou orçamento." keywords="ficha técnica tecido, composição malha, gramatura tecido, amostra tecido, comprar tecido" />
         <main className="pt-20">
           <div className="container mx-auto px-6 py-16">
             <Skeleton className="h-8 w-48 mb-8" />

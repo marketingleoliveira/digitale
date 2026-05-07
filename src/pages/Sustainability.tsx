@@ -1,5 +1,6 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { SEO } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Leaf, Droplets, Zap, Recycle, TreeDeciduous, Globe, Award, Heart } from "lucide-react";
@@ -70,6 +71,7 @@ const Sustainability = () => {
   return (
     <div className="min-h-screen">
       <Header />
+      <SEO title="Sustentabilidade – Linha ECO de Tecidos Reciclados" description="Descubra a linha ECO Digitale Têxtil: tecidos sustentáveis feitos com poliéster reciclado (PET), reduzindo impacto ambiental sem perder performance." keywords="tecidos sustentáveis, poliéster reciclado, tecido PET reciclado, linha ECO, moda sustentável, tecido ecológico" />
       <main>
         {/* Hero Section */}
         <section className="relative py-24 md:py-32 bg-gradient-to-br from-green-900 via-green-800 to-green-700 overflow-hidden">

@@ -1,5 +1,6 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { SEO } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useQuery } from "@tanstack/react-query";
@@ -94,6 +95,7 @@ const Prints = () => {
   return (
     <div className="min-h-screen">
       <Header />
+      <SEO title="Estampas Exclusivas para Tecidos Fitness e Moda Praia" description="Estampas digitais exclusivas para tecidos fitness e moda praia. Coleções autorais com alta definição, cores vibrantes e tendências de mercado." keywords="estampas exclusivas, estampas fitness, estampas moda praia, estampas digitais, estampa para tecido, prints autorais, padronagem têxtil" />
       <main>
         {/* Como podemos ajudar - B2B Section */}
         <section className="py-20 md:py-28 bg-primary">

@@ -1,5 +1,6 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { SEO } from "@/components/SEO";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link } from "react-router-dom";
@@ -76,6 +77,7 @@ const Segments = () => {
   return (
     <div className="min-h-screen">
       <Header />
+      <SEO title="Segmentos – Moda Fitness, Praia e Sportwear" description="Tecidos sob medida para os segmentos de moda fitness, moda praia, sportwear e beachwear. Soluções têxteis para cada nicho de confecção." keywords="moda fitness, moda praia, sportwear, beachwear, segmentos têxteis, tecidos para confecção" />
       <main>
         {/* Hero Section */}
         <section className="relative py-20 md:py-28 bg-gradient-to-br from-primary via-primary/95 to-primary/90 overflow-hidden">

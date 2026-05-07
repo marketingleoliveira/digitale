@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Header } from "@/components/layout/Header";
+import { SEO } from "@/components/SEO";
 import { Footer } from "@/components/layout/Footer";
 import { Star, VolumeX, Volume2, Play, Maximize2, Quote, X, Search, CalendarIcon, Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -298,6 +299,7 @@ export default function TestimonialsPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
+      <SEO title="Depoimentos de Clientes – Confecções Parceiras" description="Veja depoimentos reais de confecções e marcas que utilizam tecidos Digitale Têxtil em suas coleções de moda fitness, praia e sportwear." keywords="depoimentos clientes, avaliações Digitale Têxtil, confecções parceiras, cases de sucesso têxtil" />
       <main className="flex-1">
         {/* HERO premium */}
         <section className="relative bg-primary overflow-hidden">

@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { SEO } from "@/components/SEO";
 import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, ChevronRight, Newspaper, Filter, Eye, Sparkles, X, Heart } from "lucide-react";
 import { format } from "date-fns";
@@ -133,6 +134,7 @@ const RadarDigitale = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <SEO title="Radar Digitale – Tendências de Moda e Tecidos" description="Radar Digitale: tendências de moda, comportamento e inovações em tecidos para inspirar suas próximas coleções." keywords="tendências de moda, tendências têxteis, radar de moda, inovação têxtil, fashion trends Brasil" />
       <main>
         {/* Hero */}
         <section className="bg-white py-8 md:py-12">

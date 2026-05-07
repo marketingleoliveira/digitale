@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { SEO } from "@/components/SEO";
 import { Calendar, Search, Tag, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -76,6 +77,7 @@ const Blog = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
+      <SEO title="Blog Digitale Têxtil – Novidades e Tendências" description="Blog da Digitale Têxtil com novidades, tendências de moda, dicas de confecção e tecnologia em tecidos fitness e moda praia." keywords="blog tecidos, blog moda fitness, tendências têxteis, novidades Digitale, dicas de confecção" />
       {/* Hero */}
       <section className="pt-32 lg:pt-40 pb-16 bg-muted/50 border-b border-border">
         <div className="container mx-auto px-6">
