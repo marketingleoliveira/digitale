@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { SEO } from "@/components/SEO";
 import { Mail, Phone, MapPin, Clock, Send, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/layout/Header";
@@ -94,6 +95,7 @@ const Contact = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
+      <SEO title="Fale Conosco – Orçamento de Tecidos e Malhas" description="Entre em contato com a Digitale Têxtil. Solicite orçamento de tecidos fitness, moda praia, malhas técnicas e estampas exclusivas direto da fábrica." keywords="contato Digitale Têxtil, orçamento tecidos, comprar tecidos atacado, fornecedor de malha fitness, fábrica tecidos contato" />
       {/* Hero */}
       <section className="pt-32 lg:pt-40 pb-16 bg-muted/50 border-b border-border">
         <div className="container mx-auto px-6">

@@ -1,5 +1,6 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { SEO } from "@/components/SEO";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link, useParams, Navigate } from "react-router-dom";
@@ -159,6 +160,7 @@ const SegmentDetail = () => {
     return (
       <div className="min-h-screen">
         <Header />
+      <SEO title="Segmento Têxtil Digitale" description="Conheça os tecidos da Digitale Têxtil ideais para cada segmento de moda: fitness, praia, sportwear e mais com tecnologia e qualidade." keywords="segmento têxtil, tecidos por segmento, fitness, praia, sportwear" />
         <main>
           <Skeleton className="h-[60vh] w-full" />
           <div className="container mx-auto px-6 py-16">

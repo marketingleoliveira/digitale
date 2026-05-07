@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Award, Lightbulb, Leaf, Handshake, HeadphonesIcon, PackageCheck } from "lucide-react";
+import { SEO } from "@/components/SEO";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 
@@ -22,6 +23,7 @@ const About = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
+      <SEO title="Sobre a Digitale Têxtil – Fábrica de Tecidos Técnicos" description="Conheça a Digitale Têxtil: indústria brasileira de tecidos fitness, moda praia e malhas técnicas com inovação, qualidade e sustentabilidade desde sua fundação." keywords="sobre Digitale Têxtil, fábrica de tecidos, indústria têxtil Brasil, história Digitale, tecidos técnicos, fornecedor de malha" />
       {/* Hero */}
       <section className="pt-32 pb-20 bg-muted/30">
         <div className="container mx-auto px-4">

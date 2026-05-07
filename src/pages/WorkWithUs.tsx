@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { SEO } from "@/components/SEO";
 import { Briefcase, Upload, FileText, Check, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/layout/Header";
@@ -136,6 +137,7 @@ const WorkWithUs = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
+      <SEO title="Trabalhe Conosco – Vagas na Digitale Têxtil" description="Faça parte do time Digitale Têxtil. Confira nossas vagas abertas e oportunidades de carreira na indústria têxtil." keywords="trabalhe conosco, vagas Digitale Têxtil, emprego indústria têxtil, carreira têxtil São Paulo" />
       <section className="pt-32 lg:pt-40 pb-16 bg-gradient-to-br from-primary/10 to-accent/10 border-b border-border">
         <div className="container mx-auto px-6">
           <motion.div

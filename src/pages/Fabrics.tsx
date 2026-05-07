@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { SEO } from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -161,6 +162,7 @@ function FabricsContent() {
   return (
     <div className="min-h-screen">
       <Header />
+      <SEO title="Tecidos Fitness, Moda Praia e Malhas Técnicas" description="Catálogo completo de tecidos fitness, moda praia e malhas técnicas com proteção UV 50+, Aloe Vera, antibacteriano e linha ECO sustentável." keywords="catálogo de tecidos, tecido fitness, tecido moda praia, malha UV 50, tecido aloe vera, tecido antibacteriano, tecido eco sustentável, malha suplex, malha emana" />
       <main className="pt-20">
         {/* Hero */}
         <section className="py-16 bg-primary text-white">
