@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { SEO } from "@/components/SEO";
+import { JsonLd } from "@/components/JsonLd";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -141,6 +142,21 @@ export default function FabricDetail() {
         description={`${fabric.name}: ${(fabric.short_description || fabric.description || "tecido técnico Digitale Têxtil com alta performance").toString().slice(0, 150)}`}
         keywords={`tecido ${fabric.name}, malha ${fabric.name}, ${fabric.name} digitale, ficha técnica ${fabric.name}, comprar tecido ${fabric.name}`}
         image={fabric.image_url || undefined}
+      />
+      <JsonLd
+        id={`product-${fabric.slug}`}
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: `Tecido ${fabric.name}`,
+          description: (fabric.short_description || fabric.description || `Tecido ${fabric.name} Digitale Têxtil`).toString().slice(0, 300),
+          image: imageUrl,
+          sku: fabric.slug,
+          category: "Tecidos Técnicos",
+          brand: { "@type": "Brand", name: "Digitale Têxtil" },
+          manufacturer: { "@type": "Organization", name: "Digitale Têxtil" },
+          url: `https://digitaletextil.com.br/tecidos/${fabric.slug}`,
+        }}
       />
       <main className="pt-20">
         {/* Breadcrumb */}
