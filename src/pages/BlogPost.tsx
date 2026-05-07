@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { SEO } from "@/components/SEO";
 
 interface Post {
   id: string;
@@ -223,6 +224,12 @@ const BlogPost = () => {
   return (
     <div className="min-h-screen">
       <Header />
+      <SEO
+        title={`${post.title} – Blog Digitale Têxtil`}
+        description={(post.excerpt || post.title).slice(0, 160)}
+        keywords={`${post.title}, ${post.category?.name || "blog têxtil"}, blog Digitale Têxtil, tecidos, moda fitness, moda praia`}
+        image={post.featured_image || undefined}
+      />
       <main>
         {/* Hero Section */}
         <section className="relative py-16 md:py-24 bg-gradient-to-br from-primary via-primary/95 to-primary/90">

@@ -84,7 +84,6 @@ export default function FabricDetail() {
     return (
       <div className="min-h-screen">
         <Header />
-      <SEO title="Detalhes do Tecido Digitale Têxtil" description="Especificações técnicas, composição, gramatura e variações de cores dos tecidos Digitale Têxtil. Solicite amostra ou orçamento." keywords="ficha técnica tecido, composição malha, gramatura tecido, amostra tecido, comprar tecido" />
         <main className="pt-20">
           <div className="container mx-auto px-6 py-16">
             <Skeleton className="h-8 w-48 mb-8" />
@@ -137,6 +136,12 @@ export default function FabricDetail() {
   return (
     <div className="min-h-screen">
       <Header />
+      <SEO
+        title={`Tecido ${fabric.name} – Ficha Técnica e Composição`}
+        description={`${fabric.name}: ${(fabric.short_description || fabric.description || "tecido técnico Digitale Têxtil com alta performance").toString().slice(0, 150)}`}
+        keywords={`tecido ${fabric.name}, malha ${fabric.name}, ${fabric.name} digitale, ficha técnica ${fabric.name}, comprar tecido ${fabric.name}`}
+        image={fabric.image_url || undefined}
+      />
       <main className="pt-20">
         {/* Breadcrumb */}
         <div className="bg-secondary/30 border-b border-border">
