@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { SEO } from "@/components/SEO";
+import { JsonLd } from "@/components/JsonLd";
 
 interface Post {
   id: string;
@@ -229,6 +230,32 @@ const BlogPost = () => {
         description={(post.excerpt || post.title).slice(0, 160)}
         keywords={`${post.title}, ${post.category?.name || "blog têxtil"}, blog Digitale Têxtil, tecidos, moda fitness, moda praia`}
         image={post.featured_image || undefined}
+      />
+      <JsonLd
+        id={`blogposting-${post.slug}`}
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BlogPosting",
+          headline: post.title,
+          description: (post.excerpt || post.title).slice(0, 300),
+          image: post.featured_image || undefined,
+          datePublished: post.published_at || post.created_at,
+          dateModified: post.published_at || post.created_at,
+          author: { "@type": "Organization", name: "Digitale Têxtil" },
+          publisher: {
+            "@type": "Organization",
+            name: "Digitale Têxtil",
+            logo: {
+              "@type": "ImageObject",
+              url: "https://digitaletextil.com.br/favicon-32x32.png",
+            },
+          },
+          mainEntityOfPage: {
+            "@type": "WebPage",
+            "@id": `https://digitaletextil.com.br/blog/${post.slug}`,
+          },
+          articleSection: post.category?.name,
+        }}
       />
       <main>
         {/* Hero Section */}
