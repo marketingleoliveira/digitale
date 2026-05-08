@@ -1,6 +1,7 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SEO } from "@/components/SEO";
+import { JsonLd, buildBreadcrumbJsonLd } from "@/components/JsonLd";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Link, useParams, Navigate } from "react-router-dom";
@@ -195,6 +196,14 @@ const SegmentDetail = () => {
         description={(segment.description || `Tecidos técnicos Digitale Têxtil para o segmento ${segment.name}: performance, conforto e tecnologia para sua confecção.`).slice(0, 160)}
         keywords={`tecidos ${segment.name}, malhas ${segment.name}, segmento ${segment.name}, tecido para ${segment.name}, fornecedor ${segment.name}`}
         image={heroImage}
+      />
+      <JsonLd
+        id={`breadcrumb-segment-${segment.slug}`}
+        data={buildBreadcrumbJsonLd([
+          { name: "Home", url: "https://digitaletextil.com.br/" },
+          { name: "Segmentos", url: "https://digitaletextil.com.br/segmentos" },
+          { name: segment.name, url: `https://digitaletextil.com.br/segmentos/${segment.slug}` },
+        ])}
       />
       <main>
         {/* Hero Section */}

@@ -1,7 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { SEO } from "@/components/SEO";
-import { JsonLd } from "@/components/JsonLd";
+import { JsonLd, buildBreadcrumbJsonLd } from "@/components/JsonLd";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -62,6 +62,19 @@ export default function FabricDetail() {
       return data;
     },
     enabled: !!slug,
+  });
+
+  const { data: fabricCategoryData } = useQuery({
+    queryKey: ["fabric-category", (fabric as any)?.category_id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("fabric_categories")
+        .select("name, slug")
+        .eq("id", (fabric as any).category_id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!(fabric as any)?.category_id,
   });
 
   const { data: otherFabrics } = useQuery({
@@ -133,6 +146,12 @@ export default function FabricDetail() {
     ? (fabric.gallery_images as unknown as GalleryImage[])
     : [];
   const imageUrl = fabric.image_url || defaultImages[fabric.slug] || fabricMilano;
+  const fabricCategory = fabricCategoryData as { name?: string; slug?: string } | null;
+  const categoryName = fabricCategory?.name || "Tecidos Técnicos";
+  const categorySlug = fabricCategory?.slug;
+  const fabricUrl = `https://digitaletextil.com.br/tecidos/${fabric.slug}`;
+  const priceField = (fabric as any).price as number | string | null | undefined;
+  const hasPrice = priceField !== null && priceField !== undefined && priceField !== "";
 
   return (
     <div className="min-h-screen">
@@ -152,11 +171,40 @@ export default function FabricDetail() {
           description: (fabric.short_description || fabric.description || `Tecido ${fabric.name} Digitale Têxtil`).toString().slice(0, 300),
           image: imageUrl,
           sku: fabric.slug,
-          category: "Tecidos Técnicos",
+          mpn: fabric.slug,
+          category: categoryName,
           brand: { "@type": "Brand", name: "Digitale Têxtil" },
-          manufacturer: { "@type": "Organization", name: "Digitale Têxtil" },
-          url: `https://digitaletextil.com.br/tecidos/${fabric.slug}`,
+          manufacturer: {
+            "@type": "Organization",
+            name: "Digitale Têxtil",
+            url: "https://digitaletextil.com.br",
+          },
+          url: fabricUrl,
+          offers: {
+            "@type": "Offer",
+            url: fabricUrl,
+            priceCurrency: "BRL",
+            ...(hasPrice
+              ? { price: String(priceField) }
+              : { priceSpecification: { "@type": "PriceSpecification", priceCurrency: "BRL", valueAddedTaxIncluded: true } }),
+            availability: "https://schema.org/InStock",
+            itemCondition: "https://schema.org/NewCondition",
+            seller: { "@type": "Organization", name: "Digitale Têxtil" },
+            businessFunction: "https://schema.org/Sell",
+            eligibleCustomerType: "https://schema.org/Business",
+          },
         }}
+      />
+      <JsonLd
+        id={`breadcrumb-fabric-${fabric.slug}`}
+        data={buildBreadcrumbJsonLd([
+          { name: "Home", url: "https://digitaletextil.com.br/" },
+          { name: "Tecidos", url: "https://digitaletextil.com.br/tecidos" },
+          ...(categorySlug
+            ? [{ name: categoryName, url: `https://digitaletextil.com.br/tecidos?categoria=${categorySlug}` }]
+            : []),
+          { name: fabric.name, url: fabricUrl },
+        ])}
       />
       <main className="pt-20">
         {/* Breadcrumb */}
