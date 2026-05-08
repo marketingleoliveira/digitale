@@ -46,3 +46,29 @@ export const ORGANIZATION_JSONLD = {
 };
 
 export default JsonLd;
+
+export const PUBLISHER_JSONLD = {
+  "@type": "Organization",
+  name: "Digitale Têxtil",
+  logo: {
+    "@type": "ImageObject",
+    url: "https://digitaletextil.com.br/favicon-32x32.png",
+    width: 32,
+    height: 32,
+  },
+};
+
+export function buildBreadcrumbJsonLd(
+  items: Array<{ name: string; url: string }>
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((it, idx) => ({
+      "@type": "ListItem",
+      position: idx + 1,
+      name: it.name,
+      item: it.url,
+    })),
+  };
+}
