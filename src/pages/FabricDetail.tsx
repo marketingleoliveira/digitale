@@ -53,7 +53,7 @@ export default function FabricDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("fabrics")
-        .select("*, category:fabric_categories(id, name, slug)")
+        .select("*")
         .eq("slug", slug)
         .eq("is_active", true)
         .maybeSingle();
@@ -62,6 +62,19 @@ export default function FabricDetail() {
       return data;
     },
     enabled: !!slug,
+  });
+
+  const { data: fabricCategoryData } = useQuery({
+    queryKey: ["fabric-category", (fabric as any)?.category_id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("fabric_categories")
+        .select("name, slug")
+        .eq("id", (fabric as any).category_id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!(fabric as any)?.category_id,
   });
 
   const { data: otherFabrics } = useQuery({
@@ -133,7 +146,7 @@ export default function FabricDetail() {
     ? (fabric.gallery_images as unknown as GalleryImage[])
     : [];
   const imageUrl = fabric.image_url || defaultImages[fabric.slug] || fabricMilano;
-  const fabricCategory = (fabric as any).category as { name?: string; slug?: string } | null;
+  const fabricCategory = fabricCategoryData as { name?: string; slug?: string } | null;
   const categoryName = fabricCategory?.name || "Tecidos Técnicos";
   const categorySlug = fabricCategory?.slug;
   const fabricUrl = `https://digitaletextil.com.br/tecidos/${fabric.slug}`;
