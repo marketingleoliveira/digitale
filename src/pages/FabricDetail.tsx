@@ -1,7 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { SEO } from "@/components/SEO";
-import { JsonLd } from "@/components/JsonLd";
+import { JsonLd, buildBreadcrumbJsonLd } from "@/components/JsonLd";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -53,7 +53,7 @@ export default function FabricDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("fabrics")
-        .select("*")
+        .select("*, category:fabric_categories(id, name, slug)")
         .eq("slug", slug)
         .eq("is_active", true)
         .maybeSingle();
