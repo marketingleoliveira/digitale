@@ -259,22 +259,34 @@ const BlogPost = () => {
           description: (post.excerpt || post.title).slice(0, 300),
           image: post.featured_image || undefined,
           datePublished: post.published_at || post.created_at,
-          dateModified: post.published_at || post.created_at,
-          author: { "@type": "Organization", name: "Digitale Têxtil" },
-          publisher: {
-            "@type": "Organization",
-            name: "Digitale Têxtil",
-            logo: {
-              "@type": "ImageObject",
-              url: "https://digitaletextil.com.br/favicon-32x32.png",
-            },
+          dateModified: post.updated_at || post.published_at || post.created_at,
+          author: {
+            "@type": "Person",
+            name: authorName,
           },
+          publisher: PUBLISHER_JSONLD,
+          keywords: [post.category?.name, "blog Digitale Têxtil", "tecidos técnicos", "moda fitness", "moda praia"]
+            .filter(Boolean)
+            .join(", "),
+          articleSection: post.category?.name,
+          inLanguage: "pt-BR",
+          url: `https://digitaletextil.com.br/blog/${post.slug}`,
           mainEntityOfPage: {
             "@type": "WebPage",
             "@id": `https://digitaletextil.com.br/blog/${post.slug}`,
           },
-          articleSection: post.category?.name,
         }}
+      />
+      <JsonLd
+        id={`breadcrumb-blog-${post.slug}`}
+        data={buildBreadcrumbJsonLd([
+          { name: "Home", url: "https://digitaletextil.com.br/" },
+          { name: "Blog", url: "https://digitaletextil.com.br/blog" },
+          ...(post.category
+            ? [{ name: post.category.name, url: `https://digitaletextil.com.br/blog?categoria=${post.category.slug}` }]
+            : []),
+          { name: post.title, url: `https://digitaletextil.com.br/blog/${post.slug}` },
+        ])}
       />
       <main>
         {/* Hero Section */}
