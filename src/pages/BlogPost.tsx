@@ -282,9 +282,6 @@ const BlogPost = () => {
         data={buildBreadcrumbJsonLd([
           { name: "Home", url: "https://digitaletextil.com.br/" },
           { name: "Blog", url: "https://digitaletextil.com.br/blog" },
-          ...(post.category
-            ? [{ name: post.category.name, url: `https://digitaletextil.com.br/blog?categoria=${post.category.slug}` }]
-            : []),
           { name: post.title, url: `https://digitaletextil.com.br/blog/${post.slug}` },
         ])}
       />

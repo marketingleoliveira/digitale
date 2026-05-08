@@ -200,9 +200,6 @@ export default function FabricDetail() {
         data={buildBreadcrumbJsonLd([
           { name: "Home", url: "https://digitaletextil.com.br/" },
           { name: "Tecidos", url: "https://digitaletextil.com.br/tecidos" },
-          ...(categorySlug
-            ? [{ name: categoryName, url: `https://digitaletextil.com.br/tecidos?categoria=${categorySlug}` }]
-            : []),
           { name: fabric.name, url: fabricUrl },
         ])}
       />
