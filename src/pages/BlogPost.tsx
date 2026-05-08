@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { SEO } from "@/components/SEO";
-import { JsonLd } from "@/components/JsonLd";
+import { JsonLd, PUBLISHER_JSONLD, buildBreadcrumbJsonLd } from "@/components/JsonLd";
 
 interface Post {
   id: string;
@@ -22,6 +22,10 @@ interface Post {
   featured_image: string | null;
   published_at: string | null;
   created_at: string;
+  updated_at?: string | null;
+  author_id?: string | null;
+  meta_description?: string | null;
+  meta_title?: string | null;
   views: number;
   category: {
     id: string;
@@ -44,6 +48,7 @@ const BlogPost = () => {
   const { t, language } = useLanguage();
   const [post, setPost] = useState<Post | null>(null);
   const [relatedPosts, setRelatedPosts] = useState<RelatedPost[]>([]);
+  const [authorName, setAuthorName] = useState<string>("Digitale Têxtil");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -64,6 +69,10 @@ const BlogPost = () => {
           featured_image,
           published_at,
           created_at,
+          updated_at,
+          author_id,
+          meta_description,
+          meta_title,
           views,
           category:blog_categories(id, name, slug)
         `)
@@ -77,6 +86,16 @@ const BlogPost = () => {
       }
 
       setPost(postData as Post);
+
+      // Fetch author profile (no FK, separate query)
+      if (postData.author_id) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("user_id", postData.author_id)
+          .maybeSingle();
+        if (profile?.full_name) setAuthorName(profile.full_name);
+      }
 
       // Increment views
       await supabase
