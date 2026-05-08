@@ -133,6 +133,12 @@ export default function FabricDetail() {
     ? (fabric.gallery_images as unknown as GalleryImage[])
     : [];
   const imageUrl = fabric.image_url || defaultImages[fabric.slug] || fabricMilano;
+  const fabricCategory = (fabric as any).category as { name?: string; slug?: string } | null;
+  const categoryName = fabricCategory?.name || "Tecidos Técnicos";
+  const categorySlug = fabricCategory?.slug;
+  const fabricUrl = `https://digitaletextil.com.br/tecidos/${fabric.slug}`;
+  const priceField = (fabric as any).price as number | string | null | undefined;
+  const hasPrice = priceField !== null && priceField !== undefined && priceField !== "";
 
   return (
     <div className="min-h-screen">
