@@ -158,11 +158,40 @@ export default function FabricDetail() {
           description: (fabric.short_description || fabric.description || `Tecido ${fabric.name} Digitale Têxtil`).toString().slice(0, 300),
           image: imageUrl,
           sku: fabric.slug,
-          category: "Tecidos Técnicos",
+          mpn: fabric.slug,
+          category: categoryName,
           brand: { "@type": "Brand", name: "Digitale Têxtil" },
-          manufacturer: { "@type": "Organization", name: "Digitale Têxtil" },
-          url: `https://digitaletextil.com.br/tecidos/${fabric.slug}`,
+          manufacturer: {
+            "@type": "Organization",
+            name: "Digitale Têxtil",
+            url: "https://digitaletextil.com.br",
+          },
+          url: fabricUrl,
+          offers: {
+            "@type": "Offer",
+            url: fabricUrl,
+            priceCurrency: "BRL",
+            ...(hasPrice
+              ? { price: String(priceField) }
+              : { priceSpecification: { "@type": "PriceSpecification", priceCurrency: "BRL", valueAddedTaxIncluded: true } }),
+            availability: "https://schema.org/InStock",
+            itemCondition: "https://schema.org/NewCondition",
+            seller: { "@type": "Organization", name: "Digitale Têxtil" },
+            businessFunction: "https://schema.org/Sell",
+            eligibleCustomerType: "https://schema.org/Business",
+          },
         }}
+      />
+      <JsonLd
+        id={`breadcrumb-fabric-${fabric.slug}`}
+        data={buildBreadcrumbJsonLd([
+          { name: "Home", url: "https://digitaletextil.com.br/" },
+          { name: "Tecidos", url: "https://digitaletextil.com.br/tecidos" },
+          ...(categorySlug
+            ? [{ name: categoryName, url: `https://digitaletextil.com.br/tecidos?categoria=${categorySlug}` }]
+            : []),
+          { name: fabric.name, url: fabricUrl },
+        ])}
       />
       <main className="pt-20">
         {/* Breadcrumb */}
