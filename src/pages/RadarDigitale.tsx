@@ -243,67 +243,83 @@ const RadarDigitale = () => {
                   </div>
 
                   {/* Editions List */}
-                  <div className="bg-card rounded-2xl border border-border p-5">
-                    <h3 className="font-semibold text-foreground text-sm uppercase tracking-wider mb-4">
-                      Edições
-                    </h3>
-                    <div className="space-y-1 max-h-[400px] overflow-y-auto pr-1">
+                  <div className="bg-card rounded-2xl border border-border p-5 shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-semibold text-foreground text-sm uppercase tracking-wider">
+                        Edições
+                      </h3>
+                      <span className="text-[11px] font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                        {filteredEditions.length}
+                      </span>
+                    </div>
+                    <div className="space-y-2 max-h-[460px] overflow-y-auto pr-1 -mr-1">
                       {isLoading ? (
                         Array.from({ length: 4 }).map((_, i) => (
-                          <Skeleton key={i} className="h-12 w-full rounded-lg" />
+                          <Skeleton key={i} className="h-16 w-full rounded-xl" />
                         ))
                       ) : filteredEditions.length === 0 ? (
                         <p className="text-sm text-muted-foreground py-2">
                           Nenhuma edição encontrada.
                         </p>
                       ) : (
-                        filteredEditions.map((edition) => (
-                          <button
-                            key={edition.id}
-                            onClick={() => setSelectedEdition(edition.id)}
-                            className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors group ${
-                              activeEdition?.id === edition.id
-                                ? "bg-accent/10 border border-accent/20"
-                                : "hover:bg-muted"
-                            }`}
-                          >
-                            <div className="flex items-center gap-2">
-                              <p className={`text-sm font-medium truncate ${
-                                activeEdition?.id === edition.id ? "text-accent" : "text-foreground"
-                              }`}>
-                                {edition.title}
-                              </p>
-                              {edition.id === firstEditionId && (
-                                <Badge className="bg-green-500 text-white text-[10px] px-1.5 py-0 shrink-0 animate-pulse">
-                                  <Sparkles className="h-2.5 w-2.5 mr-0.5" />
-                                  NOVO
-                                </Badge>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              <span className="text-xs text-muted-foreground">
-                                {new Date(edition.edition_date).toLocaleDateString("pt-BR", {
-                                  day: "2-digit",
-                                  month: "short",
-                                  year: "numeric",
-                                })}
-                              </span>
-                              <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Eye className="h-3 w-3" />
-                                {formatViews(getViewCount(edition))}
-                              </span>
-                              <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Heart className={`h-3 w-3 ${likedEditions.has(edition.id) ? "fill-red-500 text-red-500" : ""}`} />
-                                {formatViews(edition.likes ?? 0)}
-                              </span>
+                        filteredEditions.map((edition) => {
+                          const isActive = activeEdition?.id === edition.id;
+                          const isNew = edition.id === firstEditionId;
+                          return (
+                            <button
+                              key={edition.id}
+                              onClick={() => setSelectedEdition(edition.id)}
+                              className={`relative w-full text-left p-3 rounded-xl transition-all duration-200 group overflow-hidden ${
+                                isActive
+                                  ? "bg-accent/5 ring-1 ring-accent/30 shadow-sm"
+                                  : "hover:bg-muted/60 ring-1 ring-transparent hover:ring-border"
+                              }`}
+                            >
+                              <span
+                                className={`absolute left-0 top-2 bottom-2 w-1 rounded-r-full transition-all ${
+                                  isActive ? "bg-accent" : "bg-transparent group-hover:bg-border"
+                                }`}
+                              />
+                              <div className="flex items-start justify-between gap-2 mb-1.5">
+                                <p className={`text-sm font-semibold leading-snug line-clamp-2 ${
+                                  isActive ? "text-accent" : "text-foreground group-hover:text-accent"
+                                }`}>
+                                  {edition.title}
+                                </p>
+                                {isNew && (
+                                  <Badge className="bg-green-500 hover:bg-green-500 text-white text-[9px] font-bold tracking-wider px-1.5 py-0 h-4 shrink-0 shadow-sm">
+                                    <Sparkles className="h-2.5 w-2.5 mr-0.5" />
+                                    NOVO
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
+                                <span className="font-medium whitespace-nowrap">
+                                  {new Date(edition.edition_date).toLocaleDateString("pt-BR", {
+                                    day: "2-digit",
+                                    month: "short",
+                                    year: "numeric",
+                                  })}
+                                </span>
+                                <div className="flex items-center gap-2.5 shrink-0">
+                                  <span className="flex items-center gap-1">
+                                    <Eye className="h-3 w-3" />
+                                    {formatViews(getViewCount(edition))}
+                                  </span>
+                                  <span className="flex items-center gap-1">
+                                    <Heart className={`h-3 w-3 ${likedEditions.has(edition.id) ? "fill-red-500 text-red-500" : ""}`} />
+                                    {formatViews(edition.likes ?? 0)}
+                                  </span>
+                                </div>
+                              </div>
                               {edition.radar_categories && (
-                                <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                                <Badge variant="outline" className="mt-2 text-[9px] font-medium px-1.5 py-0 h-4 border-accent/30 text-accent/80 bg-accent/5">
                                   {edition.radar_categories.name}
                                 </Badge>
                               )}
-                            </div>
-                          </button>
-                        ))
+                            </button>
+                          );
+                        })
                       )}
                     </div>
                   </div>
