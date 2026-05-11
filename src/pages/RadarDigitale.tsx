@@ -145,13 +145,20 @@ const RadarDigitale = () => {
               className="max-w-full h-auto max-h-[200px] md:max-h-[280px] object-contain"
             />
             {editions.length > 0 && (
-              <p className="text-muted-foreground text-sm md:text-base font-medium">
-                Tivemos + de{" "}
-                <span className="text-accent font-bold text-lg md:text-xl">
-                  {formatViews(editions.reduce((sum, e) => sum + getViewCount(e), 0))}
-                </span>{" "}
-                leitores
-              </p>
+              <div className="group relative inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-accent/10 via-primary/5 to-accent/10 border border-accent/20 shadow-sm hover:shadow-md hover:scale-105 transition-all duration-300 animate-fade-in cursor-default overflow-hidden">
+                <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-accent opacity-75 animate-ping" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-accent" />
+                </span>
+                <p className="relative text-muted-foreground text-sm md:text-base font-medium">
+                  Tivemos + de{" "}
+                  <span className="text-accent font-bold text-lg md:text-2xl tracking-tight bg-gradient-to-r from-accent via-orange-500 to-accent bg-[length:200%_auto] bg-clip-text text-transparent animate-[shimmer_3s_linear_infinite]">
+                    {formatViews(editions.reduce((sum, e) => sum + getViewCount(e), 0))}
+                  </span>{" "}
+                  leitores
+                </p>
+              </div>
             )}
           </div>
         </section>
