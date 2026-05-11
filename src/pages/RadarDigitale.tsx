@@ -234,6 +234,14 @@ const RadarDigitale = () => {
                 </p>
               </div>
             )}
+            <Button
+              onClick={() => setSuggestOpen(true)}
+              size="lg"
+              className="mt-2 gap-2 bg-accent hover:bg-accent/90 text-accent-foreground font-bold uppercase tracking-wider shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
+            >
+              <Lightbulb className="h-5 w-5" />
+              Sugerir Tema
+            </Button>
           </div>
         </section>
 
