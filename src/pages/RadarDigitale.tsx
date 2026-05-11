@@ -21,6 +21,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 
 interface RadarCategory {
@@ -234,14 +235,6 @@ const RadarDigitale = () => {
                 </p>
               </div>
             )}
-            <Button
-              onClick={() => setSuggestOpen(true)}
-              size="lg"
-              className="mt-2 gap-2 bg-accent hover:bg-accent/90 text-accent-foreground font-bold uppercase tracking-wider shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
-            >
-              <Lightbulb className="h-5 w-5" />
-              Sugerir Tema
-            </Button>
           </div>
         </section>
 
@@ -252,6 +245,29 @@ const RadarDigitale = () => {
               {/* Sidebar */}
               <aside className="lg:w-72 flex-shrink-0">
                 <div className="sticky top-24 space-y-6">
+                  {/* Suggest Topic CTA */}
+                  <TooltipProvider delayDuration={150}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          onClick={() => setSuggestOpen(true)}
+                          size="lg"
+                          className="w-full justify-start gap-2 bg-accent hover:bg-accent/90 text-accent-foreground font-bold uppercase tracking-wider shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
+                        >
+                          <Lightbulb className="h-5 w-5" />
+                          Sugerir Tema
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="right" align="start" className="max-w-xs">
+                        <p className="text-sm leading-relaxed">
+                          Tem um assunto que gostaria de ler aqui no Radar Digitale?
+                          Envie sua sugestão de tema e nossa redação pode transformá-la
+                          em uma próxima edição.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
                   {/* Category Filter */}
                   <div className="bg-card rounded-2xl border border-border p-5">
                     <div className="flex items-center gap-2 mb-4">
