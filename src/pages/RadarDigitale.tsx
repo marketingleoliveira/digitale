@@ -60,6 +60,74 @@ const RadarDigitale = () => {
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
   const [likedEditions, setLikedEditions] = useState<Set<string>>(new Set());
+  const [suggestOpen, setSuggestOpen] = useState(false);
+  const [suggestForm, setSuggestForm] = useState({ topic: "", name: "", email: "", message: "" });
+  const [submittingSuggestion, setSubmittingSuggestion] = useState(false);
+
+  const submitSuggestion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const topic = suggestForm.topic.trim();
+    if (topic.length < 3) {
+      toast.error("Descreva o tema com pelo menos 3 caracteres.");
+      return;
+    }
+    if (topic.length > 200) {
+      toast.error("O tema deve ter no máximo 200 caracteres.");
+      return;
+    }
+    const email = suggestForm.email.trim();
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast.error("E-mail inválido.");
+      return;
+    }
+    setSubmittingSuggestion(true);
+    const { error } = await supabase.from("radar_topic_suggestions").insert({
+      topic,
+      name: suggestForm.name.trim().slice(0, 120) || null,
+      email: email.slice(0, 200) || null,
+      message: suggestForm.message.trim().slice(0, 1000) || null,
+      page_url: window.location.href,
+    });
+    setSubmittingSuggestion(false);
+    if (error) {
+      toast.error("Não foi possível enviar. Tente novamente.");
+      return;
+    }
+    toast.success("Sugestão enviada! Obrigado por contribuir.");
+    setSuggestForm({ topic: "", name: "", email: "", message: "" });
+    setSuggestOpen(false);
+  };
+
+  const shareEdition = async (
+    via: "native" | "copy" | "whatsapp" | "facebook" | "twitter" | "linkedin" | "email"
+  ) => {
+    if (!activeEdition) return;
+    const url = `${window.location.origin}/radar-digitale?ed=${activeEdition.slug || activeEdition.id}`;
+    const title = activeEdition.title;
+    const text = `Confira "${title}" no Radar Digitale da Digitale Têxtil.`;
+    if (via === "native" && (navigator as any).share) {
+      try { await (navigator as any).share({ title, text, url }); } catch {}
+      return;
+    }
+    if (via === "copy") {
+      try {
+        await navigator.clipboard.writeText(url);
+        toast.success("Link copiado!");
+      } catch {
+        toast.error("Não foi possível copiar o link");
+      }
+      return;
+    }
+    const enc = encodeURIComponent;
+    const map: Record<string, string> = {
+      whatsapp: `https://wa.me/?text=${enc(text + " " + url)}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${enc(url)}`,
+      twitter: `https://twitter.com/intent/tweet?text=${enc(text)}&url=${enc(url)}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${enc(url)}`,
+      email: `mailto:?subject=${enc(title)}&body=${enc(text + "\n\n" + url)}`,
+    };
+    window.open(map[via], "_blank", "noopener,noreferrer");
+  };
 
   const { data: categories = [] } = useQuery({
     queryKey: ["radar-categories"],
