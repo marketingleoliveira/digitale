@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { SEO } from "@/components/SEO";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calendar, ChevronRight, Newspaper, Filter, Eye, Sparkles, X, Heart } from "lucide-react";
+import { Calendar, ChevronRight, Newspaper, Filter, Eye, Sparkles, X, Heart, Share2, Lightbulb, Send, Link2, MessageCircle } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -16,6 +16,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import radarHeader from "@/assets/radar-header.png";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 interface RadarCategory {
   id: string;
@@ -54,6 +60,74 @@ const RadarDigitale = () => {
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
   const [likedEditions, setLikedEditions] = useState<Set<string>>(new Set());
+  const [suggestOpen, setSuggestOpen] = useState(false);
+  const [suggestForm, setSuggestForm] = useState({ topic: "", name: "", email: "", message: "" });
+  const [submittingSuggestion, setSubmittingSuggestion] = useState(false);
+
+  const submitSuggestion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const topic = suggestForm.topic.trim();
+    if (topic.length < 3) {
+      toast.error("Descreva o tema com pelo menos 3 caracteres.");
+      return;
+    }
+    if (topic.length > 200) {
+      toast.error("O tema deve ter no máximo 200 caracteres.");
+      return;
+    }
+    const email = suggestForm.email.trim();
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast.error("E-mail inválido.");
+      return;
+    }
+    setSubmittingSuggestion(true);
+    const { error } = await supabase.from("radar_topic_suggestions").insert({
+      topic,
+      name: suggestForm.name.trim().slice(0, 120) || null,
+      email: email.slice(0, 200) || null,
+      message: suggestForm.message.trim().slice(0, 1000) || null,
+      page_url: window.location.href,
+    });
+    setSubmittingSuggestion(false);
+    if (error) {
+      toast.error("Não foi possível enviar. Tente novamente.");
+      return;
+    }
+    toast.success("Sugestão enviada! Obrigado por contribuir.");
+    setSuggestForm({ topic: "", name: "", email: "", message: "" });
+    setSuggestOpen(false);
+  };
+
+  const shareEdition = async (
+    via: "native" | "copy" | "whatsapp" | "facebook" | "twitter" | "linkedin" | "email"
+  ) => {
+    if (!activeEdition) return;
+    const url = `${window.location.origin}/radar-digitale?ed=${activeEdition.slug || activeEdition.id}`;
+    const title = activeEdition.title;
+    const text = `Confira "${title}" no Radar Digitale da Digitale Têxtil.`;
+    if (via === "native" && (navigator as any).share) {
+      try { await (navigator as any).share({ title, text, url }); } catch {}
+      return;
+    }
+    if (via === "copy") {
+      try {
+        await navigator.clipboard.writeText(url);
+        toast.success("Link copiado!");
+      } catch {
+        toast.error("Não foi possível copiar o link");
+      }
+      return;
+    }
+    const enc = encodeURIComponent;
+    const map: Record<string, string> = {
+      whatsapp: `https://wa.me/?text=${enc(text + " " + url)}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${enc(url)}`,
+      twitter: `https://twitter.com/intent/tweet?text=${enc(text)}&url=${enc(url)}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${enc(url)}`,
+      email: `mailto:?subject=${enc(title)}&body=${enc(text + "\n\n" + url)}`,
+    };
+    window.open(map[via], "_blank", "noopener,noreferrer");
+  };
 
   const { data: categories = [] } = useQuery({
     queryKey: ["radar-categories"],
@@ -160,6 +234,14 @@ const RadarDigitale = () => {
                 </p>
               </div>
             )}
+            <Button
+              onClick={() => setSuggestOpen(true)}
+              size="lg"
+              className="mt-2 gap-2 bg-accent hover:bg-accent/90 text-accent-foreground font-bold uppercase tracking-wider shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
+            >
+              <Lightbulb className="h-5 w-5" />
+              Sugerir Tema
+            </Button>
           </div>
         </section>
 
@@ -395,6 +477,43 @@ const RadarDigitale = () => {
                           <Heart className={cn("h-4 w-4", likedEditions.has(activeEdition.id) && "fill-red-500")} />
                           Curtir · {formatViews(activeEdition.likes ?? 0)}
                         </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="gap-2 hover:border-accent hover:bg-accent/10 hover:text-accent transition-all"
+                            >
+                              <Share2 className="h-4 w-4" />
+                              Compartilhar
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            {typeof navigator !== "undefined" && (navigator as any).share && (
+                              <DropdownMenuItem onClick={() => shareEdition("native")}>
+                                <Share2 className="h-4 w-4 mr-2" /> Compartilhar...
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem onClick={() => shareEdition("copy")}>
+                              <Link2 className="h-4 w-4 mr-2" /> Copiar link
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => shareEdition("whatsapp")}>
+                              <MessageCircle className="h-4 w-4 mr-2 text-green-600" /> WhatsApp
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => shareEdition("linkedin")}>
+                              <Share2 className="h-4 w-4 mr-2 text-blue-700" /> LinkedIn
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => shareEdition("facebook")}>
+                              <Share2 className="h-4 w-4 mr-2 text-blue-600" /> Facebook
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => shareEdition("twitter")}>
+                              <Share2 className="h-4 w-4 mr-2" /> X / Twitter
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => shareEdition("email")}>
+                              <Send className="h-4 w-4 mr-2" /> E-mail
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                       <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground">
                         {activeEdition.title}
@@ -423,6 +542,80 @@ const RadarDigitale = () => {
           </div>
         </section>
       </main>
+
+      <Dialog open={suggestOpen} onOpenChange={setSuggestOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center">
+                <Lightbulb className="h-5 w-5 text-accent" />
+              </div>
+              <div>
+                <DialogTitle>Sugerir um tema</DialogTitle>
+                <DialogDescription>
+                  Conte qual assunto você gostaria de ler em uma próxima edição do Radar Digitale.
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+          <form onSubmit={submitSuggestion} className="space-y-4 mt-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="topic">Tema sugerido *</Label>
+              <Input
+                id="topic"
+                required
+                maxLength={200}
+                placeholder="Ex.: Tendências de moda praia 2027"
+                value={suggestForm.topic}
+                onChange={(e) => setSuggestForm({ ...suggestForm, topic: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="name">Seu nome (opcional)</Label>
+                <Input
+                  id="name"
+                  maxLength={120}
+                  value={suggestForm.name}
+                  onChange={(e) => setSuggestForm({ ...suggestForm, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="email">E-mail (opcional)</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  maxLength={200}
+                  placeholder="voce@empresa.com"
+                  value={suggestForm.email}
+                  onChange={(e) => setSuggestForm({ ...suggestForm, email: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="message">Detalhes (opcional)</Label>
+              <Textarea
+                id="message"
+                maxLength={1000}
+                rows={4}
+                placeholder="Conte por que esse tema interessa, perguntas que gostaria de ver respondidas, etc."
+                value={suggestForm.message}
+                onChange={(e) => setSuggestForm({ ...suggestForm, message: e.target.value })}
+              />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="ghost" onClick={() => setSuggestOpen(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={submittingSuggestion} className="gap-2">
+                <Send className="h-4 w-4" />
+                {submittingSuggestion ? "Enviando..." : "Enviar sugestão"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       <Footer />
     </div>
   );

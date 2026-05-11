@@ -43,6 +43,7 @@ import Permissions from "./pages/admin/Permissions";
 import SegmentsAdmin from "./pages/admin/Segments";
 import RadarDigitale from "./pages/RadarDigitale";
 import RadarAdmin from "./pages/admin/RadarAdmin";
+import RadarTopicSuggestions from "./pages/admin/RadarTopicSuggestions";
 import FabricLeads from "./pages/admin/FabricLeads";
 import AgenteCRM from "./pages/admin/AgenteCRM";
 import AgenteVendedor from "./pages/admin/AgenteVendedor";
@@ -133,6 +134,7 @@ const App = () => (
               <Route path="/admin/print-categories" element={<ProtectedRoute requireAdmin><PrintCategories /></ProtectedRoute>} />
               <Route path="/admin/segments" element={<ProtectedRoute requireAdmin><SegmentsAdmin /></ProtectedRoute>} />
               <Route path="/admin/radar" element={<ProtectedRoute requireAdmin><RadarAdmin /></ProtectedRoute>} />
+              <Route path="/admin/radar/sugestoes" element={<ProtectedRoute requireAdmin><RadarTopicSuggestions /></ProtectedRoute>} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>

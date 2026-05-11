@@ -26,7 +26,7 @@ interface AdminLayoutProps {
   title: string;
 }
 
-import { Mail, Quote, Briefcase, FileCheck, ShieldCheck, Flame, Target, Layers } from "lucide-react";
+import { Mail, Quote, Briefcase, FileCheck, ShieldCheck, Flame, Target, Layers, Lightbulb } from "lucide-react";
 
 type MenuItem = {
   icon: any;
@@ -61,6 +61,7 @@ const menuItems: MenuItem[] = [
   { icon: MessageSquare, label: "Contatos", href: "/admin/contacts", allowedRoles: ["sdr", "vendedor"] },
   { icon: Mail, label: "Newsletter", href: "/admin/newsletter", allowedRoles: ["sdr", "vendedor"] },
   { icon: FileText, label: "Radar Digitale", href: "/admin/radar", adminOnly: true },
+  { icon: Lightbulb, label: "Sugestões Radar", href: "/admin/radar/sugestoes", adminOnly: true },
   { icon: Users, label: "Usuários", href: "/admin/users", adminOnly: true },
   { icon: ShieldCheck, label: "Permissões", href: "/admin/permissions", adminOnly: true },
   { icon: Settings, label: "Configurações", href: "/admin/settings", adminOnly: true },
