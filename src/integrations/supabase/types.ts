@@ -1235,6 +1235,7 @@ export type Database = {
       gen_fake_cnpj: { Args: never; Returns: string }
       gen_textile_cnae: { Args: never; Returns: string }
       generate_fake_fabric_leads: { Args: never; Returns: undefined }
+      generate_fake_topic_suggestions: { Args: never; Returns: undefined }
       has_permission: {
         Args: { _permission: string; _user_id: string }
         Returns: boolean
