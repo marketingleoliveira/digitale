@@ -542,6 +542,80 @@ const RadarDigitale = () => {
           </div>
         </section>
       </main>
+
+      <Dialog open={suggestOpen} onOpenChange={setSuggestOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center">
+                <Lightbulb className="h-5 w-5 text-accent" />
+              </div>
+              <div>
+                <DialogTitle>Sugerir um tema</DialogTitle>
+                <DialogDescription>
+                  Conte qual assunto você gostaria de ler em uma próxima edição do Radar Digitale.
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+          <form onSubmit={submitSuggestion} className="space-y-4 mt-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="topic">Tema sugerido *</Label>
+              <Input
+                id="topic"
+                required
+                maxLength={200}
+                placeholder="Ex.: Tendências de moda praia 2027"
+                value={suggestForm.topic}
+                onChange={(e) => setSuggestForm({ ...suggestForm, topic: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="name">Seu nome (opcional)</Label>
+                <Input
+                  id="name"
+                  maxLength={120}
+                  value={suggestForm.name}
+                  onChange={(e) => setSuggestForm({ ...suggestForm, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="email">E-mail (opcional)</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  maxLength={200}
+                  placeholder="voce@empresa.com"
+                  value={suggestForm.email}
+                  onChange={(e) => setSuggestForm({ ...suggestForm, email: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="message">Detalhes (opcional)</Label>
+              <Textarea
+                id="message"
+                maxLength={1000}
+                rows={4}
+                placeholder="Conte por que esse tema interessa, perguntas que gostaria de ver respondidas, etc."
+                value={suggestForm.message}
+                onChange={(e) => setSuggestForm({ ...suggestForm, message: e.target.value })}
+              />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="ghost" onClick={() => setSuggestOpen(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={submittingSuggestion} className="gap-2">
+                <Send className="h-4 w-4" />
+                {submittingSuggestion ? "Enviando..." : "Enviar sugestão"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       <Footer />
     </div>
   );
