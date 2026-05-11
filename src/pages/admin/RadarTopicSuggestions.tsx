@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { Lightbulb, Trash2, CheckCircle, Mail } from "lucide-react";
+import { Lightbulb, Trash2, CheckCircle, Mail, FileDown } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -78,6 +80,86 @@ const RadarTopicSuggestions = () => {
     fetchItems();
   };
 
+  const exportPdf = (onlyNew = false) => {
+    const list = onlyNew ? items.filter((i) => i.status !== "reviewed") : items;
+    if (list.length === 0) {
+      toast.error("Nenhuma sugestão para exportar.");
+      return;
+    }
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const generatedAt = new Date().toLocaleString("pt-BR");
+
+    // Header
+    doc.setFillColor(33, 55, 84); // navy primary
+    doc.rect(0, 0, pageWidth, 70, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.text("Radar Digitale — Sugestões de Tema", 40, 32);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text(`Briefing para redatores  ·  Gerado em ${generatedAt}`, 40, 52);
+
+    doc.setTextColor(60, 60, 60);
+    doc.setFontSize(10);
+    doc.text(
+      `Total: ${list.length} sugestão(ões)${onlyNew ? " — apenas novas" : ""}`,
+      40,
+      92
+    );
+
+    autoTable(doc, {
+      startY: 110,
+      head: [["#", "Tema", "Detalhes / Contato", "Status", "Data"]],
+      body: list.map((it, idx) => [
+        String(idx + 1),
+        it.topic,
+        [
+          it.message ? it.message : "—",
+          "",
+          it.name ? `Nome: ${it.name}` : null,
+          it.email ? `E-mail: ${it.email}` : null,
+        ]
+          .filter(Boolean)
+          .join("\n"),
+        it.status === "reviewed" ? "Revisado" : "Novo",
+        new Date(it.created_at).toLocaleDateString("pt-BR"),
+      ]),
+      styles: { fontSize: 9, cellPadding: 6, valign: "top" },
+      headStyles: { fillColor: [232, 93, 58], textColor: 255, fontStyle: "bold" },
+      alternateRowStyles: { fillColor: [248, 248, 250] },
+      columnStyles: {
+        0: { cellWidth: 28, halign: "center" },
+        1: { cellWidth: 140, fontStyle: "bold" },
+        2: { cellWidth: "auto" },
+        3: { cellWidth: 60, halign: "center" },
+        4: { cellWidth: 60, halign: "center" },
+      },
+      margin: { left: 40, right: 40 },
+      didDrawPage: () => {
+        const pageHeight = doc.internal.pageSize.getHeight();
+        doc.setFontSize(8);
+        doc.setTextColor(140, 140, 140);
+        doc.text(
+          "Digitale Têxtil — Radar Digitale",
+          40,
+          pageHeight - 20
+        );
+        doc.text(
+          `Página ${doc.getCurrentPageInfo().pageNumber}`,
+          pageWidth - 40,
+          pageHeight - 20,
+          { align: "right" }
+        );
+      },
+    });
+
+    const stamp = new Date().toISOString().slice(0, 10);
+    doc.save(`radar-sugestoes-${stamp}.pdf`);
+    toast.success("PDF gerado!");
+  };
+
   return (
     <AdminLayout title="Sugestões de Tema - Radar">
       <div className="space-y-6">
@@ -85,11 +167,21 @@ const RadarTopicSuggestions = () => {
           <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center">
             <Lightbulb className="h-5 w-5 text-accent" />
           </div>
-          <div>
+          <div className="flex-1">
             <h2 className="text-xl font-bold">Sugestões dos leitores</h2>
             <p className="text-sm text-muted-foreground">
               Temas enviados pelos visitantes para futuras edições do Radar Digitale.
             </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => exportPdf(true)} className="gap-2">
+              <FileDown className="h-4 w-4" />
+              Exportar Novas
+            </Button>
+            <Button onClick={() => exportPdf(false)} className="gap-2">
+              <FileDown className="h-4 w-4" />
+              Exportar PDF
+            </Button>
           </div>
         </div>
 

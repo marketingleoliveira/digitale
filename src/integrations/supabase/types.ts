@@ -1032,6 +1032,27 @@ export type Database = {
         }
         Relationships: []
       }
+      radar_view_log: {
+        Row: {
+          created_at: string
+          edition_id: string | null
+          id: string
+          increment: number
+        }
+        Insert: {
+          created_at?: string
+          edition_id?: string | null
+          id?: string
+          increment: number
+        }
+        Update: {
+          created_at?: string
+          edition_id?: string | null
+          id?: string
+          increment?: number
+        }
+        Relationships: []
+      }
       role_permissions: {
         Row: {
           created_at: string
@@ -1225,6 +1246,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_radar_views_auto: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role:
