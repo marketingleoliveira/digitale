@@ -469,6 +469,43 @@ const RadarDigitale = () => {
                           <Heart className={cn("h-4 w-4", likedEditions.has(activeEdition.id) && "fill-red-500")} />
                           Curtir · {formatViews(activeEdition.likes ?? 0)}
                         </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="gap-2 hover:border-accent hover:bg-accent/10 hover:text-accent transition-all"
+                            >
+                              <Share2 className="h-4 w-4" />
+                              Compartilhar
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            {typeof navigator !== "undefined" && (navigator as any).share && (
+                              <DropdownMenuItem onClick={() => shareEdition("native")}>
+                                <Share2 className="h-4 w-4 mr-2" /> Compartilhar...
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem onClick={() => shareEdition("copy")}>
+                              <Link2 className="h-4 w-4 mr-2" /> Copiar link
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => shareEdition("whatsapp")}>
+                              <MessageCircle className="h-4 w-4 mr-2 text-green-600" /> WhatsApp
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => shareEdition("linkedin")}>
+                              <Share2 className="h-4 w-4 mr-2 text-blue-700" /> LinkedIn
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => shareEdition("facebook")}>
+                              <Share2 className="h-4 w-4 mr-2 text-blue-600" /> Facebook
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => shareEdition("twitter")}>
+                              <Share2 className="h-4 w-4 mr-2" /> X / Twitter
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => shareEdition("email")}>
+                              <Send className="h-4 w-4 mr-2" /> E-mail
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                       <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground">
                         {activeEdition.title}
