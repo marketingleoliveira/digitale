@@ -242,9 +242,9 @@ const RadarDigitale = () => {
         <section className="py-8 md:py-12">
           <div className="container mx-auto px-4 md:px-6">
             <div className="flex flex-col lg:flex-row gap-8">
-              {/* Sidebar */}
-              <aside className="lg:w-72 flex-shrink-0">
-                <div className="sticky top-24 space-y-6">
+              {/* Main Content - Edition Viewer */}
+              <div className="flex-1 min-w-0 order-1 lg:order-2">
+                {isLoading ? (
                   {/* Suggest Topic CTA */}
                   <TooltipProvider delayDuration={150}>
                     <Tooltip>
