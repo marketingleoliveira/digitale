@@ -242,9 +242,133 @@ const RadarDigitale = () => {
         <section className="py-8 md:py-12">
           <div className="container mx-auto px-4 md:px-6">
             <div className="flex flex-col lg:flex-row gap-8">
+              {/* Main Content - Edition Viewer */}
+              <div className="flex-1 min-w-0 order-1 lg:order-2">
+                {isLoading ? (
+                  <div className="bg-card rounded-2xl border border-border p-8">
+                    <Skeleton className="h-8 w-2/3 mb-4" />
+                    <Skeleton className="h-4 w-1/3 mb-8" />
+                    <Skeleton className="h-[600px] w-full rounded-xl" />
+                  </div>
+                ) : !activeEdition ? (
+                  <div className="bg-card rounded-2xl border border-border p-12 text-center">
+                    <Newspaper className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
+                    <h2 className="text-xl font-semibold text-foreground mb-2">
+                      Nenhuma edição disponível
+                    </h2>
+                    <p className="text-muted-foreground">
+                      Em breve teremos novidades por aqui!
+                    </p>
+                  </div>
+                ) : (
+                  <motion.div
+                    key={activeEdition.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-card rounded-2xl border border-border overflow-hidden"
+                  >
+                    {/* Edition Header */}
+                    <div className="p-6 md:p-8 border-b border-border">
+                      <div className="flex flex-wrap items-center gap-3 mb-3">
+                        {activeEdition.radar_categories && (
+                          <Badge className="bg-accent text-accent-foreground">
+                            {activeEdition.radar_categories.name}
+                          </Badge>
+                        )}
+                        <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+                          <Calendar className="h-4 w-4" />
+                          <span>
+                            Edição {new Date(activeEdition.edition_date).toLocaleDateString("pt-BR", {
+                              day: "2-digit",
+                              month: "long",
+                              year: "numeric",
+                            })}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+                          <Eye className="h-4 w-4" />
+                          <span>{formatViews(getViewCount(activeEdition))} leituras</span>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => likeMutation.mutate(activeEdition.id)}
+                          disabled={likeMutation.isPending}
+                          className={cn(
+                            "gap-2 transition-all",
+                            likedEditions.has(activeEdition.id)
+                              ? "border-red-300 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700"
+                              : "hover:border-red-300 hover:bg-red-50 hover:text-red-600"
+                          )}
+                        >
+                          <Heart className={cn("h-4 w-4", likedEditions.has(activeEdition.id) && "fill-red-500")} />
+                          Curtir · {formatViews(activeEdition.likes ?? 0)}
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="gap-2 hover:border-accent hover:bg-accent/10 hover:text-accent transition-all"
+                            >
+                              <Share2 className="h-4 w-4" />
+                              Compartilhar
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            {typeof navigator !== "undefined" && (navigator as any).share && (
+                              <DropdownMenuItem onClick={() => shareEdition("native")}>
+                                <Share2 className="h-4 w-4 mr-2" /> Compartilhar...
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem onClick={() => shareEdition("copy")}>
+                              <Link2 className="h-4 w-4 mr-2" /> Copiar link
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => shareEdition("whatsapp")}>
+                              <MessageCircle className="h-4 w-4 mr-2 text-green-600" /> WhatsApp
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => shareEdition("linkedin")}>
+                              <Share2 className="h-4 w-4 mr-2 text-blue-700" /> LinkedIn
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => shareEdition("facebook")}>
+                              <Share2 className="h-4 w-4 mr-2 text-blue-600" /> Facebook
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => shareEdition("twitter")}>
+                              <Share2 className="h-4 w-4 mr-2" /> X / Twitter
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => shareEdition("email")}>
+                              <Send className="h-4 w-4 mr-2" /> E-mail
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                      <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground">
+                        {activeEdition.title}
+                      </h2>
+                      {activeEdition.description && (
+                        <p className="text-muted-foreground mt-2">{activeEdition.description}</p>
+                      )}
+                    </div>
+
+                    {/* Edition Content - embedded file */}
+                    <div>
+                      {activeEdition.file_url.endsWith(".pdf") ? (
+                        <PdfViewer url={activeEdition.file_url} title={activeEdition.title} />
+                      ) : (
+                        <img
+                          src={activeEdition.file_url}
+                          alt={activeEdition.title}
+                          className="w-full object-cover"
+                        />
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+
               {/* Sidebar */}
-              <aside className="lg:w-72 flex-shrink-0">
-                <div className="sticky top-24 space-y-6">
+              <aside className="lg:w-72 flex-shrink-0 order-2 lg:order-1">
+                <div className="lg:sticky lg:top-24 space-y-6">
                   {/* Suggest Topic CTA */}
                   <TooltipProvider delayDuration={150}>
                     <Tooltip>
@@ -430,130 +554,6 @@ const RadarDigitale = () => {
                   </div>
                 </div>
               </aside>
-
-              {/* Main Content - Edition Viewer */}
-              <div className="flex-1 min-w-0">
-                {isLoading ? (
-                  <div className="bg-card rounded-2xl border border-border p-8">
-                    <Skeleton className="h-8 w-2/3 mb-4" />
-                    <Skeleton className="h-4 w-1/3 mb-8" />
-                    <Skeleton className="h-[600px] w-full rounded-xl" />
-                  </div>
-                ) : !activeEdition ? (
-                  <div className="bg-card rounded-2xl border border-border p-12 text-center">
-                    <Newspaper className="h-16 w-16 text-muted-foreground/30 mx-auto mb-4" />
-                    <h2 className="text-xl font-semibold text-foreground mb-2">
-                      Nenhuma edição disponível
-                    </h2>
-                    <p className="text-muted-foreground">
-                      Em breve teremos novidades por aqui!
-                    </p>
-                  </div>
-                ) : (
-                  <motion.div
-                    key={activeEdition.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-card rounded-2xl border border-border overflow-hidden"
-                  >
-                    {/* Edition Header */}
-                    <div className="p-6 md:p-8 border-b border-border">
-                      <div className="flex flex-wrap items-center gap-3 mb-3">
-                        {activeEdition.radar_categories && (
-                          <Badge className="bg-accent text-accent-foreground">
-                            {activeEdition.radar_categories.name}
-                          </Badge>
-                        )}
-                        <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
-                          <Calendar className="h-4 w-4" />
-                          <span>
-                            Edição {new Date(activeEdition.edition_date).toLocaleDateString("pt-BR", {
-                              day: "2-digit",
-                              month: "long",
-                              year: "numeric",
-                            })}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
-                          <Eye className="h-4 w-4" />
-                          <span>{formatViews(getViewCount(activeEdition))} leituras</span>
-                        </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => likeMutation.mutate(activeEdition.id)}
-                          disabled={likeMutation.isPending}
-                          className={cn(
-                            "gap-2 transition-all",
-                            likedEditions.has(activeEdition.id)
-                              ? "border-red-300 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700"
-                              : "hover:border-red-300 hover:bg-red-50 hover:text-red-600"
-                          )}
-                        >
-                          <Heart className={cn("h-4 w-4", likedEditions.has(activeEdition.id) && "fill-red-500")} />
-                          Curtir · {formatViews(activeEdition.likes ?? 0)}
-                        </Button>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="gap-2 hover:border-accent hover:bg-accent/10 hover:text-accent transition-all"
-                            >
-                              <Share2 className="h-4 w-4" />
-                              Compartilhar
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48">
-                            {typeof navigator !== "undefined" && (navigator as any).share && (
-                              <DropdownMenuItem onClick={() => shareEdition("native")}>
-                                <Share2 className="h-4 w-4 mr-2" /> Compartilhar...
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuItem onClick={() => shareEdition("copy")}>
-                              <Link2 className="h-4 w-4 mr-2" /> Copiar link
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => shareEdition("whatsapp")}>
-                              <MessageCircle className="h-4 w-4 mr-2 text-green-600" /> WhatsApp
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => shareEdition("linkedin")}>
-                              <Share2 className="h-4 w-4 mr-2 text-blue-700" /> LinkedIn
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => shareEdition("facebook")}>
-                              <Share2 className="h-4 w-4 mr-2 text-blue-600" /> Facebook
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => shareEdition("twitter")}>
-                              <Share2 className="h-4 w-4 mr-2" /> X / Twitter
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => shareEdition("email")}>
-                              <Send className="h-4 w-4 mr-2" /> E-mail
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                      <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground">
-                        {activeEdition.title}
-                      </h2>
-                      {activeEdition.description && (
-                        <p className="text-muted-foreground mt-2">{activeEdition.description}</p>
-                      )}
-                    </div>
-
-                    {/* Edition Content - embedded file */}
-                    <div>
-                      {activeEdition.file_url.endsWith(".pdf") ? (
-                        <PdfViewer url={activeEdition.file_url} title={activeEdition.title} />
-                      ) : (
-                        <img
-                          src={activeEdition.file_url}
-                          alt={activeEdition.title}
-                          className="w-full object-cover"
-                        />
-                      )}
-                    </div>
-                  </motion.div>
-                )}
-              </div>
             </div>
           </div>
         </section>
