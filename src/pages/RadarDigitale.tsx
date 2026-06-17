@@ -60,7 +60,24 @@ const RadarDigitale = () => {
   const [selectedEdition, setSelectedEdition] = useState<string | null>(null);
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
-  const [likedEditions, setLikedEditions] = useState<Set<string>>(new Set());
+  const LIKES_STORAGE_KEY = "radar_liked_editions_v1";
+  const [likedEditions, setLikedEditions] = useState<Set<string>>(() => {
+    try {
+      const raw = localStorage.getItem(LIKES_STORAGE_KEY);
+      if (!raw) return new Set();
+      const arr = JSON.parse(raw);
+      return new Set(Array.isArray(arr) ? arr : []);
+    } catch {
+      return new Set();
+    }
+  });
+
+  // Persist liked editions to localStorage so the device "remembers" forever
+  useEffect(() => {
+    try {
+      localStorage.setItem(LIKES_STORAGE_KEY, JSON.stringify(Array.from(likedEditions)));
+    } catch {}
+  }, [likedEditions]);
   const [suggestOpen, setSuggestOpen] = useState(false);
   const [suggestForm, setSuggestForm] = useState({ topic: "", name: "", email: "", message: "" });
   const [submittingSuggestion, setSubmittingSuggestion] = useState(false);
@@ -184,6 +201,10 @@ const RadarDigitale = () => {
 
   const likeMutation = useMutation({
     mutationFn: async (editionId: string) => {
+      // If this device already liked this edition, do nothing (cached forever)
+      if (likedEditions.has(editionId)) {
+        return { liked: true, cached: true };
+      }
       const res = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/radar-like`,
         {
@@ -196,10 +217,11 @@ const RadarDigitale = () => {
       return res.json();
     },
     onSuccess: (data, editionId) => {
+      if (data?.cached) return;
       setLikedEditions((prev) => {
         const next = new Set(prev);
-        if (data.liked) next.add(editionId);
-        else next.delete(editionId);
+        // Always add — once liked from this device, keep it liked forever
+        next.add(editionId);
         return next;
       });
       queryClient.invalidateQueries({ queryKey: ["radar-editions"] });
