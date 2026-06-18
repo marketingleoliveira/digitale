@@ -36,28 +36,15 @@ Deno.serve(async (req) => {
 
     if (insertError) {
       if (insertError.code === "23505") {
-        // Already liked - remove the like (toggle)
-        await supabase
-          .from("radar_likes")
-          .delete()
-          .eq("edition_id", edition_id)
-          .eq("ip_address", ip);
-
-        // Decrement likes count
+        // Already liked from this IP — idempotent, never decrement
         const { data: edition } = await supabase
           .from("radar_editions")
           .select("likes")
           .eq("id", edition_id)
           .single();
 
-        const newLikes = Math.max(0, (edition?.likes ?? 1) - 1);
-        await supabase
-          .from("radar_editions")
-          .update({ likes: newLikes })
-          .eq("id", edition_id);
-
         return new Response(
-          JSON.stringify({ liked: false, likes: newLikes }),
+          JSON.stringify({ liked: true, likes: edition?.likes ?? 0, cached: true }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
