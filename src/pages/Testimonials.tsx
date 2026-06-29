@@ -32,14 +32,18 @@ function TestimonialCard({ t, onOpenVideo, isNew }: { t: Testimonial; onOpenVide
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isMuted, setIsMuted] = useState(true);
   const [isInView, setIsInView] = useState(false);
+  const [shouldLoad, setShouldLoad] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
-      ([entry]) => setIsInView(entry.isIntersecting),
-      { threshold: 0.2 }
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+        if (entry.isIntersecting) setShouldLoad(true);
+      },
+      { threshold: 0.1, rootMargin: "200px" }
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -97,17 +101,28 @@ function TestimonialCard({ t, onOpenVideo, isNew }: { t: Testimonial; onOpenVide
       <div className="relative bg-black aspect-[3/4] overflow-hidden">
         {hasVideo ? (
           <>
-            <video
-              ref={setVideoRef}
-              src={t.video_url!}
-              autoPlay
-              muted={isMuted}
-              playsInline
-              loop
-              preload="auto"
-              poster={t.author_photo_url || undefined}
-              className="w-full h-full object-cover"
-            />
+            {shouldLoad ? (
+              <video
+                ref={setVideoRef}
+                src={t.video_url!}
+                autoPlay
+                muted={isMuted}
+                playsInline
+                loop
+                preload="metadata"
+                poster={t.author_photo_url || undefined}
+                className="w-full h-full object-cover"
+              />
+            ) : t.author_photo_url ? (
+              <img
+                src={t.author_photo_url}
+                alt={t.author_name}
+                loading="lazy"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-primary to-primary/70" />
+            )}
             {/* Overlay gradiente */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
 
