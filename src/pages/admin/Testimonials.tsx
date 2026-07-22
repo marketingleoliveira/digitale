@@ -460,11 +460,7 @@ const Testimonials = () => {
       toast.error("Apenas vídeos são permitidos");
       return;
     }
-
-    if (file.size > 50 * 1024 * 1024) {
-      toast.error("Vídeo muito grande (máximo 50MB)");
-      return;
-    }
+    // Upload permitido independente do tamanho do arquivo
 
     setUploadingVideo(true);
 
