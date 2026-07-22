@@ -460,7 +460,7 @@ const Testimonials = () => {
       toast.error("Apenas vídeos são permitidos");
       return;
     }
-
+    // Upload permitido independente do tamanho do arquivo
 
     setUploadingVideo(true);
 
