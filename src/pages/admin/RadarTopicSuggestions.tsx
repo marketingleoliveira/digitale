@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -38,9 +40,28 @@ interface Suggestion {
   created_at: string;
 }
 
+/** Temas monitorados no dashboard do relatório. */
+const THEMES: { label: string; keywords: string[]; color: [number, number, number] }[] = [
+  { label: "Comportamento", keywords: ["comportament", "consumidor", "cliente", "geração", "geracao", "hábito", "habito", "cultura", "lifestyle"], color: [33, 55, 84] },
+  { label: "Economia", keywords: ["econom", "preço", "preco", "custo", "dólar", "dolar", "mercado", "venda", "faturament", "importa", "exporta", "inflaç", "inflac"], color: [232, 93, 58] },
+  { label: "Tendência", keywords: ["tendênc", "tendenc", "moda", "coleç", "colec", "estampa", "cor ", "cores", "verão", "verao", "inverno", "lançament", "lancament"], color: [90, 120, 160] },
+  { label: "Tecnologia", keywords: ["tecnolog", "digital", "ia ", "inteligência", "inteligencia", "automaç", "automac", "máquina", "maquina", "software", "impressão", "impressao", "inova"], color: [70, 150, 140] },
+  { label: "Sustentabilidade", keywords: ["sustentá", "sustenta", "ecolog", "recicl", "ambient", "esg", "verde", "água", "agua", "carbono", "resídu", "residu"], color: [90, 160, 90] },
+];
+
+function classifyTopic(text: string): string {
+  const t = (text || "").toLowerCase();
+  for (const theme of THEMES) {
+    if (theme.keywords.some((k) => t.includes(k))) return theme.label;
+  }
+  return "Outros";
+}
+
 const RadarTopicSuggestions = () => {
   const [items, setItems] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(true);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const fetchItems = async () => {
     setLoading(true);
@@ -80,26 +101,129 @@ const RadarTopicSuggestions = () => {
     fetchItems();
   };
 
+  /** Filtra por intervalo de datas (inclusivo) informado pelo usuário. */
+  const filterByDate = (list: Suggestion[]) =>
+    list.filter((i) => {
+      const d = new Date(i.created_at);
+      if (startDate && d < new Date(`${startDate}T00:00:00`)) return false;
+      if (endDate && d > new Date(`${endDate}T23:59:59`)) return false;
+      return true;
+    });
+
   const exportPdf = (onlyNew = false) => {
-    const list = onlyNew ? items.filter((i) => i.status !== "reviewed") : items;
+    const base = onlyNew ? items.filter((i) => i.status !== "reviewed") : items;
+    const list = filterByDate(base);
     if (list.length === 0) {
       toast.error("Nenhuma sugestão para exportar.");
       return;
     }
     const doc = new jsPDF({ unit: "pt", format: "a4" });
     const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
     const generatedAt = new Date().toLocaleString("pt-BR");
+    const periodLabel =
+      startDate || endDate
+        ? `${startDate ? new Date(`${startDate}T00:00:00`).toLocaleDateString("pt-BR") : "início"} até ${
+            endDate ? new Date(`${endDate}T00:00:00`).toLocaleDateString("pt-BR") : "hoje"
+          }`
+        : "Todo o período";
 
-    // Header
+    // ---------- PÁGINA 1: DASHBOARD ----------
     doc.setFillColor(33, 55, 84); // navy primary
-    doc.rect(0, 0, pageWidth, 70, "F");
+    doc.rect(0, 0, pageWidth, 90, "F");
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
+    doc.setFontSize(19);
     doc.text("Radar Digitale — Sugestões de Tema", 40, 32);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(10);
     doc.text(`Briefing para redatores  ·  Gerado em ${generatedAt}`, 40, 52);
+    doc.text(`Período: ${periodLabel}`, 40, 70);
+
+    // Contagem por tema
+    const counts = new Map<string, number>();
+    for (const it of list) {
+      const key = classifyTopic(`${it.topic} ${it.message ?? ""}`);
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+    const rows = [...THEMES.map((t) => t.label), "Outros"]
+      .map((label) => ({
+        label,
+        count: counts.get(label) ?? 0,
+        color: THEMES.find((t) => t.label === label)?.color ?? ([140, 140, 140] as [number, number, number]),
+      }))
+      .sort((a, b) => b.count - a.count);
+    const max = Math.max(1, ...rows.map((r) => r.count));
+
+    doc.setTextColor(33, 55, 84);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.text("Panorama dos temas mais pedidos", 40, 130);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(90, 90, 90);
+    doc.text(
+      `${list.length} sugestão(ões) analisada(s)${onlyNew ? " — apenas novas" : ""}`,
+      40,
+      148
+    );
+
+    // Barras horizontais
+    let y = 175;
+    const barX = 190;
+    const barMaxW = pageWidth - barX - 90;
+    rows.forEach((r) => {
+      doc.setTextColor(40, 40, 40);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.text(r.label, 40, y + 11);
+
+      doc.setFillColor(238, 240, 244);
+      doc.roundedRect(barX, y, barMaxW, 16, 4, 4, "F");
+
+      const w = Math.max(2, (r.count / max) * barMaxW);
+      doc.setFillColor(r.color[0], r.color[1], r.color[2]);
+      doc.roundedRect(barX, y, w, 16, 4, 4, "F");
+
+      const pct = list.length ? Math.round((r.count / list.length) * 100) : 0;
+      doc.setTextColor(60, 60, 60);
+      doc.setFont("helvetica", "normal");
+      doc.text(`${r.count} (${pct}%)`, barX + barMaxW + 10, y + 11);
+      y += 30;
+    });
+
+    // Destaques
+    const top = rows[0];
+    doc.setDrawColor(225, 228, 234);
+    doc.roundedRect(40, y + 10, pageWidth - 80, 64, 6, 6, "S");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(33, 55, 84);
+    doc.text("Recomendação editorial", 54, y + 32);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(80, 80, 80);
+    doc.text(
+      `Tema com maior demanda no período: ${top?.label ?? "—"} (${top?.count ?? 0} pedidos). Priorize pautas nesta linha.`,
+      54,
+      y + 52,
+      { maxWidth: pageWidth - 110 }
+    );
+
+    doc.setFontSize(8);
+    doc.setTextColor(140, 140, 140);
+    doc.text("Digitale Têxtil — Radar Digitale", 40, pageHeight - 20);
+    doc.text("Página 1", pageWidth - 40, pageHeight - 20, { align: "right" });
+
+    // ---------- PÁGINAS SEGUINTES: LISTA ----------
+    doc.addPage();
+    doc.setFillColor(33, 55, 84);
+    doc.rect(0, 0, pageWidth, 70, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("Sugestões detalhadas", 40, 40);
 
     doc.setTextColor(60, 60, 60);
     doc.setFontSize(10);
@@ -138,7 +262,6 @@ const RadarTopicSuggestions = () => {
       },
       margin: { left: 40, right: 40 },
       didDrawPage: () => {
-        const pageHeight = doc.internal.pageSize.getHeight();
         doc.setFontSize(8);
         doc.setTextColor(140, 140, 140);
         doc.text(
@@ -173,16 +296,49 @@ const RadarTopicSuggestions = () => {
               Temas enviados pelos visitantes para futuras edições do Radar Digitale.
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => exportPdf(true)} className="gap-2">
-              <FileDown className="h-4 w-4" />
-              Exportar Novas
-            </Button>
-            <Button onClick={() => exportPdf(false)} className="gap-2">
-              <FileDown className="h-4 w-4" />
-              Exportar PDF
-            </Button>
+        </div>
+
+        <div className="bg-card rounded-xl border border-border p-4 flex flex-wrap items-end gap-3">
+          <div className="space-y-1">
+            <Label htmlFor="start-date" className="text-xs">De</Label>
+            <Input
+              id="start-date"
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-[170px]"
+            />
           </div>
+          <div className="space-y-1">
+            <Label htmlFor="end-date" className="text-xs">Até</Label>
+            <Input
+              id="end-date"
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="w-[170px]"
+            />
+          </div>
+          {(startDate || endDate) && (
+            <Button
+              variant="ghost"
+              onClick={() => { setStartDate(""); setEndDate(""); }}
+            >
+              Limpar datas
+            </Button>
+          )}
+          <div className="flex-1" />
+          <span className="text-sm text-muted-foreground">
+            {filterByDate(items).length} no período
+          </span>
+          <Button variant="outline" onClick={() => exportPdf(true)} className="gap-2">
+            <FileDown className="h-4 w-4" />
+            Exportar Novas
+          </Button>
+          <Button onClick={() => exportPdf(false)} className="gap-2">
+            <FileDown className="h-4 w-4" />
+            Exportar PDF
+          </Button>
         </div>
 
         <div className="bg-card rounded-xl border border-border overflow-hidden">
