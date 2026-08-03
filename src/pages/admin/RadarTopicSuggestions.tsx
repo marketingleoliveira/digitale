@@ -360,14 +360,14 @@ const RadarTopicSuggestions = () => {
                     Carregando...
                   </TableCell>
                 </TableRow>
-              ) : items.length === 0 ? (
+              ) : filterByDate(items).length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                     Nenhuma sugestão recebida ainda.
                   </TableCell>
                 </TableRow>
               ) : (
-                items.map((it) => (
+                filterByDate(items).map((it) => (
                   <TableRow key={it.id}>
                     <TableCell className="font-medium max-w-xs">{it.topic}</TableCell>
                     <TableCell className="text-sm">
