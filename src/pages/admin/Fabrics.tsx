@@ -514,6 +514,7 @@ export default function AdminFabrics() {
                     <TableCell>
                       {categories?.find(c => c.id === fabric.category_id)?.name || "-"}
                     </TableCell>
+                    <TableCell>
                       <div className="flex gap-1">
                         {fabric.color_variants?.slice(0, 4).map((color, i) => (
                           <div
@@ -584,7 +585,7 @@ export default function AdminFabrics() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                     Nenhum tecido cadastrado
                   </TableCell>
                 </TableRow>
