@@ -50,7 +50,7 @@ const techDescriptions: Record<string, string> = {
 };
 
 const techBadgesByCategory: Record<string, { name: string; image: string }[]> = {
-  "poliamida": [
+  "fitness": [
     { name: "Aloe Vera", image: badgeAloeVera },
     { name: "Proteção UV 50+", image: badgeUV50 },
     { name: "Antibacteriana", image: badgeAntibacteriano },
@@ -58,7 +58,7 @@ const techBadgesByCategory: Record<string, { name: string; image: string }[]> = 
     { name: "4 Way Stretch", image: badge4WayStretch },
     { name: "Zero Transparência", image: badgeZeroTransparencia },
   ],
-  "supermicrofibra": [
+  "praia": [
     { name: "Aloe Vera", image: badgeAloeVera },
     { name: "Proteção UV 50+", image: badgeUV50 },
     { name: "Creora", image: badgeCreora },
@@ -220,7 +220,7 @@ function FabricsContent() {
                             
                             {/* Tech Badges - centered */}
                             {(() => {
-                              const slug = category.slug?.toLowerCase() || category.name.toLowerCase();
+                              const slug = category.slug?.toLowerCase();
                               const badges = techBadgesByCategory[slug];
                               if (!badges) return <div className="flex-1" />;
                               return (
