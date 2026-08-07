@@ -560,7 +560,7 @@ export default function AdminFabrics() {
                         {fabric.fabric_category_assignments?.map(a => {
                           const cat = categories?.find(c => c.id === a.category_id);
                           return cat ? (
-                            <span key={cat.id} className="px-2 py-0.5 bg-accent/10 text-accent text-[10px] rounded-full font-medium flex items-center gap-1">
+                            <span key={cat.id} className="px-2 py-0.5 bg-[#FF8A00]/10 text-[#FF5C00] text-[10px] rounded-full font-medium flex items-center gap-1">
                               {cat.slug?.toLowerCase() === 'fitness' ? (
                                 <Dumbbell className="h-2 w-2" />
                               ) : cat.slug?.toLowerCase() === 'praia' ? (

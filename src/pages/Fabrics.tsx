@@ -205,7 +205,7 @@ function FabricsContent() {
                         <CollapsibleTrigger asChild>
                           <button className="w-full flex flex-col md:flex-row items-center justify-between p-5 bg-card rounded-xl border border-border hover:border-accent/30 transition-all group gap-4">
                             <div className="flex items-center gap-4 flex-shrink-0">
-                              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent to-accent/70 flex items-center justify-center text-white">
+                              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#FF8A00] to-[#FF5C00] flex items-center justify-center text-white">
                                 {category.slug?.toLowerCase() === 'fitness' ? (
                                   <Dumbbell className="h-6 w-6" />
                                 ) : category.slug?.toLowerCase() === 'praia' ? (
