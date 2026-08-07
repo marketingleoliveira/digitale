@@ -40,6 +40,7 @@ interface Fabric {
   id: string;
   name: string;
   slug: string;
+  category_id: string | null;
   short_description: string | null;
   description: string | null;
   image_url: string | null;
@@ -60,6 +61,7 @@ export default function AdminFabrics() {
   const [formData, setFormData] = useState({
     name: "",
     slug: "",
+    category_id: "",
     short_description: "",
     description: "",
     image_url: "",
@@ -70,6 +72,18 @@ export default function AdminFabrics() {
     color_variants: [] as ColorVariant[],
     is_active: true,
     display_order: 0,
+  });
+
+  const { data: categories } = useQuery({
+    queryKey: ["admin-fabric-categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("fabric_categories")
+        .select("*")
+        .order("display_order");
+      if (error) throw error;
+      return data;
+    },
   });
 
   const { data: fabrics, isLoading } = useQuery({
@@ -90,6 +104,7 @@ export default function AdminFabrics() {
       const fabricData = {
         name: data.name,
         slug: data.slug,
+        category_id: data.category_id || null,
         short_description: data.short_description || null,
         description: data.description || null,
         image_url: data.image_url || null,
@@ -159,6 +174,7 @@ export default function AdminFabrics() {
     setFormData({
       name: "",
       slug: "",
+      category_id: "",
       short_description: "",
       description: "",
       image_url: "",
@@ -178,6 +194,7 @@ export default function AdminFabrics() {
     setFormData({
       name: fabric.name,
       slug: fabric.slug,
+      category_id: fabric.category_id || "",
       short_description: fabric.short_description || "",
       description: fabric.description || "",
       image_url: fabric.image_url || "",
@@ -278,6 +295,25 @@ export default function AdminFabrics() {
                           required
                         />
                       </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="category">Categoria</Label>
+                        <select
+                          id="category"
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          value={formData.category_id}
+                          onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
+                        >
+                          <option value="">Sem categoria</option>
+                          {categories?.map((cat) => (
+                            <option key={cat.id} value={cat.id}>
+                              {cat.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="slug">Slug *</Label>
                         <Input
