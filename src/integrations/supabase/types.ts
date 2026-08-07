@@ -437,6 +437,36 @@ export type Database = {
         }
         Relationships: []
       }
+      fabric_category_assignments: {
+        Row: {
+          category_id: string
+          fabric_id: string
+        }
+        Insert: {
+          category_id: string
+          fabric_id: string
+        }
+        Update: {
+          category_id?: string
+          fabric_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fabric_category_assignments_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "fabric_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fabric_category_assignments_fabric_id_fkey"
+            columns: ["fabric_id"]
+            isOneToOne: false
+            referencedRelation: "fabrics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fabric_leads: {
         Row: {
           cnae: string | null

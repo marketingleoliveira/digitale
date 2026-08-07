@@ -23,6 +23,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Checkbox,
+} from "@/components/ui/checkbox";
 import { Plus, Pencil, Trash2, GripVertical, Image, Palette, Images, Star } from "lucide-react";
 import { toast } from "sonner";
 import { isVideoUrl } from "@/lib/media-utils";
@@ -41,6 +44,7 @@ interface Fabric {
   name: string;
   slug: string;
   category_id: string | null;
+  fabric_category_assignments?: { category_id: string }[];
   short_description: string | null;
   description: string | null;
   image_url: string | null;
@@ -61,7 +65,7 @@ export default function AdminFabrics() {
   const [formData, setFormData] = useState({
     name: "",
     slug: "",
-    category_id: "",
+    category_ids: [] as string[],
     short_description: "",
     description: "",
     image_url: "",
@@ -91,7 +95,7 @@ export default function AdminFabrics() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("fabrics")
-        .select("*")
+        .select("*, fabric_category_assignments(category_id)")
         .order("display_order");
 
       if (error) throw error;
@@ -104,7 +108,6 @@ export default function AdminFabrics() {
       const fabricData = {
         name: data.name,
         slug: data.slug,
-        category_id: data.category_id || null,
         short_description: data.short_description || null,
         description: data.description || null,
         image_url: data.image_url || null,
@@ -117,6 +120,8 @@ export default function AdminFabrics() {
         display_order: data.display_order,
       };
 
+      let fabricId = editingFabric?.id;
+
       if (editingFabric) {
         const { error } = await supabase
           .from("fabrics")
@@ -124,8 +129,36 @@ export default function AdminFabrics() {
           .eq("id", editingFabric.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("fabrics").insert(fabricData as any);
+        const { data: newFabric, error } = await supabase
+          .from("fabrics")
+          .insert(fabricData as any)
+          .select()
+          .single();
         if (error) throw error;
+        fabricId = newFabric.id;
+      }
+
+      // Update category assignments
+      if (fabricId) {
+        // Delete existing
+        const { error: deleteError } = await supabase
+          .from("fabric_category_assignments")
+          .delete()
+          .eq("fabric_id", fabricId);
+        if (deleteError) throw deleteError;
+
+        // Insert new ones
+        if (data.category_ids.length > 0) {
+          const { error: insertError } = await supabase
+            .from("fabric_category_assignments")
+            .insert(
+              data.category_ids.map((catId) => ({
+                fabric_id: fabricId,
+                category_id: catId,
+              }))
+            );
+          if (insertError) throw insertError;
+        }
       }
     },
     onSuccess: () => {
@@ -174,7 +207,7 @@ export default function AdminFabrics() {
     setFormData({
       name: "",
       slug: "",
-      category_id: "",
+      category_ids: [],
       short_description: "",
       description: "",
       image_url: "",
@@ -194,7 +227,7 @@ export default function AdminFabrics() {
     setFormData({
       name: fabric.name,
       slug: fabric.slug,
-      category_id: fabric.category_id || "",
+      category_ids: fabric.fabric_category_assignments?.map(a => a.category_id) || [],
       short_description: fabric.short_description || "",
       description: fabric.description || "",
       image_url: fabric.image_url || "",
@@ -296,20 +329,31 @@ export default function AdminFabrics() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="category">Categoria</Label>
-                        <select
-                          id="category"
-                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                          value={formData.category_id}
-                          onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
-                        >
-                          <option value="">Sem categoria</option>
+                        <Label>Categorias</Label>
+                        <div className="grid grid-cols-2 gap-2 p-3 border rounded-md bg-background/50">
                           {categories?.map((cat) => (
-                            <option key={cat.id} value={cat.id}>
-                              {cat.name}
-                            </option>
+                            <div key={cat.id} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={`cat-${cat.id}`}
+                                checked={formData.category_ids.includes(cat.id)}
+                                onCheckedChange={(checked) => {
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    category_ids: checked
+                                      ? [...prev.category_ids, cat.id]
+                                      : prev.category_ids.filter((id) => id !== cat.id),
+                                  }));
+                                }}
+                              />
+                              <label
+                                htmlFor={`cat-${cat.id}`}
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                              >
+                                {cat.name}
+                              </label>
+                            </div>
                           ))}
-                        </select>
+                        </div>
                       </div>
                     </div>
 
@@ -512,7 +556,17 @@ export default function AdminFabrics() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      {categories?.find(c => c.id === fabric.category_id)?.name || "-"}
+                      <div className="flex flex-wrap gap-1">
+                        {fabric.fabric_category_assignments?.map(a => {
+                          const cat = categories?.find(c => c.id === a.category_id);
+                          return cat ? (
+                            <span key={cat.id} className="px-2 py-0.5 bg-accent/10 text-accent text-[10px] rounded-full font-medium">
+                              {cat.name}
+                            </span>
+                          ) : null;
+                        })}
+                        {(!fabric.fabric_category_assignments || fabric.fabric_category_assignments.length === 0) && "-"}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-1">
