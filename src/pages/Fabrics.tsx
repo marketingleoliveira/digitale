@@ -4,7 +4,7 @@ import { SEO } from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { ChevronDown, Heart, Eye, Play } from "lucide-react";
+import { ChevronDown, Heart, Eye, Play, Dumbbell, Sun } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { isVideoUrl } from "@/lib/media-utils";
@@ -205,8 +205,14 @@ function FabricsContent() {
                         <CollapsibleTrigger asChild>
                           <button className="w-full flex flex-col md:flex-row items-center justify-between p-5 bg-card rounded-xl border border-border hover:border-accent/30 transition-all group gap-4">
                             <div className="flex items-center gap-4 flex-shrink-0">
-                              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent to-accent/70 flex items-center justify-center text-white font-bold text-lg">
-                                {category.name.charAt(0)}
+                              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#FF8A00] to-[#FF5C00] flex items-center justify-center text-white">
+                                {category.slug?.toLowerCase() === 'fitness' ? (
+                                  <Dumbbell className="h-6 w-6" />
+                                ) : category.slug?.toLowerCase() === 'praia' ? (
+                                  <Sun className="h-6 w-6" />
+                                ) : (
+                                  <span className="font-bold text-lg">{category.name.charAt(0)}</span>
+                                )}
                               </div>
                               <div className="text-left">
                                 <h2 className="text-xl md:text-2xl font-bold text-foreground group-hover:text-accent transition-colors">
