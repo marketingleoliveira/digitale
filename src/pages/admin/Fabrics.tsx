@@ -512,6 +512,8 @@ export default function AdminFabrics() {
                       </div>
                     </TableCell>
                     <TableCell>
+                      {categories?.find(c => c.id === fabric.category_id)?.name || "-"}
+                    </TableCell>
                       <div className="flex gap-1">
                         {fabric.color_variants?.slice(0, 4).map((color, i) => (
                           <div
