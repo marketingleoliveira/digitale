@@ -463,6 +463,7 @@ export default function AdminFabrics() {
                 <TableHead className="w-12"></TableHead>
                 <TableHead>Imagem</TableHead>
                 <TableHead>Nome</TableHead>
+                <TableHead>Categoria</TableHead>
                 <TableHead>Cores</TableHead>
                 <TableHead>Destaque</TableHead>
                 <TableHead>Status</TableHead>

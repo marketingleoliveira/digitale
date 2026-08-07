@@ -220,7 +220,7 @@ function FabricsContent() {
                             
                             {/* Tech Badges - centered */}
                             {(() => {
-                              const slug = category.slug?.toLowerCase() || category.name.toLowerCase();
+                              const slug = category.slug?.toLowerCase();
                               const badges = techBadgesByCategory[slug];
                               if (!badges) return <div className="flex-1" />;
                               return (
