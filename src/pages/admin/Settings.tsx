@@ -182,10 +182,10 @@ const Settings = () => {
                   id="whatsapp_number"
                   value={whatsappNumber}
                   onChange={(e) => setWhatsappNumber(e.target.value)}
-                  placeholder="551120649662"
+                  placeholder="5511973715327"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Digite o número completo com código do país (55) e DDD. Exemplo: 551120649662
+                  Digite o número completo com código do país (55) e DDD. Exemplo: 5511973715327
                 </p>
               </div>
               <Button onClick={saveWhatsappNumber} disabled={loading}>
