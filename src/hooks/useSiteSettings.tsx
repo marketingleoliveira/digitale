@@ -6,7 +6,7 @@ interface SiteSettings {
 }
 
 const DEFAULT_SETTINGS: SiteSettings = {
-  whatsapp_number: "551120649662",
+  whatsapp_number: "5511973715327",
 };
 
 export function useSiteSettings() {
