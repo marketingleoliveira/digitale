@@ -17,7 +17,7 @@ const Contact = () => {
   const { t } = useLanguage();
   const { whatsappNumber } = useSiteSettings();
 
-  // Format WhatsApp number for display (e.g. "5511945621254" -> "+55 11 94562-1254")
+  // Format WhatsApp number for display (e.g. "5511973715327" -> "+55 11 97371-5327")
   const formatPhoneDisplay = (num: string) => {
     if (num.length === 13) {
       return `+${num.slice(0,2)} ${num.slice(2,4)} ${num.slice(4,9)}-${num.slice(9)}`;
