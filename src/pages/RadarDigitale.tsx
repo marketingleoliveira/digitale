@@ -201,27 +201,28 @@ const RadarDigitale = () => {
 
   const likeMutation = useMutation({
     mutationFn: async (editionId: string) => {
-      // If this device already liked this edition, do nothing (cached forever)
-      if (likedEditions.has(editionId)) {
-        return { liked: true, cached: true };
-      }
       const res = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/radar-like`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json", "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
+          headers: { 
+            "Content-Type": "application/json", 
+            "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY 
+          },
           body: JSON.stringify({ edition_id: editionId }),
         }
       );
-      if (!res.ok) throw new Error("Erro ao curtir");
+      if (!res.ok) throw new Error("Erro ao processar curtida");
       return res.json();
     },
     onSuccess: (data, editionId) => {
-      if (data?.cached) return;
       setLikedEditions((prev) => {
         const next = new Set(prev);
-        // Always add — once liked from this device, keep it liked forever
-        next.add(editionId);
+        if (data.liked) {
+          next.add(editionId);
+        } else {
+          next.delete(editionId);
+        }
         return next;
       });
       queryClient.invalidateQueries({ queryKey: ["radar-editions"] });
