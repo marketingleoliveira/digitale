@@ -14,6 +14,31 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { cn } from "@/lib/utils";
 
+import badgeAloeVera from "@/assets/tech-badges/aloe-vera.webp";
+import badgeUV50 from "@/assets/tech-badges/uv50.webp";
+import badgeAntibacteriano from "@/assets/tech-badges/antibacteriano.webp";
+import badgeSuperBlack from "@/assets/tech-badges/super-black.webp";
+import badge4WayStretch from "@/assets/tech-badges/4-way-stretch.webp";
+import badgeZeroTransparencia from "@/assets/tech-badges/zero-transparencia.webp";
+import badgeCreora from "@/assets/tech-badges/creora.png";
+import badgeDigitaleEco from "@/assets/tech-badges/digitale-eco.webp";
+import badgeEstampariaHD from "@/assets/tech-badges/super-brilho.png";
+import badgeSuperMicrofibra from "@/assets/tech-badges/super-micro-fibra.webp";
+
+const badgeMap: Record<string, string> = {
+  "ALOE VERA": badgeAloeVera,
+  "PROTEÇÃO UV 50+": badgeUV50,
+  "ANTIBACTERIANO": badgeAntibacteriano,
+  "SUPER BLACK": badgeSuperBlack,
+  "4 WAY STRETCH": badge4WayStretch,
+  "ZERO TRANSPARÊNCIA": badgeZeroTransparencia,
+  "CREORA": badgeCreora,
+  "DIGITALE ECO": badgeDigitaleEco,
+  "ESTAMPARIA DIGITAL HD": badgeEstampariaHD,
+  "SUPER MICROFIBRA": badgeSuperMicrofibra,
+  "DRY FAST": badgeDigitaleEco, // Fallback
+};
+
 export interface Technology {
   id: string;
   name: string;
@@ -62,6 +87,8 @@ function getTechStyles(name: string) {
   if (n.includes("SUPER BLACK")) return "bg-black text-white"; // Preto
   if (n.includes("DIGITALE ECO")) return "bg-[#006837] text-white"; // Verde escuro
   if (n.includes("ESTAMPARIA")) return "bg-gradient-to-br from-[#FF0080] via-[#FF8C00] to-[#40E0D0] text-white"; // Colorido
+  if (n.includes("4 WAY")) return "bg-white text-black border border-gray-200 shadow-sm"; 
+  if (n.includes("ZERO")) return "bg-[#e5e5e5] text-black"; 
   return "bg-primary text-white";
 }
 
@@ -104,6 +131,9 @@ const Technologies = () => {
       }
       if (name.toUpperCase().includes("CREORA")) {
         return { title: "CREORA®", subtitle: "HIGHCLO" };
+      }
+      if (name.toUpperCase().includes("ESTAMPARIA DIGITAL HD")) {
+        return { title: "ESTAMPARIA DIGITAL", subtitle: "HD" };
       }
       return { title: parts[0], subtitle: parts.slice(1).join(" ") };
     }
@@ -184,11 +214,17 @@ const Technologies = () => {
                       {/* Logo Circular */}
                       <div 
                         className={cn(
-                          "flex h-28 w-28 md:h-32 md:w-32 shrink-0 items-center justify-center rounded-full text-center p-3 shadow-lg group-hover:scale-105 transition-transform duration-300",
-                          styles
+                          "flex h-28 w-28 md:h-32 md:w-32 shrink-0 items-center justify-center rounded-full text-center p-0 overflow-hidden shadow-lg group-hover:scale-105 transition-transform duration-300 bg-white",
+                          !badgeMap[tech.name.toUpperCase()] && styles
                         )}
                       >
-                        {tech.name.toUpperCase().includes("CREORA") ? (
+                        {badgeMap[tech.name.toUpperCase()] ? (
+                          <img 
+                            src={badgeMap[tech.name.toUpperCase()]} 
+                            alt={tech.name}
+                            className="h-full w-full object-contain"
+                          />
+                        ) : tech.name.toUpperCase().includes("CREORA") ? (
                           <div className="flex flex-col items-center justify-center scale-90 sm:scale-100">
                              <span className="text-[#213754] text-2xl md:text-3xl font-bold tracking-tighter leading-none">creora®</span>
                              <div className="mt-1 h-[1px] w-8 bg-[#FF8A00]" />
@@ -288,9 +324,17 @@ const Technologies = () => {
                   <div className="h-1 w-20 bg-[#FF8A00] mt-3 rounded-full" />
                 </div>
                 
-                {selected && SelectedIcon && (
-                   <div className={cn("h-20 w-20 shrink-0 rounded-full flex items-center justify-center p-2 shadow-lg", getTechStyles(selected.name))}>
-                      <SelectedIcon className="h-8 w-8" />
+                {selected && (
+                   <div className={cn("h-20 w-20 shrink-0 rounded-full flex items-center justify-center p-0 overflow-hidden shadow-lg bg-white", !badgeMap[selected.name.toUpperCase()] && getTechStyles(selected.name))}>
+                      {badgeMap[selected.name.toUpperCase()] ? (
+                        <img 
+                          src={badgeMap[selected.name.toUpperCase()]} 
+                          alt={selected.name}
+                          className="h-full w-full object-contain"
+                        />
+                      ) : (
+                        <SelectedIcon className="h-8 w-8" />
+                      )}
                    </div>
                 )}
               </div>

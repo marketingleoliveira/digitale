@@ -35,7 +35,8 @@ import badge4WayStretch from "@/assets/tech-badges/4-way-stretch.webp";
 import badgeZeroTransparencia from "@/assets/tech-badges/zero-transparencia.webp";
 import badgeCreora from "@/assets/tech-badges/creora.png";
 import badgeSuperMicroFibra from "@/assets/tech-badges/super-micro-fibra.webp";
-import badgeSuperBrilho from "@/assets/tech-badges/super-brilho.png";
+import badgeEstampariaHD from "@/assets/tech-badges/digitale-eco.webp"; // Using placeholder until real asset is cut or updated
+import techBadgesReal from "@/assets/tech-badges-real.png.asset.json";
 
 const techDescriptions: Record<string, string> = {
   "Aloe Vera": "Tecnologia que incorpora microcápsulas de Aloe Vera na fibra do tecido, proporcionando hidratação e suavidade ao contato com a pele, além de propriedades calmantes e anti-irritação.",
@@ -46,7 +47,7 @@ const techDescriptions: Record<string, string> = {
   "Zero Transparência": "Tecido com construção especial que elimina a transparência mesmo em cores claras, garantindo segurança e confiança durante qualquer atividade física.",
   "Creora": "Fio de elastano premium da marca Creora®, reconhecido mundialmente por sua elasticidade superior, excelente recuperação e durabilidade, proporcionando ajuste perfeito ao corpo.",
   "Super Microfibra": "Tecido produzido com fios de microfibra ultrafinos, resultando em toque extremamente macio, leveza e alta capacidade de absorção e secagem rápida.",
-  "Super Brilho": "Tecnologia que proporciona cores mais vivas e vibrantes ao tecido, com brilho intenso e duradouro que resiste a múltiplas lavagens, ideal para peças que exigem alto impacto visual.",
+  "Estamparia Digital HD": "Tecnologia de estamparia digital de alta definição que garante cores vibrantes, nitidez excepcional nos detalhes e durabilidade superior, permitindo infinitas possibilidades de cores e desenhos.",
 };
 
 const techBadgesByCategory: Record<string, { name: string; image: string }[]> = {
@@ -64,7 +65,7 @@ const techBadgesByCategory: Record<string, { name: string; image: string }[]> = 
     { name: "Creora", image: badgeCreora },
     { name: "Super Microfibra", image: badgeSuperMicroFibra },
     { name: "Antibacteriana", image: badgeAntibacteriano },
-    { name: "Super Brilho", image: badgeSuperBrilho },
+    { name: "Estamparia Digital HD", image: badgeEstampariaHD },
   ],
 };
 
