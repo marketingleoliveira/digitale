@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus, Edit, Trash2, Eye, EyeOff, Star, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, EyeOff, Star, ArrowUp, ArrowDown, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { ImageUpload } from "@/components/admin/ImageUpload";
