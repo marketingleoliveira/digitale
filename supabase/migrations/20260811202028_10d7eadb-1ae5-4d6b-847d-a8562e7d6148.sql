@@ -1,0 +1,12 @@
+BEGIN;
+UPDATE public.technologies SET image_url = 'https://tktdlaclbavbycwcsazx.supabase.co/storage/v1/object/public/uploads/technologies/uv50.jpg' WHERE name = 'PROTEÇÃO UV 50+';
+UPDATE public.technologies SET image_url = 'https://tktdlaclbavbycwcsazx.supabase.co/storage/v1/object/public/uploads/technologies/dryfast.jpg' WHERE name = 'Dry Fast — Secagem Rápida';
+UPDATE public.technologies SET image_url = 'https://tktdlaclbavbycwcsazx.supabase.co/storage/v1/object/public/uploads/technologies/antibac.jpg' WHERE name = 'Acabamento Antibacteriano';
+UPDATE public.technologies SET image_url = 'https://tktdlaclbavbycwcsazx.supabase.co/storage/v1/object/public/uploads/technologies/compression.jpg' WHERE name = 'Compressão Inteligente';
+UPDATE public.technologies SET image_url = 'https://tktdlaclbavbycwcsazx.supabase.co/storage/v1/object/public/uploads/technologies/recycle.jpg' WHERE name = 'Fio Reciclado PET';
+UPDATE public.technologies SET image_url = 'https://tktdlaclbavbycwcsazx.supabase.co/storage/v1/object/public/uploads/technologies/superblack.jpg' WHERE name = 'SUPER BLACK';
+UPDATE public.technologies SET image_url = 'https://tktdlaclbavbycwcsazx.supabase.co/storage/v1/object/public/uploads/technologies/creora.jpg' WHERE name = 'CREORA® HIGHCLO';
+UPDATE public.technologies SET image_url = 'https://tktdlaclbavbycwcsazx.supabase.co/storage/v1/object/public/uploads/technologies/aloevera.jpg' WHERE name = 'ALOE VERA';
+UPDATE public.technologies SET image_url = 'https://tktdlaclbavbycwcsazx.supabase.co/storage/v1/object/public/uploads/technologies/eco.jpg' WHERE name = 'DIGITALE ECO';
+UPDATE public.technologies SET image_url = 'https://tktdlaclbavbycwcsazx.supabase.co/storage/v1/object/public/uploads/technologies/digital.jpg' WHERE name = 'ESTAMPARIA DIGITAL HD';
+COMMIT;
