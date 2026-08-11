@@ -35,7 +35,7 @@ import badge4WayStretch from "@/assets/tech-badges/4-way-stretch.webp";
 import badgeZeroTransparencia from "@/assets/tech-badges/zero-transparencia.webp";
 import badgeCreora from "@/assets/tech-badges/creora.png";
 import badgeSuperMicroFibra from "@/assets/tech-badges/super-micro-fibra.webp";
-import badgeEstampariaHD from "@/assets/tech-badges/digitale-eco.webp"; // Using placeholder until real asset is cut or updated
+import badgeEstampariaHD from "@/assets/tech-badges/digitale-estamparia-hd.webp";
 import techBadgesReal from "@/assets/tech-badges-real.png.asset.json";
 
 const techDescriptions: Record<string, string> = {
