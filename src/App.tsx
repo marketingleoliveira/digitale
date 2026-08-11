@@ -17,6 +17,7 @@ import PrintsCatalog from "./pages/PrintsCatalog";
 import Segments from "./pages/Segments";
 import SegmentDetail from "./pages/SegmentDetail";
 import Sustainability from "./pages/Sustainability";
+import Technologies from "./pages/Technologies";
 import TestimonialsPage from "./pages/Testimonials";
 import Privacy from "./pages/Privacy";
 import WorkWithUs from "./pages/WorkWithUs";
@@ -41,6 +42,7 @@ import JobOpenings from "./pages/admin/JobOpenings";
 import JobApplications from "./pages/admin/JobApplications";
 import Permissions from "./pages/admin/Permissions";
 import SegmentsAdmin from "./pages/admin/Segments";
+import AdminTechnologies from "./pages/admin/Technologies";
 import RadarDigitale from "./pages/RadarDigitale";
 import RadarAdmin from "./pages/admin/RadarAdmin";
 import RadarTopicSuggestions from "./pages/admin/RadarTopicSuggestions";
@@ -100,6 +102,9 @@ const App = () => (
               <Route path="/segmentos/:slug" element={<SegmentDetail />} />
               <Route path="/segments" element={<Navigate to="/segmentos" replace />} />
               <Route path="/sustentabilidade" element={<Sustainability />} />
+              <Route path="/tecnologias" element={<Technologies />} />
+              <Route path="/technologies" element={<Navigate to="/tecnologias" replace />} />
+              <Route path="/tecnologia" element={<Navigate to="/tecnologias" replace />} />
               <Route path="/sostenibilidad" element={<Navigate to="/sustentabilidade" replace />} />
               <Route path="/sustainability" element={<Navigate to="/sustentabilidade" replace />} />
               <Route path="/radar-digitale" element={<RadarDigitale />} />
@@ -133,6 +138,7 @@ const App = () => (
               <Route path="/admin/prints" element={<ProtectedRoute requireAdmin><PrintsAdmin /></ProtectedRoute>} />
               <Route path="/admin/print-categories" element={<ProtectedRoute requireAdmin><PrintCategories /></ProtectedRoute>} />
               <Route path="/admin/segments" element={<ProtectedRoute requireAdmin><SegmentsAdmin /></ProtectedRoute>} />
+              <Route path="/admin/technologies" element={<ProtectedRoute requireAdmin><AdminTechnologies /></ProtectedRoute>} />
               <Route path="/admin/radar" element={<ProtectedRoute requireAdmin><RadarAdmin /></ProtectedRoute>} />
               <Route path="/admin/radar/sugestoes" element={<ProtectedRoute requireAdmin><RadarTopicSuggestions /></ProtectedRoute>} />
               

@@ -34,6 +34,7 @@ export function Header() {
     },
     { name: t("nav.fabrics"), href: "/tecidos" },
     { name: t("nav.prints"), href: "/estampas" },
+    { name: "Tecnologias", href: "/tecnologias" },
     { name: t("nav.careers"), href: "/trabalhe-conosco" },
     { name: "RADAR DIGITALE", href: "/radar-digitale" },
   ];
