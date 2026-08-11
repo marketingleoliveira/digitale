@@ -288,9 +288,9 @@ const Technologies = () => {
                   <div className="h-1 w-20 bg-[#FF8A00] mt-3 rounded-full" />
                 </div>
                 
-                {selected && (
+                {selected && SelectedIcon && (
                    <div className={cn("h-20 w-20 shrink-0 rounded-full flex items-center justify-center p-2 shadow-lg", getTechStyles(selected.name))}>
-                      {resolveIcon(selected.icon)({ className: "h-8 w-8" })}
+                      <SelectedIcon className="h-8 w-8" />
                    </div>
                 )}
               </div>
