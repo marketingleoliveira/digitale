@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Plus, Edit, Trash2, Eye, EyeOff, Star, ArrowUp, ArrowDown, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminLayout } from "@/components/admin/AdminLayout";
+import * as LucideIcons from "lucide-react";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -393,21 +394,22 @@ const AdminTechnologies = () => {
               <div className="space-y-2">
                 <Label htmlFor="icon">Ícone (Escolha ou digite nome Lucide)</Label>
                 <div className="flex flex-wrap gap-2 p-2 border rounded-md bg-muted/20">
-                  {LUCIDE_ICONS.map((iconName) => (
-                    <Button
-                      key={iconName}
-                      type="button"
-                      variant={formData.icon === iconName ? "default" : "outline"}
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      onClick={() => setFormData({ ...formData, icon: iconName })}
-                      title={iconName}
-                    >
-                      <span className="sr-only">{iconName}</span>
-                      {/* Renderização dinâmica simplificada para o seletor */}
-                      <Sparkles className="h-4 w-4" /> 
-                    </Button>
-                  ))}
+                  {LUCIDE_ICONS.map((iconName) => {
+                    const IconComponent = (LucideIcons as any)[iconName] || Sparkles;
+                    return (
+                      <Button
+                        key={iconName}
+                        type="button"
+                        variant={formData.icon === iconName ? "default" : "outline"}
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                        onClick={() => setFormData({ ...formData, icon: iconName })}
+                        title={iconName}
+                      >
+                        <IconComponent className="h-4 w-4" />
+                      </Button>
+                    );
+                  })}
                 </div>
                 <Input
                   id="icon"
