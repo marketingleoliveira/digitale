@@ -110,6 +110,9 @@ const Technologies = () => {
     return { title: name, subtitle: "" };
   };
 
+  // Componente do ícone da tecnologia selecionada (renderizado como JSX, nunca chamado como função)
+  const SelectedIcon = selected ? resolveIcon(selected.icon) : null;
+
   return (
     <div className="min-h-screen bg-background font-sans">
       <SEO
