@@ -62,6 +62,8 @@ function getTechStyles(name: string) {
   if (n.includes("SUPER BLACK")) return "bg-black text-white"; // Preto
   if (n.includes("DIGITALE ECO")) return "bg-[#006837] text-white"; // Verde escuro
   if (n.includes("ESTAMPARIA")) return "bg-gradient-to-br from-[#FF0080] via-[#FF8C00] to-[#40E0D0] text-white"; // Colorido
+  if (n.includes("4 WAY")) return "bg-white text-black border border-gray-200 shadow-sm"; 
+  if (n.includes("ZERO")) return "bg-[#e5e5e5] text-black"; 
   return "bg-primary text-white";
 }
 
