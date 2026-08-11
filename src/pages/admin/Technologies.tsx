@@ -42,6 +42,13 @@ const EMPTY_FORM = {
   display_order: 0,
 };
 
+const LUCIDE_ICONS = [
+  "Sun", "Droplets", "ShieldCheck", "Activity", "Recycle", 
+  "Shield", "Waves", "Leaf", "Palette", "Zap", 
+  "Cloud", "Wind", "Thermometer", "Sparkles", "CheckCircle2",
+  "Target", "Star", "Flame", "Layers", "Fingerprint"
+];
+
 /** Normaliza texto em slug URL-safe (sem acentos, espaços viram hífen). */
 function slugify(value: string): string {
   return value
@@ -384,9 +391,27 @@ const AdminTechnologies = () => {
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="icon">Ícone (nome Lucide)</Label>
+                <Label htmlFor="icon">Ícone (Escolha ou digite nome Lucide)</Label>
+                <div className="flex flex-wrap gap-2 p-2 border rounded-md bg-muted/20">
+                  {LUCIDE_ICONS.map((iconName) => (
+                    <Button
+                      key={iconName}
+                      type="button"
+                      variant={formData.icon === iconName ? "default" : "outline"}
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      onClick={() => setFormData({ ...formData, icon: iconName })}
+                      title={iconName}
+                    >
+                      <span className="sr-only">{iconName}</span>
+                      {/* Renderização dinâmica simplificada para o seletor */}
+                      <Sparkles className="h-4 w-4" /> 
+                    </Button>
+                  ))}
+                </div>
                 <Input
                   id="icon"
+                  className="mt-2"
                   value={formData.icon}
                   onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
                   placeholder="Sun, Droplets, ShieldCheck..."
