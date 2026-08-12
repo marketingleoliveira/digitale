@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
@@ -9,10 +10,18 @@ import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 export function WhatsAppButton() {
   const { t } = useLanguage();
   const { whatsappLink } = useSiteSettings();
+  const location = useLocation();
   const [isVisible, setIsVisible] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
 
+  // Hide the floating WhatsApp button inside the admin panel
+  const isAdmin = location.pathname.startsWith("/admin");
+
   useEffect(() => {
+    if (isAdmin) {
+      setIsVisible(false);
+      return;
+    }
     // Show button after scrolling a bit or after 3 seconds
     const timer = setTimeout(() => setIsVisible(true), 3000);
     
