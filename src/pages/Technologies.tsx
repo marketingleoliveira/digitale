@@ -47,6 +47,7 @@ export interface Technology {
   description: string | null;
   image_url: string | null;
   icon: string | null;
+  icon_url: string | null;
   benefits: string[];
   applications: string[];
   is_featured: boolean;
