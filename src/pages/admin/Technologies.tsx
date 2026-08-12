@@ -22,6 +22,7 @@ interface TechnologyRow {
   description: string | null;
   image_url: string | null;
   icon: string | null;
+  icon_url: string | null;
   benefits: unknown;
   applications: unknown;
   is_featured: boolean;
