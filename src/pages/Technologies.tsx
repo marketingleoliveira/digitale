@@ -351,11 +351,11 @@ const Technologies = () => {
 
                 {!!selected?.benefits.length && (
                   <div>
-                    <h3 className="text-sm font-bold text-[#FF8A00] uppercase tracking-widest mb-4">Principais Diferenciais</h3>
-                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                    <h3 className="text-[10px] md:text-sm font-bold text-[#FF8A00] uppercase tracking-widest mb-3 md:mb-4">Principais Diferenciais</h3>
+                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-x-8 md:gap-y-4">
                       {selected.benefits.map((b) => (
-                        <li key={b} className="flex items-center gap-4 text-base text-[#555] font-semibold bg-gray-50 p-4 rounded-2xl">
-                          <div className="h-2 w-2 shrink-0 rounded-full bg-[#FF8A00]" />
+                        <li key={b} className="flex items-center gap-3 md:gap-4 text-sm md:text-base text-[#555] font-semibold bg-gray-50 p-3 md:p-4 rounded-xl md:rounded-2xl">
+                          <div className="h-1.5 w-1.5 md:h-2 md:w-2 shrink-0 rounded-full bg-[#FF8A00]" />
                           <span>{b}</span>
                         </li>
                       ))}
