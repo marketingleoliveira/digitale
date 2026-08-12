@@ -300,16 +300,16 @@ const Technologies = () => {
       <Footer />
 
       <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto rounded-[3rem] p-0 border-none shadow-2xl overflow-hidden">
+        <DialogContent className="max-w-3xl w-[95vw] md:w-full max-h-[90vh] overflow-y-auto rounded-[2rem] md:rounded-[3rem] p-0 border-none shadow-2xl overflow-x-hidden">
           <div className="relative">
             {selected?.image_url ? (
-              <div className="h-64 md:h-80 w-full overflow-hidden">
+              <div className="h-48 md:h-80 w-full overflow-hidden">
                 <img
                   src={selected.image_url}
                   alt={`Tecnologia ${selected.name}`}
                   className="h-full w-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-white via-white/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-white via-white/10 to-transparent" />
               </div>
             ) : (
               <div className="h-40 bg-[#213754]" />
