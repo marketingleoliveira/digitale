@@ -37,6 +37,7 @@ const EMPTY_FORM = {
   description: "",
   image_url: "",
   icon: "Sparkles",
+  icon_url: "",
   benefits: "",
   applications: "",
   is_featured: false,
