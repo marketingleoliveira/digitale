@@ -308,6 +308,17 @@ export default function TestimonialsPage() {
     return matchTerm && matchDate;
   });
 
+  // Reset para a primeira página quando os filtros mudarem
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterDate]);
+
+  const totalPages = Math.ceil(filteredTestimonials.length / ITEMS_PER_PAGE);
+  const paginatedTestimonials = filteredTestimonials.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
   const videoCount = testimonials.filter(t => t.video_url).length;
   const avgRating = testimonials.length
     ? (testimonials.reduce((s, t) => s + (t.rating || 5), 0) / testimonials.length).toFixed(1)
