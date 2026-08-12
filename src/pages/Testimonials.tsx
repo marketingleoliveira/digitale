@@ -266,6 +266,8 @@ export default function TestimonialsPage() {
   const [openVideo, setOpenVideo] = useState<Testimonial | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDate, setFilterDate] = useState<Date | undefined>(undefined);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 6;
 
   useEffect(() => {
     document.title = "Depoimentos | Digitale Têxtil";
@@ -305,6 +307,17 @@ export default function TestimonialsPage() {
     );
     return matchTerm && matchDate;
   });
+
+  // Reset para a primeira página quando os filtros mudarem
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterDate]);
+
+  const totalPages = Math.ceil(filteredTestimonials.length / ITEMS_PER_PAGE);
+  const paginatedTestimonials = filteredTestimonials.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   const videoCount = testimonials.filter(t => t.video_url).length;
   const avgRating = testimonials.length
@@ -477,15 +490,55 @@ export default function TestimonialsPage() {
                 <p className="text-muted-foreground">Nenhum depoimento encontrado para os filtros aplicados.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 max-w-7xl mx-auto">
-                {filteredTestimonials.map((t) => (
-                  <TestimonialCard
-                    key={t.id}
-                    t={t}
-                    onOpenVideo={setOpenVideo}
-                    isNew={(t.display_order ?? -1) === 0}
-                  />
-                ))}
+              <div className="flex flex-col gap-12">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-8 max-w-7xl mx-auto w-full">
+                  {paginatedTestimonials.map((t) => (
+                    <TestimonialCard
+                      key={t.id}
+                      t={t}
+                      onOpenVideo={setOpenVideo}
+                      isNew={(t.display_order ?? -1) === 0}
+                    />
+                  ))}
+                </div>
+
+                {totalPages > 1 && (
+                  <div className="flex flex-col items-center gap-6 pt-4 border-t border-border/40 max-w-7xl mx-auto w-full">
+                    <div className="flex items-center gap-2">
+                      {Array.from({ length: totalPages }).map((_, i) => (
+                        <Button
+                          key={i}
+                          variant={currentPage === i + 1 ? "default" : "outline"}
+                          size="icon"
+                          onClick={() => {
+                            setCurrentPage(i + 1);
+                            window.scrollTo({ top: 400, behavior: 'smooth' });
+                          }}
+                          className={cn(
+                            "w-10 h-10 rounded-full font-bold transition-all",
+                            currentPage === i + 1 ? "bg-accent hover:bg-accent/90 text-white" : "hover:border-accent hover:text-accent"
+                          )}
+                        >
+                          {i + 1}
+                        </Button>
+                      ))}
+                    </div>
+                    
+                    {currentPage < totalPages && (
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          setCurrentPage(currentPage + 1);
+                          window.scrollTo({ top: 400, behavior: 'smooth' });
+                        }}
+                        className="group flex items-center gap-2 text-accent font-bold hover:text-accent hover:bg-accent/5 transition-all"
+                      >
+                        Próxima página
+                        <Sparkles className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      </Button>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>
