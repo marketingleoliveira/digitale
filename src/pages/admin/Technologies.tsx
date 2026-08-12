@@ -436,14 +436,25 @@ const AdminTechnologies = () => {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label>Imagem</Label>
-              <ImageUpload
-                bucket="uploads"
-                folder="technologies"
-                value={formData.image_url}
-                onChange={(url) => setFormData({ ...formData, image_url: url })}
-              />
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Header (Foto Principal)</Label>
+                <ImageUpload
+                  bucket="uploads"
+                  folder="technologies"
+                  value={formData.image_url}
+                  onChange={(url) => setFormData({ ...formData, image_url: url })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Logo (Selo Técnico)</Label>
+                <ImageUpload
+                  bucket="uploads"
+                  folder="technologies"
+                  value={formData.icon_url}
+                  onChange={(url) => setFormData({ ...formData, icon_url: url })}
+                />
+              </div>
             </div>
 
             <div className="flex flex-wrap gap-6">
