@@ -315,13 +315,13 @@ const Technologies = () => {
               <div className="h-40 bg-[#213754]" />
             )}
             
-            <div className="px-8 md:px-12 pb-12 pt-6 bg-white relative">
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
-                <div>
-                  <h2 className="font-display text-3xl md:text-4xl font-bold text-[#213754] uppercase tracking-tight">
+            <div className="px-6 md:px-12 pb-10 md:pb-12 pt-4 md:pt-6 bg-white relative">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 mb-6 md:mb-8">
+                <div className="flex-1">
+                  <h2 className="font-display text-2xl md:text-4xl font-bold text-[#213754] uppercase tracking-tight leading-tight">
                     {selected?.name}
                   </h2>
-                  <div className="h-1 w-20 bg-[#FF8A00] mt-3 rounded-full" />
+                  <div className="h-1 w-16 md:w-20 bg-[#FF8A00] mt-2 md:mt-3 rounded-full" />
                 </div>
                 
                 {selected && (
