@@ -325,7 +325,7 @@ const Technologies = () => {
                 </div>
                 
                 {selected && (
-                   <div className={cn("h-20 w-20 shrink-0 rounded-full flex items-center justify-center p-0 overflow-hidden shadow-lg bg-white", !badgeMap[selected.name.toUpperCase()] && getTechStyles(selected.name))}>
+                   <div className={cn("h-16 w-16 md:h-20 md:w-20 shrink-0 rounded-full flex items-center justify-center p-0 overflow-hidden shadow-lg bg-white", !badgeMap[selected.name.toUpperCase()] && getTechStyles(selected.name))}>
                       {badgeMap[selected.name.toUpperCase()] ? (
                         <img 
                           src={badgeMap[selected.name.toUpperCase()]} 
@@ -333,7 +333,7 @@ const Technologies = () => {
                           className="h-full w-full object-contain"
                         />
                       ) : (
-                        <SelectedIcon className="h-8 w-8" />
+                        <SelectedIcon className="h-6 w-6 md:h-8 md:w-8" />
                       )}
                    </div>
                 )}
