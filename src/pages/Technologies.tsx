@@ -216,10 +216,16 @@ const Technologies = () => {
                       <div 
                         className={cn(
                           "flex h-28 w-28 md:h-32 md:w-32 shrink-0 items-center justify-center rounded-full text-center p-0 overflow-hidden shadow-lg group-hover:scale-105 transition-transform duration-300 bg-white",
-                          !badgeMap[tech.name.toUpperCase()] && styles
+                          (!tech.icon_url && !badgeMap[tech.name.toUpperCase()]) && styles
                         )}
                       >
-                        {badgeMap[tech.name.toUpperCase()] ? (
+                        {tech.icon_url ? (
+                          <img 
+                            src={tech.icon_url} 
+                            alt={tech.name}
+                            className="h-full w-full object-contain"
+                          />
+                        ) : badgeMap[tech.name.toUpperCase()] ? (
                           <img 
                             src={badgeMap[tech.name.toUpperCase()]} 
                             alt={tech.name}
@@ -326,8 +332,14 @@ const Technologies = () => {
                 </div>
                 
                 {selected && (
-                   <div className={cn("h-16 w-16 md:h-20 md:w-20 shrink-0 rounded-full flex items-center justify-center p-0 overflow-hidden shadow-lg bg-white", !badgeMap[selected.name.toUpperCase()] && getTechStyles(selected.name))}>
-                      {badgeMap[selected.name.toUpperCase()] ? (
+                   <div className={cn("h-16 w-16 md:h-20 md:w-20 shrink-0 rounded-full flex items-center justify-center p-0 overflow-hidden shadow-lg bg-white", (!selected.icon_url && !badgeMap[selected.name.toUpperCase()]) && getTechStyles(selected.name))}>
+                      {selected.icon_url ? (
+                        <img 
+                          src={selected.icon_url} 
+                          alt={selected.name}
+                          className="h-full w-full object-contain"
+                        />
+                      ) : badgeMap[selected.name.toUpperCase()] ? (
                         <img 
                           src={badgeMap[selected.name.toUpperCase()]} 
                           alt={selected.name}
