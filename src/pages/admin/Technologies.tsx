@@ -22,6 +22,7 @@ interface TechnologyRow {
   description: string | null;
   image_url: string | null;
   icon: string | null;
+  icon_url: string | null;
   benefits: unknown;
   applications: unknown;
   is_featured: boolean;
@@ -36,6 +37,7 @@ const EMPTY_FORM = {
   description: "",
   image_url: "",
   icon: "Sparkles",
+  icon_url: "",
   benefits: "",
   applications: "",
   is_featured: false,
@@ -124,6 +126,7 @@ const AdminTechnologies = () => {
       description: tech.description ?? "",
       image_url: tech.image_url ?? "",
       icon: tech.icon ?? "Sparkles",
+      icon_url: tech.icon_url ?? "",
       benefits: toLines(tech.benefits),
       applications: toLines(tech.applications),
       is_featured: tech.is_featured,
@@ -148,6 +151,7 @@ const AdminTechnologies = () => {
       description: formData.description.trim() || null,
       image_url: formData.image_url.trim() || null,
       icon: formData.icon.trim() || null,
+      icon_url: formData.icon_url.trim() || null,
       benefits: fromLines(formData.benefits),
       applications: fromLines(formData.applications),
       is_featured: formData.is_featured,
@@ -432,14 +436,25 @@ const AdminTechnologies = () => {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label>Imagem</Label>
-              <ImageUpload
-                bucket="uploads"
-                folder="technologies"
-                value={formData.image_url}
-                onChange={(url) => setFormData({ ...formData, image_url: url })}
-              />
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Header (Foto Principal)</Label>
+                <ImageUpload
+                  bucket="uploads"
+                  folder="technologies"
+                  value={formData.image_url}
+                  onChange={(url) => setFormData({ ...formData, image_url: url })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Logo (Selo Técnico)</Label>
+                <ImageUpload
+                  bucket="uploads"
+                  folder="technologies"
+                  value={formData.icon_url}
+                  onChange={(url) => setFormData({ ...formData, icon_url: url })}
+                />
+              </div>
             </div>
 
             <div className="flex flex-wrap gap-6">
