@@ -42,6 +42,8 @@ export function WhatsAppButton() {
     window.open(whatsappLink(t("whatsapp.defaultMessage")), "_blank");
   };
 
+  if (isAdmin) return null;
+
   return (
     <AnimatePresence>
       {isVisible && (
