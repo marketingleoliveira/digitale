@@ -365,10 +365,10 @@ const Technologies = () => {
 
                 {!!selected?.applications.length && (
                   <div>
-                    <h3 className="text-sm font-bold text-[#FF8A00] uppercase tracking-widest mb-4">Segmentos de Aplicação</h3>
-                    <div className="flex flex-wrap gap-3">
+                    <h3 className="text-[10px] md:text-sm font-bold text-[#FF8A00] uppercase tracking-widest mb-3 md:mb-4">Segmentos de Aplicação</h3>
+                    <div className="flex flex-wrap gap-2 md:gap-3">
                       {selected.applications.map((a) => (
-                        <Badge key={a} variant="outline" className="rounded-full border-[#213754] text-[#213754] px-6 py-2 text-sm font-bold hover:bg-[#213754] hover:text-white transition-colors">
+                        <Badge key={a} variant="outline" className="rounded-full border-[#213754] text-[#213754] px-4 md:px-6 py-1 md:py-2 text-[10px] md:text-sm font-bold hover:bg-[#213754] hover:text-white transition-colors">
                           {a}
                         </Badge>
                       ))}
