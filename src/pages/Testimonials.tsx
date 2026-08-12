@@ -266,6 +266,8 @@ export default function TestimonialsPage() {
   const [openVideo, setOpenVideo] = useState<Testimonial | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDate, setFilterDate] = useState<Date | undefined>(undefined);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 6;
 
   useEffect(() => {
     document.title = "Depoimentos | Digitale Têxtil";
