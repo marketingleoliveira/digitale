@@ -1,0 +1,1 @@
+ALTER TABLE public.technologies ADD COLUMN icon_url TEXT;

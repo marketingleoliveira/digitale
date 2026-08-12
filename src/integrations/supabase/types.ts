@@ -1198,6 +1198,7 @@ export type Database = {
           description: string | null
           display_order: number
           icon: string | null
+          icon_url: string | null
           id: string
           image_url: string | null
           is_active: boolean
@@ -1214,6 +1215,7 @@ export type Database = {
           description?: string | null
           display_order?: number
           icon?: string | null
+          icon_url?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
@@ -1230,6 +1232,7 @@ export type Database = {
           description?: string | null
           display_order?: number
           icon?: string | null
+          icon_url?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
