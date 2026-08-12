@@ -300,32 +300,32 @@ const Technologies = () => {
       <Footer />
 
       <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto rounded-[3rem] p-0 border-none shadow-2xl overflow-hidden">
+        <DialogContent className="max-w-3xl w-[95vw] md:w-full max-h-[90vh] overflow-y-auto rounded-[2rem] md:rounded-[3rem] p-0 border-none shadow-2xl overflow-x-hidden">
           <div className="relative">
             {selected?.image_url ? (
-              <div className="h-64 md:h-80 w-full overflow-hidden">
+              <div className="h-48 md:h-80 w-full overflow-hidden">
                 <img
                   src={selected.image_url}
                   alt={`Tecnologia ${selected.name}`}
                   className="h-full w-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-white via-white/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-white via-white/10 to-transparent" />
               </div>
             ) : (
               <div className="h-40 bg-[#213754]" />
             )}
             
-            <div className="px-8 md:px-12 pb-12 pt-6 bg-white relative">
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
-                <div>
-                  <h2 className="font-display text-3xl md:text-4xl font-bold text-[#213754] uppercase tracking-tight">
+            <div className="px-6 md:px-12 pb-10 md:pb-12 pt-4 md:pt-6 bg-white relative">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 mb-6 md:mb-8">
+                <div className="flex-1">
+                  <h2 className="font-display text-2xl md:text-4xl font-bold text-[#213754] uppercase tracking-tight leading-tight">
                     {selected?.name}
                   </h2>
-                  <div className="h-1 w-20 bg-[#FF8A00] mt-3 rounded-full" />
+                  <div className="h-1 w-16 md:w-20 bg-[#FF8A00] mt-2 md:mt-3 rounded-full" />
                 </div>
                 
                 {selected && (
-                   <div className={cn("h-20 w-20 shrink-0 rounded-full flex items-center justify-center p-0 overflow-hidden shadow-lg bg-white", !badgeMap[selected.name.toUpperCase()] && getTechStyles(selected.name))}>
+                   <div className={cn("h-16 w-16 md:h-20 md:w-20 shrink-0 rounded-full flex items-center justify-center p-0 overflow-hidden shadow-lg bg-white", !badgeMap[selected.name.toUpperCase()] && getTechStyles(selected.name))}>
                       {badgeMap[selected.name.toUpperCase()] ? (
                         <img 
                           src={badgeMap[selected.name.toUpperCase()]} 
@@ -333,17 +333,17 @@ const Technologies = () => {
                           className="h-full w-full object-contain"
                         />
                       ) : (
-                        <SelectedIcon className="h-8 w-8" />
+                        <SelectedIcon className="h-6 w-6 md:h-8 md:w-8" />
                       )}
                    </div>
                 )}
               </div>
 
-              <div className="space-y-8">
+              <div className="space-y-6 md:space-y-8">
                 {selected?.description && (
                   <div>
-                    <h3 className="text-sm font-bold text-[#FF8A00] uppercase tracking-widest mb-3">Sobre a Tecnologia</h3>
-                    <p className="text-lg leading-relaxed text-[#555] font-medium">
+                    <h3 className="text-[10px] md:text-sm font-bold text-[#FF8A00] uppercase tracking-widest mb-2 md:mb-3">Sobre a Tecnologia</h3>
+                    <p className="text-base md:text-lg leading-relaxed text-[#555] font-medium">
                       {selected.description}
                     </p>
                   </div>
@@ -351,11 +351,11 @@ const Technologies = () => {
 
                 {!!selected?.benefits.length && (
                   <div>
-                    <h3 className="text-sm font-bold text-[#FF8A00] uppercase tracking-widest mb-4">Principais Diferenciais</h3>
-                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                    <h3 className="text-[10px] md:text-sm font-bold text-[#FF8A00] uppercase tracking-widest mb-3 md:mb-4">Principais Diferenciais</h3>
+                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-x-8 md:gap-y-4">
                       {selected.benefits.map((b) => (
-                        <li key={b} className="flex items-center gap-4 text-base text-[#555] font-semibold bg-gray-50 p-4 rounded-2xl">
-                          <div className="h-2 w-2 shrink-0 rounded-full bg-[#FF8A00]" />
+                        <li key={b} className="flex items-center gap-3 md:gap-4 text-sm md:text-base text-[#555] font-semibold bg-gray-50 p-3 md:p-4 rounded-xl md:rounded-2xl">
+                          <div className="h-1.5 w-1.5 md:h-2 md:w-2 shrink-0 rounded-full bg-[#FF8A00]" />
                           <span>{b}</span>
                         </li>
                       ))}
@@ -365,10 +365,10 @@ const Technologies = () => {
 
                 {!!selected?.applications.length && (
                   <div>
-                    <h3 className="text-sm font-bold text-[#FF8A00] uppercase tracking-widest mb-4">Segmentos de Aplicação</h3>
-                    <div className="flex flex-wrap gap-3">
+                    <h3 className="text-[10px] md:text-sm font-bold text-[#FF8A00] uppercase tracking-widest mb-3 md:mb-4">Segmentos de Aplicação</h3>
+                    <div className="flex flex-wrap gap-2 md:gap-3">
                       {selected.applications.map((a) => (
-                        <Badge key={a} variant="outline" className="rounded-full border-[#213754] text-[#213754] px-6 py-2 text-sm font-bold hover:bg-[#213754] hover:text-white transition-colors">
+                        <Badge key={a} variant="outline" className="rounded-full border-[#213754] text-[#213754] px-4 md:px-6 py-1 md:py-2 text-[10px] md:text-sm font-bold hover:bg-[#213754] hover:text-white transition-colors">
                           {a}
                         </Badge>
                       ))}
