@@ -151,6 +151,7 @@ const AdminTechnologies = () => {
       description: formData.description.trim() || null,
       image_url: formData.image_url.trim() || null,
       icon: formData.icon.trim() || null,
+      icon_url: formData.icon_url.trim() || null,
       benefits: fromLines(formData.benefits),
       applications: fromLines(formData.applications),
       is_featured: formData.is_featured,
