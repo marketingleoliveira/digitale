@@ -339,11 +339,11 @@ const Technologies = () => {
                 )}
               </div>
 
-              <div className="space-y-8">
+              <div className="space-y-6 md:space-y-8">
                 {selected?.description && (
                   <div>
-                    <h3 className="text-sm font-bold text-[#FF8A00] uppercase tracking-widest mb-3">Sobre a Tecnologia</h3>
-                    <p className="text-lg leading-relaxed text-[#555] font-medium">
+                    <h3 className="text-[10px] md:text-sm font-bold text-[#FF8A00] uppercase tracking-widest mb-2 md:mb-3">Sobre a Tecnologia</h3>
+                    <p className="text-base md:text-lg leading-relaxed text-[#555] font-medium">
                       {selected.description}
                     </p>
                   </div>
