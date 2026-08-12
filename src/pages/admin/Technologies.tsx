@@ -126,6 +126,7 @@ const AdminTechnologies = () => {
       description: tech.description ?? "",
       image_url: tech.image_url ?? "",
       icon: tech.icon ?? "Sparkles",
+      icon_url: tech.icon_url ?? "",
       benefits: toLines(tech.benefits),
       applications: toLines(tech.applications),
       is_featured: tech.is_featured,
