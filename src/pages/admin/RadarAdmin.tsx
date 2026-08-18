@@ -99,6 +99,8 @@ interface RadarEdition {
   display_order: number;
   views: number;
   likes: number;
+  happy_count?: number | null;
+  sad_count?: number | null;
   radar_categories: RadarCategory | null;
 }
 
@@ -140,6 +142,31 @@ const SortableEditionRow = ({ edition, onEdit, onDelete, onTogglePublish }: Sort
       <TableCell>{new Date(edition.edition_date).toLocaleDateString("pt-BR")}</TableCell>
       <TableCell className="text-muted-foreground">{edition.views ?? 0}</TableCell>
       <TableCell className="text-muted-foreground">{edition.likes ?? 0}</TableCell>
+      <TableCell>
+        {(() => {
+          const happy = edition.happy_count ?? 0;
+          const sad = edition.sad_count ?? 0;
+          const total = happy + sad;
+          const pct = total > 0 ? Math.round((happy / total) * 100) : null;
+          return (
+            <div className="flex items-center gap-2 text-sm">
+              <span className="flex items-center gap-1 text-green-600">
+                <Smile className="h-3.5 w-3.5" />
+                {happy}
+              </span>
+              <span className="flex items-center gap-1 text-red-500">
+                <Frown className="h-3.5 w-3.5" />
+                {sad}
+              </span>
+              {pct !== null && (
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
+                  {pct}%
+                </Badge>
+              )}
+            </div>
+          );
+        })()}
+      </TableCell>
       <TableCell>
         <Badge variant={edition.is_published ? "default" : "outline"} className={edition.is_published ? "bg-green-500" : ""}>
           {edition.is_published ? "Publicado" : "Oculto"}
