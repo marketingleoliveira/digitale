@@ -41,6 +41,8 @@ interface RadarEdition {
   description: string | null;
   views: number;
   likes: number;
+  happy_count?: number | null;
+  sad_count?: number | null;
   radar_categories: RadarCategory | null;
 }
 
