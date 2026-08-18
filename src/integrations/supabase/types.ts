@@ -947,9 +947,11 @@ export type Database = {
           display_order: number
           edition_date: string
           file_url: string
+          happy_count: number
           id: string
           is_published: boolean
           likes: number
+          sad_count: number
           slug: string
           title: string
           updated_at: string
@@ -963,9 +965,11 @@ export type Database = {
           display_order?: number
           edition_date?: string
           file_url: string
+          happy_count?: number
           id?: string
           is_published?: boolean
           likes?: number
+          sad_count?: number
           slug: string
           title: string
           updated_at?: string
@@ -979,9 +983,11 @@ export type Database = {
           display_order?: number
           edition_date?: string
           file_url?: string
+          happy_count?: number
           id?: string
           is_published?: boolean
           likes?: number
+          sad_count?: number
           slug?: string
           title?: string
           updated_at?: string
@@ -1019,6 +1025,38 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "radar_likes_edition_id_fkey"
+            columns: ["edition_id"]
+            isOneToOne: false
+            referencedRelation: "radar_editions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      radar_reactions: {
+        Row: {
+          created_at: string
+          edition_id: string
+          id: string
+          ip_address: string
+          reaction: string
+        }
+        Insert: {
+          created_at?: string
+          edition_id: string
+          id?: string
+          ip_address: string
+          reaction: string
+        }
+        Update: {
+          created_at?: string
+          edition_id?: string
+          id?: string
+          ip_address?: string
+          reaction?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "radar_reactions_edition_id_fkey"
             columns: ["edition_id"]
             isOneToOne: false
             referencedRelation: "radar_editions"
