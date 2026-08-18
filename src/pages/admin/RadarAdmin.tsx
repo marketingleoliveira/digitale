@@ -589,6 +589,7 @@ const RadarAdmin = () => {
                 <TableHead>Data</TableHead>
                 <TableHead>Views</TableHead>
                 <TableHead>Likes</TableHead>
+                <TableHead>Reações</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
