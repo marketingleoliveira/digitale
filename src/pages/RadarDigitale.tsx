@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { SEO } from "@/components/SEO";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calendar, ChevronRight, Newspaper, Filter, Eye, Sparkles, X, Heart, Share2, Lightbulb, Send, Link2, MessageCircle } from "lucide-react";
+import { Calendar, ChevronRight, Newspaper, Filter, Eye, Sparkles, X, Heart, Share2, Lightbulb, Send, Link2, MessageCircle, Smile, Frown } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -41,6 +41,8 @@ interface RadarEdition {
   description: string | null;
   views: number;
   likes: number;
+  happy_count?: number | null;
+  sad_count?: number | null;
   radar_categories: RadarCategory | null;
 }
 
@@ -78,6 +80,24 @@ const RadarDigitale = () => {
       localStorage.setItem(LIKES_STORAGE_KEY, JSON.stringify(Array.from(likedEditions)));
     } catch {}
   }, [likedEditions]);
+
+  // Reações (feliz / triste) por edição, memorizadas neste dispositivo
+  const REACTIONS_STORAGE_KEY = "radar_reactions_v1";
+  const [reactions, setReactions] = useState<Record<string, "happy" | "sad">>(() => {
+    try {
+      const raw = localStorage.getItem(REACTIONS_STORAGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : {};
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch {
+      return {};
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(REACTIONS_STORAGE_KEY, JSON.stringify(reactions));
+    } catch {}
+  }, [reactions]);
   const [suggestOpen, setSuggestOpen] = useState(false);
   const [suggestForm, setSuggestForm] = useState({ topic: "", name: "", email: "", message: "" });
   const [submittingSuggestion, setSubmittingSuggestion] = useState(false);
@@ -229,6 +249,40 @@ const RadarDigitale = () => {
     },
   });
 
+  const reactionMutation = useMutation({
+    mutationFn: async ({
+      editionId,
+      reaction,
+    }: {
+      editionId: string;
+      reaction: "happy" | "sad";
+    }) => {
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/radar-reaction`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({ edition_id: editionId, reaction }),
+        }
+      );
+      if (!res.ok) throw new Error("Erro ao registrar reação");
+      return res.json() as Promise<{ reaction: "happy" | "sad" | null }>;
+    },
+    onSuccess: (data, variables) => {
+      setReactions((prev) => {
+        const next = { ...prev };
+        if (data.reaction) next[variables.editionId] = data.reaction;
+        else delete next[variables.editionId];
+        return next;
+      });
+      queryClient.invalidateQueries({ queryKey: ["radar-editions"] });
+    },
+    onError: () => toast.error("Não foi possível registrar sua reação."),
+  });
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -327,6 +381,45 @@ const RadarDigitale = () => {
                           <Heart className={cn("h-4 w-4", likedEditions.has(activeEdition.id) && "fill-red-500")} />
                           Curtir · {formatViews(activeEdition.likes ?? 0)}
                         </Button>
+                        <div className="flex items-center gap-1 rounded-md border border-border bg-background p-0.5">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              reactionMutation.mutate({ editionId: activeEdition.id, reaction: "happy" })
+                            }
+                            disabled={reactionMutation.isPending}
+                            aria-label="Gostei desta edição"
+                            className={cn(
+                              "gap-1.5 h-8 px-2 transition-all",
+                              reactions[activeEdition.id] === "happy"
+                                ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700"
+                                : "text-muted-foreground hover:bg-emerald-50 hover:text-emerald-600"
+                            )}
+                          >
+                            <Smile className="h-4 w-4" />
+                            {formatViews(activeEdition.happy_count ?? 0)}
+                          </Button>
+                          <span className="h-4 w-px bg-border" />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              reactionMutation.mutate({ editionId: activeEdition.id, reaction: "sad" })
+                            }
+                            disabled={reactionMutation.isPending}
+                            aria-label="Não gostei desta edição"
+                            className={cn(
+                              "gap-1.5 h-8 px-2 transition-all",
+                              reactions[activeEdition.id] === "sad"
+                                ? "bg-amber-50 text-amber-600 hover:bg-amber-100 hover:text-amber-700"
+                                : "text-muted-foreground hover:bg-amber-50 hover:text-amber-600"
+                            )}
+                          >
+                            <Frown className="h-4 w-4" />
+                            {formatViews(activeEdition.sad_count ?? 0)}
+                          </Button>
+                        </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
