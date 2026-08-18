@@ -655,6 +655,24 @@ const RadarDigitale = () => {
                                     <Heart className={`h-3 w-3 ${likedEditions.has(edition.id) ? "fill-red-500 text-red-500" : ""}`} />
                                     {formatViews(edition.likes ?? 0)}
                                   </span>
+                                  {(() => {
+                                    const happy = edition.happy_count ?? 0;
+                                    const sad = edition.sad_count ?? 0;
+                                    const total = happy + sad;
+                                    if (total === 0) return null;
+                                    const pct = Math.round((happy / total) * 100);
+                                    return (
+                                      <span
+                                        className={`flex items-center gap-1 font-semibold ${
+                                          pct >= 50 ? "text-green-600" : "text-red-500"
+                                        }`}
+                                        title={`Índice de satisfação: ${pct}% (${happy} positivas / ${sad} negativas)`}
+                                      >
+                                        {pct >= 50 ? <Smile className="h-3 w-3" /> : <Frown className="h-3 w-3" />}
+                                        {pct}%
+                                      </span>
+                                    );
+                                  })()}
                                 </div>
                               </div>
                               {edition.radar_categories && (
