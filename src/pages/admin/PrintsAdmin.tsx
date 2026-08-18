@@ -1,6 +1,23 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Button } from "@/components/ui/button";
@@ -54,6 +71,102 @@ interface Print {
   display_order: number;
 }
 
+interface SortablePrintRowProps {
+  print: Print;
+  selected: boolean;
+  onSelect: (id: string, checked: boolean) => void;
+  onEdit: (print: Print) => void;
+  onDelete: (id: string) => void;
+  onToggleActive: (id: string, isActive: boolean) => void;
+  categoryName: string | null;
+}
+
+const SortablePrintRow = ({
+  print,
+  selected,
+  onSelect,
+  onEdit,
+  onDelete,
+  onToggleActive,
+  categoryName,
+}: SortablePrintRowProps) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: print.id,
+  });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <TableRow
+      ref={setNodeRef}
+      style={style}
+      className={isDragging ? "bg-muted" : selected ? "bg-accent/10" : ""}
+    >
+      <TableCell>
+        <Checkbox checked={selected} onCheckedChange={(checked) => onSelect(print.id, !!checked)} />
+      </TableCell>
+      <TableCell>
+        <button
+          type="button"
+          {...attributes}
+          {...listeners}
+          className="cursor-grab active:cursor-grabbing p-1 text-muted-foreground hover:text-foreground touch-none"
+          title="Arraste para reordenar"
+        >
+          <GripVertical className="h-4 w-4" />
+        </button>
+      </TableCell>
+      <TableCell>
+        {isVideoUrl(print.image_url) ? (
+          <video
+            src={print.image_url}
+            className="w-16 h-16 object-cover rounded-lg"
+            muted
+            playsInline
+            autoPlay
+            loop
+          />
+        ) : (
+          <img src={print.image_url} alt={print.code} className="w-16 h-16 object-cover rounded-lg" />
+        )}
+      </TableCell>
+      <TableCell className="font-medium">{print.code}</TableCell>
+      <TableCell>{print.name || "-"}</TableCell>
+      <TableCell>
+        {categoryName ? (
+          <Badge variant="secondary">{categoryName}</Badge>
+        ) : (
+          <span className="text-muted-foreground">-</span>
+        )}
+      </TableCell>
+      <TableCell>
+        <Switch
+          checked={print.is_active}
+          onCheckedChange={() => onToggleActive(print.id, print.is_active)}
+        />
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-2">
+          <Button size="icon" variant="ghost" onClick={() => onEdit(print)}>
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="text-destructive hover:text-destructive"
+            onClick={() => onDelete(print.id)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+};
+
 const PrintsAdmin = () => {
   const { invalidatePrints } = useInvalidateCache();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -61,6 +174,12 @@ const PrintsAdmin = () => {
   const [selectedPrints, setSelectedPrints] = useState<Set<string>>(new Set());
   const [bulkMoveDialogOpen, setBulkMoveDialogOpen] = useState(false);
   const [bulkCategoryId, setBulkCategoryId] = useState("");
+  const [orderedPrints, setOrderedPrints] = useState<Print[]>([]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
   const [form, setForm] = useState({
     code: "",
     name: "",
@@ -82,6 +201,44 @@ const PrintsAdmin = () => {
       return data as Print[];
     },
   });
+
+  // Mantém a ordem local sincronizada com o servidor
+  useEffect(() => {
+    setOrderedPrints(prints);
+  }, [prints]);
+
+  // Persiste a nova ordem após o drag
+  const reorderMutation = useMutation({
+    mutationFn: async (items: Print[]) => {
+      const updates = items.map((item, index) =>
+        supabase.from("prints").update({ display_order: index }).eq("id", item.id)
+      );
+      const results = await Promise.all(updates);
+      const failed = results.find((r) => r.error);
+      if (failed?.error) throw failed.error;
+    },
+    onSuccess: () => {
+      invalidatePrints();
+      toast.success("Ordem atualizada!");
+    },
+    onError: (error: Error) => {
+      toast.error("Erro ao reordenar", { description: error.message });
+      setOrderedPrints(prints);
+    },
+  });
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = orderedPrints.findIndex((p) => p.id === active.id);
+    const newIndex = orderedPrints.findIndex((p) => p.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const next = arrayMove(orderedPrints, oldIndex, newIndex);
+    setOrderedPrints(next);
+    reorderMutation.mutate(next);
+  };
 
   // Query for categories
   const { data: categories = [] } = useQuery({
@@ -461,91 +618,46 @@ const PrintsAdmin = () => {
               Nenhuma estampa cadastrada. Clique em "Nova Estampa" para adicionar.
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-12">
-                    <Checkbox
-                      checked={allSelected}
-                      onCheckedChange={(checked) => handleSelectAll(!!checked)}
-                    />
-                  </TableHead>
-                  <TableHead className="w-12"></TableHead>
-                  <TableHead className="w-20">Imagem</TableHead>
-                  <TableHead>Código</TableHead>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Categoria</TableHead>
-                  <TableHead className="w-20">Ativa</TableHead>
-                  <TableHead className="w-24">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {prints.map((print) => (
-                  <TableRow key={print.id} className={selectedPrints.has(print.id) ? "bg-accent/10" : ""}>
-                    <TableCell>
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-12">
                       <Checkbox
-                        checked={selectedPrints.has(print.id)}
-                        onCheckedChange={(checked) => handleSelectPrint(print.id, !!checked)}
+                        checked={allSelected}
+                        onCheckedChange={(checked) => handleSelectAll(!!checked)}
                       />
-                    </TableCell>
-                    <TableCell>
-                      <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
-                    </TableCell>
-                    <TableCell>
-                      {isVideoUrl(print.image_url) ? (
-                        <video
-                          src={print.image_url}
-                          className="w-16 h-16 object-cover rounded-lg"
-                          muted playsInline autoPlay loop
-                        />
-                      ) : (
-                        <img
-                          src={print.image_url}
-                          alt={print.code}
-                          className="w-16 h-16 object-cover rounded-lg"
-                        />
-                      )}
-                    </TableCell>
-                    <TableCell className="font-medium">{print.code}</TableCell>
-                    <TableCell>{print.name || "-"}</TableCell>
-                    <TableCell>
-                      {print.category_id ? (
-                        <Badge variant="secondary">
-                          {getCategoryName(print.category_id)}
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Switch
-                        checked={print.is_active}
-                        onCheckedChange={() => handleToggleActive(print.id, print.is_active)}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => handleEdit(print)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => handleDelete(print.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+                    </TableHead>
+                    <TableHead className="w-12"></TableHead>
+                    <TableHead className="w-20">Imagem</TableHead>
+                    <TableHead>Código</TableHead>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>Categoria</TableHead>
+                    <TableHead className="w-20">Ativa</TableHead>
+                    <TableHead className="w-24">Ações</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  <SortableContext
+                    items={orderedPrints.map((p) => p.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {orderedPrints.map((print) => (
+                      <SortablePrintRow
+                        key={print.id}
+                        print={print}
+                        selected={selectedPrints.has(print.id)}
+                        onSelect={handleSelectPrint}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        onToggleActive={handleToggleActive}
+                        categoryName={getCategoryName(print.category_id)}
+                      />
+                    ))}
+                  </SortableContext>
+                </TableBody>
+              </Table>
+            </DndContext>
           )}
         </div>
       </div>
