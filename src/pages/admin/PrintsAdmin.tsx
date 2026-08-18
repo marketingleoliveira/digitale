@@ -618,91 +618,46 @@ const PrintsAdmin = () => {
               Nenhuma estampa cadastrada. Clique em "Nova Estampa" para adicionar.
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-12">
-                    <Checkbox
-                      checked={allSelected}
-                      onCheckedChange={(checked) => handleSelectAll(!!checked)}
-                    />
-                  </TableHead>
-                  <TableHead className="w-12"></TableHead>
-                  <TableHead className="w-20">Imagem</TableHead>
-                  <TableHead>Código</TableHead>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Categoria</TableHead>
-                  <TableHead className="w-20">Ativa</TableHead>
-                  <TableHead className="w-24">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {prints.map((print) => (
-                  <TableRow key={print.id} className={selectedPrints.has(print.id) ? "bg-accent/10" : ""}>
-                    <TableCell>
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-12">
                       <Checkbox
-                        checked={selectedPrints.has(print.id)}
-                        onCheckedChange={(checked) => handleSelectPrint(print.id, !!checked)}
+                        checked={allSelected}
+                        onCheckedChange={(checked) => handleSelectAll(!!checked)}
                       />
-                    </TableCell>
-                    <TableCell>
-                      <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
-                    </TableCell>
-                    <TableCell>
-                      {isVideoUrl(print.image_url) ? (
-                        <video
-                          src={print.image_url}
-                          className="w-16 h-16 object-cover rounded-lg"
-                          muted playsInline autoPlay loop
-                        />
-                      ) : (
-                        <img
-                          src={print.image_url}
-                          alt={print.code}
-                          className="w-16 h-16 object-cover rounded-lg"
-                        />
-                      )}
-                    </TableCell>
-                    <TableCell className="font-medium">{print.code}</TableCell>
-                    <TableCell>{print.name || "-"}</TableCell>
-                    <TableCell>
-                      {print.category_id ? (
-                        <Badge variant="secondary">
-                          {getCategoryName(print.category_id)}
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Switch
-                        checked={print.is_active}
-                        onCheckedChange={() => handleToggleActive(print.id, print.is_active)}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => handleEdit(print)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => handleDelete(print.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+                    </TableHead>
+                    <TableHead className="w-12"></TableHead>
+                    <TableHead className="w-20">Imagem</TableHead>
+                    <TableHead>Código</TableHead>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>Categoria</TableHead>
+                    <TableHead className="w-20">Ativa</TableHead>
+                    <TableHead className="w-24">Ações</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  <SortableContext
+                    items={orderedPrints.map((p) => p.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {orderedPrints.map((print) => (
+                      <SortablePrintRow
+                        key={print.id}
+                        print={print}
+                        selected={selectedPrints.has(print.id)}
+                        onSelect={handleSelectPrint}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        onToggleActive={handleToggleActive}
+                        categoryName={getCategoryName(print.category_id)}
+                      />
+                    ))}
+                  </SortableContext>
+                </TableBody>
+              </Table>
+            </DndContext>
           )}
         </div>
       </div>
