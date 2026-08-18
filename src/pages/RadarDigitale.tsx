@@ -638,7 +638,7 @@ const RadarDigitale = () => {
                                   </Badge>
                                 )}
                               </div>
-                              <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
+                              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
                                 <span className="font-medium whitespace-nowrap">
                                   {new Date(edition.edition_date).toLocaleDateString("pt-BR", {
                                     day: "2-digit",
@@ -646,12 +646,12 @@ const RadarDigitale = () => {
                                     year: "numeric",
                                   })}
                                 </span>
-                                <div className="flex items-center gap-2.5 shrink-0">
-                                  <span className="flex items-center gap-1">
+                                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                                  <span className="flex items-center gap-1 whitespace-nowrap" title="Visualizações">
                                     <Eye className="h-3 w-3" />
-                                    {formatViews(getViewCount(edition))}
+                                    {formatViews(getViewCount(edition))} visualizações
                                   </span>
-                                  <span className="flex items-center gap-1">
+                                  <span className="flex items-center gap-1 whitespace-nowrap">
                                     <Heart className={`h-3 w-3 ${likedEditions.has(edition.id) ? "fill-red-500 text-red-500" : ""}`} />
                                     {formatViews(edition.likes ?? 0)}
                                   </span>
@@ -663,13 +663,13 @@ const RadarDigitale = () => {
                                     const pct = Math.round((happy / total) * 100);
                                     return (
                                       <span
-                                        className={`flex items-center gap-1 font-semibold ${
+                                        className={`flex items-center gap-1 font-semibold whitespace-nowrap ${
                                           pct >= 50 ? "text-green-600" : "text-red-500"
                                         }`}
-                                        title={`Índice de satisfação: ${pct}% (${happy} positivas / ${sad} negativas)`}
+                                        title={`Aprovação: ${pct}% (${happy} positivas / ${sad} negativas)`}
                                       >
                                         {pct >= 50 ? <Smile className="h-3 w-3" /> : <Frown className="h-3 w-3" />}
-                                        {pct}%
+                                        {pct}% aprovação
                                       </span>
                                     );
                                   })()}
