@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { SEO } from "@/components/SEO";
 import { motion, AnimatePresence } from "framer-motion";
-import { Calendar, ChevronRight, Newspaper, Filter, Eye, Sparkles, X, Heart, Share2, Lightbulb, Send, Link2, MessageCircle } from "lucide-react";
+import { Calendar, ChevronRight, Newspaper, Filter, Eye, Sparkles, X, Heart, Share2, Lightbulb, Send, Link2, MessageCircle, Smile, Frown } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -381,6 +381,45 @@ const RadarDigitale = () => {
                           <Heart className={cn("h-4 w-4", likedEditions.has(activeEdition.id) && "fill-red-500")} />
                           Curtir · {formatViews(activeEdition.likes ?? 0)}
                         </Button>
+                        <div className="flex items-center gap-1 rounded-md border border-border bg-background p-0.5">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              reactionMutation.mutate({ editionId: activeEdition.id, reaction: "happy" })
+                            }
+                            disabled={reactionMutation.isPending}
+                            aria-label="Gostei desta edição"
+                            className={cn(
+                              "gap-1.5 h-8 px-2 transition-all",
+                              reactions[activeEdition.id] === "happy"
+                                ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700"
+                                : "text-muted-foreground hover:bg-emerald-50 hover:text-emerald-600"
+                            )}
+                          >
+                            <Smile className="h-4 w-4" />
+                            {formatViews(activeEdition.happy_count ?? 0)}
+                          </Button>
+                          <span className="h-4 w-px bg-border" />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              reactionMutation.mutate({ editionId: activeEdition.id, reaction: "sad" })
+                            }
+                            disabled={reactionMutation.isPending}
+                            aria-label="Não gostei desta edição"
+                            className={cn(
+                              "gap-1.5 h-8 px-2 transition-all",
+                              reactions[activeEdition.id] === "sad"
+                                ? "bg-amber-50 text-amber-600 hover:bg-amber-100 hover:text-amber-700"
+                                : "text-muted-foreground hover:bg-amber-50 hover:text-amber-600"
+                            )}
+                          >
+                            <Frown className="h-4 w-4" />
+                            {formatViews(activeEdition.sad_count ?? 0)}
+                          </Button>
+                        </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
