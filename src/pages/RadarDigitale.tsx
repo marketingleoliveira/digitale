@@ -80,6 +80,24 @@ const RadarDigitale = () => {
       localStorage.setItem(LIKES_STORAGE_KEY, JSON.stringify(Array.from(likedEditions)));
     } catch {}
   }, [likedEditions]);
+
+  // Reações (feliz / triste) por edição, memorizadas neste dispositivo
+  const REACTIONS_STORAGE_KEY = "radar_reactions_v1";
+  const [reactions, setReactions] = useState<Record<string, "happy" | "sad">>(() => {
+    try {
+      const raw = localStorage.getItem(REACTIONS_STORAGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : {};
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch {
+      return {};
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(REACTIONS_STORAGE_KEY, JSON.stringify(reactions));
+    } catch {}
+  }, [reactions]);
   const [suggestOpen, setSuggestOpen] = useState(false);
   const [suggestForm, setSuggestForm] = useState({ topic: "", name: "", email: "", message: "" });
   const [submittingSuggestion, setSubmittingSuggestion] = useState(false);
@@ -229,6 +247,40 @@ const RadarDigitale = () => {
       });
       queryClient.invalidateQueries({ queryKey: ["radar-editions"] });
     },
+  });
+
+  const reactionMutation = useMutation({
+    mutationFn: async ({
+      editionId,
+      reaction,
+    }: {
+      editionId: string;
+      reaction: "happy" | "sad";
+    }) => {
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/radar-reaction`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({ edition_id: editionId, reaction }),
+        }
+      );
+      if (!res.ok) throw new Error("Erro ao registrar reação");
+      return res.json() as Promise<{ reaction: "happy" | "sad" | null }>;
+    },
+    onSuccess: (data, variables) => {
+      setReactions((prev) => {
+        const next = { ...prev };
+        if (data.reaction) next[variables.editionId] = data.reaction;
+        else delete next[variables.editionId];
+        return next;
+      });
+      queryClient.invalidateQueries({ queryKey: ["radar-editions"] });
+    },
+    onError: () => toast.error("Não foi possível registrar sua reação."),
   });
 
   return (
