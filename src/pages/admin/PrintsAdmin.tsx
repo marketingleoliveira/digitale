@@ -174,6 +174,12 @@ const PrintsAdmin = () => {
   const [selectedPrints, setSelectedPrints] = useState<Set<string>>(new Set());
   const [bulkMoveDialogOpen, setBulkMoveDialogOpen] = useState(false);
   const [bulkCategoryId, setBulkCategoryId] = useState("");
+  const [orderedPrints, setOrderedPrints] = useState<Print[]>([]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
   const [form, setForm] = useState({
     code: "",
     name: "",
@@ -195,6 +201,44 @@ const PrintsAdmin = () => {
       return data as Print[];
     },
   });
+
+  // Mantém a ordem local sincronizada com o servidor
+  useEffect(() => {
+    setOrderedPrints(prints);
+  }, [prints]);
+
+  // Persiste a nova ordem após o drag
+  const reorderMutation = useMutation({
+    mutationFn: async (items: Print[]) => {
+      const updates = items.map((item, index) =>
+        supabase.from("prints").update({ display_order: index }).eq("id", item.id)
+      );
+      const results = await Promise.all(updates);
+      const failed = results.find((r) => r.error);
+      if (failed?.error) throw failed.error;
+    },
+    onSuccess: () => {
+      invalidatePrints();
+      toast.success("Ordem atualizada!");
+    },
+    onError: (error: Error) => {
+      toast.error("Erro ao reordenar", { description: error.message });
+      setOrderedPrints(prints);
+    },
+  });
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = orderedPrints.findIndex((p) => p.id === active.id);
+    const newIndex = orderedPrints.findIndex((p) => p.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const next = arrayMove(orderedPrints, oldIndex, newIndex);
+    setOrderedPrints(next);
+    reorderMutation.mutate(next);
+  };
 
   // Query for categories
   const { data: categories = [] } = useQuery({
