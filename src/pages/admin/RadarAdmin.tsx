@@ -231,6 +231,8 @@ const RadarAdmin = () => {
   const [isPublished, setIsPublished] = useState(false);
   const [views, setViews] = useState(0);
   const [likes, setLikes] = useState(0);
+  const [happyCount, setHappyCount] = useState(0);
+  const [sadCount, setSadCount] = useState(0);
   const [newCategoryName, setNewCategoryName] = useState("");
 
   const { data: categories = [] } = useQuery({
@@ -268,6 +270,8 @@ const RadarAdmin = () => {
     setIsPublished(false);
     setViews(0);
     setLikes(0);
+    setHappyCount(0);
+    setSadCount(0);
     setEditingEdition(null);
   };
 
@@ -282,6 +286,8 @@ const RadarAdmin = () => {
     setIsPublished(edition.is_published);
     setViews(edition.views ?? 0);
     setLikes(edition.likes ?? 0);
+    setHappyCount(edition.happy_count ?? 0);
+    setSadCount(edition.sad_count ?? 0);
     setEditionDialog(true);
   };
 
@@ -330,6 +336,8 @@ const RadarAdmin = () => {
       is_published: isPublished,
       views,
       likes,
+      happy_count: happyCount,
+      sad_count: sadCount,
       updated_at: new Date().toISOString(),
     };
 
@@ -526,6 +534,32 @@ const RadarAdmin = () => {
               <div>
                 <Label>Curtidas</Label>
                 <Input type="number" min={0} value={likes} onChange={(e) => setLikes(parseInt(e.target.value) || 0)} placeholder="0" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="flex items-center gap-1.5 text-green-600">
+                    <Smile className="h-4 w-4" /> Reações positivas
+                  </Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={happyCount}
+                    onChange={(e) => setHappyCount(Math.max(0, parseInt(e.target.value) || 0))}
+                    placeholder="0"
+                  />
+                </div>
+                <div>
+                  <Label className="flex items-center gap-1.5 text-red-500">
+                    <Frown className="h-4 w-4" /> Reações negativas
+                  </Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={sadCount}
+                    onChange={(e) => setSadCount(Math.max(0, parseInt(e.target.value) || 0))}
+                    placeholder="0"
+                  />
+                </div>
               </div>
               <div className="flex items-center gap-2">
                 <input
