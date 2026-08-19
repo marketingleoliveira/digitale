@@ -1,26 +1,36 @@
-# Digitale Têxtil Institucional 
+# Digitale Têxtil Institutional
 
-quero modernizar o site https://digitaletextil.com.br/ crie um layout baseado em todo o conteúdo da digitale, com todas as funções de blog para postagem e tudo mais, mas em layout moderno, seguindo as cores e o padrão atual moderno, do logo
+Plataforma institucional e blog corporativo para a **Digitale Têxtil**, projetada com layout moderno e otimizada para apresentar catálogos de tecidos, conteúdos educativos sobre a indústria têxtil e soluções B2B.
 
-This project was built with [Lovable](https://lovable.dev).
+🔗 **Live App:** [digitale.lovable.app](https://digitale.lovable.app)  
+🌐 **Site Oficial:** [www.digitaletextil.com.br](https://www.digitaletextil.com.br)  
+💼 **Portfólio do Desenvolvedor:** [portfolioleoliveira.lovable.app](https://portfolioleoliveira.lovable.app)
 
-**Live app**: https://digitale.lovable.app
+---
 
-## Build with Lovable
+## 📌 Sobre o Projeto
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/a4d41946-6383-4d6c-afa9-9047d43d7190).
+O repositório traz a modernização completa da presença digital da **Digitale Têxtil**. A aplicação contempla uma estrutura robusta com módulo de blog para publicação de artigos, gestão de dados de produtos têxteis via scripts customizados (`check_tech.ts`, `update_techs.ts`) e design totalmente alinhado à identidade visual da marca.
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+---
 
-## Development
+## ⚡ Tecnologias Utilizadas
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+* **Frontend:** TypeScript, React, Vite, Tailwind CSS, shadcn/ui
+* **Backend & Banco de Dados:** Supabase (PL/pgSQL)
+* **Scripts Internos:** TypeScript / Node.js
+* **Gerenciador de Pacotes:** Bun / npm
+* **Desenvolvimento Acelerado:** Lovable
 
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
-```
+---
+
+## 🚀 Como Executar o Projeto
+
+### Pré-requisitos
+Certifique-se de ter o **Node.js** e o **npm** (ou **Bun**) instalados em sua máquina.
+
+### Passo a Passo
+
+1. **Clonar o repositório:**
+   ```bash
+   git clone [https://github.com/RennanLucas/Digitale-Textil-Institucional.git](https://github.com/RennanLucas/Digitale-Textil-Institucional.git)
