@@ -41,41 +41,58 @@ Deno.serve(async (req) => {
     let current: Reaction | null = null;
 
     if (existing && existing.reaction === reaction) {
-      // toggle off
+      // toggle off: -1
       await supabase.from("radar_reactions").delete().eq("id", existing.id);
       current = null;
+      
+      const decrField = existing.reaction === "happy" ? "happy_count" : "sad_count";
+      await supabase.rpc("increment_radar_count", { 
+        row_id: edition_id, 
+        field_name: decrField,
+        amount: -1
+      });
     } else if (existing) {
+      // Changed reaction: -1 from old, +1 to new
+      const decrField = existing.reaction === "happy" ? "happy_count" : "sad_count";
+      const incrField = reaction === "happy" ? "happy_count" : "sad_count";
+      
       await supabase.from("radar_reactions").update({ reaction }).eq("id", existing.id);
       current = reaction;
+
+      await supabase.rpc("increment_radar_counts", { 
+        row_id: edition_id, 
+        incr_field: incrField,
+        decr_field: decrField 
+      });
     } else {
+      // New reaction: +1
       const { error } = await supabase
         .from("radar_reactions")
         .insert({ edition_id, ip_address: ip, reaction });
       if (error) throw error;
       current = reaction;
+
+      const incrField = reaction === "happy" ? "happy_count" : "sad_count";
+      await supabase.rpc("increment_radar_count", { 
+        row_id: edition_id, 
+        field_name: incrField,
+        amount: 1
+      });
     }
 
-    // Recount from source of truth to stay consistent
-    const [{ count: happy }, { count: sad }] = await Promise.all([
-      supabase
-        .from("radar_reactions")
-        .select("id", { count: "exact", head: true })
-        .eq("edition_id", edition_id)
-        .eq("reaction", "happy"),
-      supabase
-        .from("radar_reactions")
-        .select("id", { count: "exact", head: true })
-        .eq("edition_id", edition_id)
-        .eq("reaction", "sad"),
-    ]);
-
-    await supabase
+    // Fetch the updated counts to return to the UI
+    const { data: updatedEdition } = await supabase
       .from("radar_editions")
-      .update({ happy_count: happy ?? 0, sad_count: sad ?? 0 })
-      .eq("id", edition_id);
+      .select("happy_count, sad_count")
+      .eq("id", edition_id)
+      .single();
 
     return new Response(
-      JSON.stringify({ reaction: current, happy_count: happy ?? 0, sad_count: sad ?? 0 }),
+      JSON.stringify({ 
+        reaction: current, 
+        happy_count: updatedEdition?.happy_count ?? 0, 
+        sad_count: updatedEdition?.sad_count ?? 0 
+      }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch (err) {
