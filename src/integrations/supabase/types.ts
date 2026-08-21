@@ -1369,6 +1369,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_radar_count: {
+        Args: { amount: number; field_name: string; row_id: string }
+        Returns: undefined
+      }
+      increment_radar_counts: {
+        Args: { decr_field: string; incr_field: string; row_id: string }
+        Returns: undefined
+      }
       increment_radar_views_auto: { Args: never; Returns: undefined }
     }
     Enums: {
